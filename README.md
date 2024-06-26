@@ -15,6 +15,14 @@ Automated Modelling Examples:
 
 Stepwsie example
 ``` r
+library(nlmixr2autoinit)
+library(nlmixr2auto)
+
+d1<-pheno_sd
+inits.out<-getppkinit(dat = d1,runnpd = 0)
+autosetinit(dat = d1,
+            inits= inits.out$Recommended_initial_estimates)
+
 sf.operator(dat=d1,
             no.cores = getRxThreads(),
             thetalower=c(vp=1,
@@ -458,15 +466,6 @@ ga.operator(dat = d1,
 ```
 ACO example
 ``` r
-library(nlmixr2autoinit)
-library(nlmixr2auto)
-
-d1<-pheno_sd
-inits.out<-getppkinit(dat = d1,runnpd = 0)
-autosetinit(dat = d1,
-            inits= inits.out$Recommended_initial_estimates)
-
-# Run get.ini to obtain the initial estimates by the internal calculation
 aco.operator(dat = d1,
              no.ants<-6,
              max.iter<-6,
