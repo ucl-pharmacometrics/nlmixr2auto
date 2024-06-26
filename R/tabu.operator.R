@@ -55,7 +55,7 @@
 #'
 #'
 #' }
-
+#' @export
 
 tabu.operator <- function(dat,
                           tabu.duration,
