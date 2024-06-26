@@ -9,7 +9,8 @@ library(devtools)
 install_github("ucl-pharmacometrics/nlmixr2autoinit")
 install_github("ucl-pharmacometrics/nlmixr2auto")
 ```
-Examples: 
+
+Automated Modelling Examples: 
 （The following example runs the model with a small quantity of runs and iterations. These numbers can be set according to actual needs or just set simply default values.）
 
 ACO example
