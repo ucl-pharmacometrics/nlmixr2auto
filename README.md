@@ -13,6 +13,87 @@ install_github("ucl-pharmacometrics/nlmixr2auto")
 Automated Modelling Examples: 
 （The following example runs the model with a small quantity of runs and iterations. These numbers can be set according to actual needs or just set simply default values.）
 
+Stepwsie example
+``` r
+sf.operator(dat=d1,
+            no.cores = getRxThreads(),
+            thetalower=c(vp=1,
+                         vp2=1),
+            control = saemControl(
+              seed = 1234,
+              print = 5,
+              nBurn = 50,
+              nEm = 30,
+              logLik = T),
+            table=tableControl(cwres=T),
+            filename =  "pheno_sd",
+            foldername =   "pheno_sd" )
+
+# [1] "Output directory for Stepwise analysis is created"
+# Running Stepwise 1. Structural Model----------------------------------------------------
+#   Test number of compartments----------------------------------------------------
+#   Model: 1-------------------------------------------------------------------------------------------------------------
+#   Model: 2-------------------------------------------------------------------------------------------------------------
+#   Model: 3-------------------------------------------------------------------------------------------------------------
+#   Analyse elimination type----------------------------------------------------
+#   Model: 4-------------------------------------------------------------------------------------------------------------
+#   Model: 5-------------------------------------------------------------------------------------------------------------
+#   Test IIV on Km----------------------------------------------------
+#   Model: 6-------------------------------------------------------------------------------------------------------------
+#   Introduce IIV on parameters----------------------------------------------------
+#   Model: 7-------------------------------------------------------------------------------------------------------------
+#   Model: 8-------------------------------------------------------------------------------------------------------------
+#   Test Correlation between parameters----------------------------------------------------
+#   Model: 9-------------------------------------------------------------------------------------------------------------
+#   Model: 10-------------------------------------------------------------------------------------------------------------
+#   Explore types of residual errors----------------------------------------------------
+#   Model: 11-------------------------------------------------------------------------------------------------------------
+#   Model: 12-------------------------------------------------------------------------------------------------------------
+#   $bestmodel
+# Step                                              Model name                   Model code  Fitness            Penalty terms
+# 5 Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913 RSE, Shrinkage, RV model
+# 
+# $history
+# $history$local.best.models
+# Step                                              Model name                   Model code  Fitness
+# 1            no. of compartments    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
+# 2               elimination type    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
+# 3              IIV on parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
+# 4 Correlation between parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
+# 5           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913
+# Penalty terms
+# 1                      RSE
+# 2                      RSE
+# 3           RSE, Shrinkage
+# 4 RSE, Shrinkage, RV model
+# 5 RSE, Shrinkage, RV model
+# 
+# $history$allmodels
+# Step                                                  Model name                   Model code   Fitness
+# 1             no. of compartments        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
+# 2             no. of compartments        2Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 2, 0, 0, 0, 0, 0, 0, 0, 0, 3 41200.834
+# 3             no. of compartments        3Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 3, 0, 0, 0, 0, 0, 0, 0, 0, 3 71230.484
+# 4                elimination type        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
+# 5                elimination type                1Cmpt,IIV.cl,M-M_elimination,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 1, 0, 3 21224.696
+# 6               IIV on parameters        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
+# 7               IIV on parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
+# 8  Correlation between parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
+# 9            Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
+# 10           Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1  1064.913
+# 11           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,proportional 1, 0, 1, 0, 0, 0, 0, 0, 0, 2  1070.526
+# Penalty terms
+# 1                       RSE
+# 2                       RSE
+# 3                       RSE
+# 4            RSE, Shrinkage
+# 5            RSE, Shrinkage
+# 6  RSE, Shrinkage, RV model
+# 7  RSE, Shrinkage, RV model
+# 8  RSE, Shrinkage, RV model
+# 9  RSE, Shrinkage, RV model
+# 10 RSE, Shrinkage, RV model
+# 11 RSE, Shrinkage, RV model
+```
 ACO example
 ``` r
 library(nlmixr2autoinit)
@@ -656,87 +737,6 @@ ga.operator(dat = d1,
 # [6,]        0        1      0      1      0       1     0      0  0     1   1   1
 ```
 
-Stepwsie example
-``` r
-sf.operator(dat=d1,
-            no.cores = getRxThreads(),
-            thetalower=c(vp=1,
-                         vp2=1),
-            control = saemControl(
-              seed = 1234,
-              print = 5,
-              nBurn = 50,
-              nEm = 30,
-              logLik = T),
-            table=tableControl(cwres=T),
-            filename =  "pheno_sd",
-            foldername =   "pheno_sd" )
-
-# [1] "Output directory for Stepwise analysis is created"
-# Running Stepwise 1. Structural Model----------------------------------------------------
-#   Test number of compartments----------------------------------------------------
-#   Model: 1-------------------------------------------------------------------------------------------------------------
-#   Model: 2-------------------------------------------------------------------------------------------------------------
-#   Model: 3-------------------------------------------------------------------------------------------------------------
-#   Analyse elimination type----------------------------------------------------
-#   Model: 4-------------------------------------------------------------------------------------------------------------
-#   Model: 5-------------------------------------------------------------------------------------------------------------
-#   Test IIV on Km----------------------------------------------------
-#   Model: 6-------------------------------------------------------------------------------------------------------------
-#   Introduce IIV on parameters----------------------------------------------------
-#   Model: 7-------------------------------------------------------------------------------------------------------------
-#   Model: 8-------------------------------------------------------------------------------------------------------------
-#   Test Correlation between parameters----------------------------------------------------
-#   Model: 9-------------------------------------------------------------------------------------------------------------
-#   Model: 10-------------------------------------------------------------------------------------------------------------
-#   Explore types of residual errors----------------------------------------------------
-#   Model: 11-------------------------------------------------------------------------------------------------------------
-#   Model: 12-------------------------------------------------------------------------------------------------------------
-#   $bestmodel
-# Step                                              Model name                   Model code  Fitness            Penalty terms
-# 5 Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913 RSE, Shrinkage, RV model
-# 
-# $history
-# $history$local.best.models
-# Step                                              Model name                   Model code  Fitness
-# 1            no. of compartments    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
-# 2               elimination type    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
-# 3              IIV on parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
-# 4 Correlation between parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
-# 5           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913
-# Penalty terms
-# 1                      RSE
-# 2                      RSE
-# 3           RSE, Shrinkage
-# 4 RSE, Shrinkage, RV model
-# 5 RSE, Shrinkage, RV model
-# 
-# $history$allmodels
-# Step                                                  Model name                   Model code   Fitness
-# 1             no. of compartments        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 2             no. of compartments        2Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 2, 0, 0, 0, 0, 0, 0, 0, 0, 3 41200.834
-# 3             no. of compartments        3Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 3, 0, 0, 0, 0, 0, 0, 0, 0, 3 71230.484
-# 4                elimination type        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 5                elimination type                1Cmpt,IIV.cl,M-M_elimination,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 1, 0, 3 21224.696
-# 6               IIV on parameters        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 7               IIV on parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 8  Correlation between parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 9            Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 10           Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1  1064.913
-# 11           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,proportional 1, 0, 1, 0, 0, 0, 0, 0, 0, 2  1070.526
-# Penalty terms
-# 1                       RSE
-# 2                       RSE
-# 3                       RSE
-# 4            RSE, Shrinkage
-# 5            RSE, Shrinkage
-# 6  RSE, Shrinkage, RV model
-# 7  RSE, Shrinkage, RV model
-# 8  RSE, Shrinkage, RV model
-# 9  RSE, Shrinkage, RV model
-# 10 RSE, Shrinkage, RV model
-# 11 RSE, Shrinkage, RV model
-```
 
 Tabu example
 ``` r
