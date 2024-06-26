@@ -98,7 +98,7 @@ sf.operator <- function(dat,
   }
   
   if (!dir.exists(outputdir)) {
-    print("Output directory for GA analysis is created")
+    print("Output directory for stepwise analysis is created")
     dir.create(outputdir, showWarnings = F, recursive = T)
   }
   setwd(paste0(getwd(), "/", outputdir))
