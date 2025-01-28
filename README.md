@@ -19,7 +19,7 @@ library(nlmixr2autoinit)
 library(nlmixr2auto)
 
 d1<-pheno_sd
-inits.out<-getppkinit(dat = d1,runnpd = 0)
+inits.out<-getPPKinits(dat = d1)
 autosetinit(dat = d1,
             inits= inits.out$Recommended_initial_estimates)
 
