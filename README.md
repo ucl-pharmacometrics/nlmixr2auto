@@ -17,9 +17,33 @@ Stepwsie example
 ``` r
 library(nlmixr2autoinit)
 library(nlmixr2auto)
-
 d1<-pheno_sd
 inits.out<-getPPKinits(dat = d1)
+# Processing data....................
+# 
+# 
+# Infometrics                               Values 
+# ----------------------------------------  -------
+#   Dose Route                                bolus  
+# Total Number of Subjects                  59     
+# Total Number of Observations              155    
+# Subjects with First-Dose Interval Data    35     
+# Observations in the First-Dose Interval   35     
+# Subjects with Multiple-Dose Data          56     
+# Observations after Multiple Doses         120    
+# ------------------------------------  ------
+#   Run adaptive single-point method to calculate PK parameters....................
+# Estimating half-life....................
+# Estimated half-life : 131.08
+# Run non-compartmental analysis on naive pooling data....................
+# Run graphical analysis on naive pooling data only after the first dose....................
+# Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0098, estimated Vd: 1.31 
+# Run parameter sweeping on nonlinear eliminiation kinetics PK parameters....................
+# |=================================================================================================================================| 100%
+# Run parameter sweeping on multi-compartmental PK parameters....................
+# |=================================================================================================================================| 100%
+# |=================================================================================================================================| 100%
+
 autosetinit(dat = d1,
             inits= inits.out$Recommended_initial_estimates)
 
@@ -58,17 +82,19 @@ sf.operator(dat=d1,
 #   Model: 11-------------------------------------------------------------------------------------------------------------
 #   Model: 12-------------------------------------------------------------------------------------------------------------
 #   $bestmodel
-# Step                                              Model name                   Model code  Fitness            Penalty terms
-# 5 Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913 RSE, Shrinkage, RV model
+# Step                                                         Model name                   Model code  Fitness
+# 5 Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1 1033.184
+# Penalty terms
+# 5 RSE, Shrinkage, RV model
 # 
 # $history
 # $history$local.best.models
-# Step                                              Model name                   Model code  Fitness
-# 1            no. of compartments    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
-# 2               elimination type    1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1209.231
-# 3              IIV on parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
-# 4 Correlation between parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1142.936
-# 5           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 1064.913
+# Step                                                         Model name                   Model code  Fitness
+# 1            no. of compartments               1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1219.086
+# 2               elimination type               1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1219.086
+# 3              IIV on parameters            1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1138.516
+# 4 Correlation between parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3 1124.493
+# 5           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1 1033.184
 # Penalty terms
 # 1                      RSE
 # 2                      RSE
@@ -77,30 +103,30 @@ sf.operator(dat=d1,
 # 5 RSE, Shrinkage, RV model
 # 
 # $history$allmodels
-# Step                                                  Model name                   Model code   Fitness
-# 1             no. of compartments        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 2             no. of compartments        2Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 2, 0, 0, 0, 0, 0, 0, 0, 0, 3 41200.834
-# 3             no. of compartments        3Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 3, 0, 0, 0, 0, 0, 0, 0, 0, 3 71230.484
-# 4                elimination type        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 5                elimination type                1Cmpt,IIV.cl,M-M_elimination,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 1, 0, 3 21224.696
-# 6               IIV on parameters        1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3  1209.231
-# 7               IIV on parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 8  Correlation between parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 9            Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3  1142.936
-# 10           Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,additive 1, 0, 1, 0, 0, 0, 0, 0, 0, 1  1064.913
-# 11           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,proportional 1, 0, 1, 0, 0, 0, 0, 0, 0, 2  1070.526
-# Penalty terms
-# 1                       RSE
-# 2                       RSE
-# 3                       RSE
-# 4            RSE, Shrinkage
-# 5            RSE, Shrinkage
-# 6  RSE, Shrinkage, RV model
-# 7  RSE, Shrinkage, RV model
-# 8  RSE, Shrinkage, RV model
-# 9  RSE, Shrinkage, RV model
-# 10 RSE, Shrinkage, RV model
-# 11 RSE, Shrinkage, RV model
+# Step                                                             Model name                   Model code
+# 1             no. of compartments                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
+# 2             no. of compartments                   2Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 2, 0, 0, 0, 0, 0, 0, 0, 0, 3
+# 3             no. of compartments                   3Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 3, 0, 0, 0, 0, 0, 0, 0, 0, 3
+# 4                elimination type                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
+# 5                elimination type                           1Cmpt,IIV.cl,M-M_elimination,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 1, 0, 3
+# 6               IIV on parameters                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
+# 7               IIV on parameters                1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3
+# 8  Correlation between parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3
+# 9            Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3
+# 10           Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1
+# 11           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,proportional 1, 0, 1, 0, 0, 0, 0, 0, 1, 2
+# Fitness            Penalty terms
+# 1   1219.086                      RSE
+# 2  41220.176                      RSE
+# 3  71212.583                      RSE
+# 4   1219.086           RSE, Shrinkage
+# 5  21261.182           RSE, Shrinkage
+# 6   1219.086 RSE, Shrinkage, RV model
+# 7   1138.516 RSE, Shrinkage, RV model
+# 8   1124.493 RSE, Shrinkage, RV model
+# 9   1124.493 RSE, Shrinkage, RV model
+# 10  1033.184 RSE, Shrinkage, RV model
+# 11  1035.156 RSE, Shrinkage, RV model
 ```
 GA example
 ``` r
