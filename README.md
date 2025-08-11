@@ -72,15 +72,16 @@ print(outs)
 #   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod12.txt
 # > print(outs)
 # 
+# 
 # === Best Model Code ===
-#   no.cmpt  eta.km  eta.vc  eta.vp eta.vp2   eta.q  eta.q2      mm   mcorr      rv 
-# 1       0       1       0       0       0       0       0       1       1 
+# no.cmpt  eta.km  eta.vc  eta.vp eta.vp2   eta.q  eta.q2      mm   mcorr      rv 
+#       1       0       1       0       0       0       0       0       1       1 
 # 
 # === Best Model Name ===
-#   iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_additive 
+# iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_additive 
 # 
 # === Stepwise Selection History ===
-#   Step                                         Penalty.terms                                                       Model.name          Model.code    Fitness
+#                   Step                                         Penalty.terms                                                       Model.name          Model.code    Fitness
 # 1  No. of compartments                                rse, theta, covariance   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11167.0409
 # 2     Elimination type                                rse, theta, covariance   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11167.0409
 # 3        IIV (forward)              rse, theta, covariance, shrinkage, omega iv_1cmpt_etaCLVC_First-order elimination_No correlation_combined 1,0,1,0,0,0,0,0,0,3 11076.5477
