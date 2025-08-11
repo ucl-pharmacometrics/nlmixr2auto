@@ -56,8 +56,7 @@ numeric vectors (\code{unname()}) when passed to \code{sf.mod.run()}.
 If \code{state$modi} is \code{NULL}, a default of \code{1} is used.
 }
 \examples{
-Initialize state (if needed)
-state <- modlog_state()
+# Initialize state (if needed)
 # Run the compartment screening (custom_base is required and forwarded via ...):
 res <- step_compartments(
  dat = dat,
