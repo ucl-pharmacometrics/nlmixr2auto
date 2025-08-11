@@ -912,8 +912,8 @@ step_rv <- function(dat,
 #' @examples
 
 #' \dontrun{
-# result<-sf.operator(dat = pheno_sd)
-# print(result)
+#' result<-sf.operator(dat = pheno_sd)
+#' print(result)
 #' }
 #'
 #' @export
