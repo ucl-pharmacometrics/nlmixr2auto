@@ -36,9 +36,9 @@
 #' \dontrun{
 #'
 #' library(nlmixr2autoinit)
-#' d1<-pheno_sd
-#' inits.out<-getppkinit(dat = d1,runnpd = 0)
-#' autosetinit(dat = d1,
+#' dat<-pheno_sd
+#' inits.out<-getppkinit(dat = dat,runnpd = 0)
+#' autosetinit(dat = dat,
 #'            inits= inits.out$Recommended_initial_estimates)
 #' }
 #'
@@ -197,8 +197,8 @@ autosetinit <-  function(dat,
     input_add.err <- input_add.err
     input_logn.sd <- input_logn.sd
   } else {
-    d1.obs <- d1[d1$EVID == 0, ]
-    pop.cmax <- aggregate(d1.obs, by = list(d1.obs$ID), FUN = max)
+    dat.obs <- dat[dat$EVID == 0, ]
+    pop.cmax <- aggregate(dat.obs, by = list(dat.obs$ID), FUN = max)
     dat.cmax <- median(pop.cmax$DV)
     input_add.err <- round(dat.cmax / 1000, 1) # cmax/1000
 

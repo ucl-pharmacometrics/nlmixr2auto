@@ -1,85 +1,937 @@
-#' Run stepwise algorithm for automated model selection
+#' Create a base model code for stepwise model search
 #'
-#' Perform a stepwise algorithm to select the best model for pharmacokinetic modelling
+#' Generates a named numeric vector representing the base model code
+#' for a given search space (\code{"ivbase"} or \code{"oralbase"}).
+#' The returned vector contains model specification fields such as
+#' number of compartments, IIV flags, Michaelis–Menten term, correlation flag,
+#' and residual error model.
 #'
-#' @param dat A data frame containing the pharmacokinetic data to be used for model fitting.
-#' @param search.space An integer specifying the search space type (1 for standard).
-#' @param no.cores The number of CPU cores to use for parallel processing.
-#' @param thetalower A named vector specifying lower bounds for model parameters.
-#' @param crse Constraint value for the relative standard error (RSE).
-#' @param cshrink Constraint value for the shrinkage.
-#' @param cadd Constraint value for the additive error.
-#' @param cprop Constraint value for the proportional error.
-#' @param ccorr Constraint value for the correlation between parameters.
-#' @param penalty.type The type of penalty to apply during the fitness evaluation:
+#' Users can optionally supply a custom base model code via \code{custom_base}.
+#' The function will validate its type and length according to the chosen
+#' \code{search.space} and return it with proper element names.
+#'
+#' @param search.space Character scalar: either \code{"ivbase"} (9 elements)
+#'   or \code{"oralbase"} (10 elements). Default is \code{"ivbase"}.
+#' @param custom_base Optional numeric vector representing a user-specified
+#'   base model code. Must have length 9 for \code{"ivbase"} or 10 for
+#'   \code{"oralbase"}.
+#'
+#' @return A named integer vector representing the model code, with elements:
+#'   \itemize{
+#'     \item \code{no.cmpt}   — Number of compartments
+#'     \item \code{eta.km}    — IIV flag for Km
+#'     \item \code{eta.vc}    — IIV flag for Vc
+#'     \item \code{eta.vp}    — IIV flag for Vp
+#'     \item \code{eta.vp2}   — IIV flag for Vp2
+#'     \item \code{eta.q}     — IIV flag for Q
+#'     \item \code{eta.q2}    — IIV flag for Q2
+#'     \item \code{mm}        — Michaelis–Menten term flag
+#'     \item \code{mcorr}     — Correlation flag between ETAs
+#'     \item \code{eps.model} — Residual error model code
+#'   }
+#'   For \code{"ivbase"}, the last element (\code{eps.model}) is in position 9.
+#'
+#' @examples
+#' base_model("ivbase")
+#' base_model("oralbase")
+#' base_model("ivbase", custom_base = c(2,1,0,0,0,0,0,0,3))
+#'
+#' @export
+base_model <- function(search.space = "ivbase",
+                       custom_base = NULL) {
+  # Element names for the full oralbase vector
+  element_names <- c(
+    "no.cmpt",
+    "eta.km",
+    "eta.vc",
+    "eta.vp",
+    "eta.vp2",
+    "eta.q",
+    "eta.q2",
+    "mm",
+    "mcorr",
+    "rv"
+  )
+
+  if (!is.null(custom_base)) {
+    if (!is.numeric(custom_base)) {
+      stop("custom_base must be a numeric vector.")
+    }
+    if (search.space == "ivbase" && length(custom_base) != 9L) {
+      stop("For search.space = 'ivbase', model code must have length 9.")
+    }
+    if (search.space == "oralbase" && length(custom_base) != 10L) {
+      stop("For search.space = 'oralbase', model code must have length 10.")
+    }
+    return(setNames(
+      as.integer(custom_base),
+      if (search.space == "ivbase")
+        element_names[1:9]
+      else
+        element_names
+    ))
+  }
+
+  default_code <- c(
+    no.cmpt = 1,
+    eta.km  = 0,
+    eta.vc  = 0,
+    eta.vp  = 0,
+    eta.vp2 = 0,
+    eta.q   = 0,
+    eta.q2  = 0,
+    eta.ka  = 0,
+    mm      = 0,
+    mcorr   = 0,
+    rv      = 3
+  )
+
+  if (search.space == "ivbase") {
+    return(default_code[c(1:7, 9:11)])
+  } else if (search.space == "oralbase") {
+    return(default_code)
+  } else {
+    stop("Invalid search.space. Must be 'ivbase' or 'oralbase'.")
+  }
+}
+
+
+
+
+
+
+#' Screen number of compartments from the current/baseline model
+#'
+#' Clones the current model code (from \code{state$best_code}, or from
+#' \code{base_model(search.space, custom_base = ...)} if \code{state$best_code}
+#' is \code{NULL}) and generates three candidates by setting
+#' \code{no.cmpt} to 1, 2, and 3 while keeping all other positions unchanged.
+#' Each candidate is evaluated with \code{sf.mod.run()} and the best (lowest
+#' \code{Fitness}) is returned alongside a results table for logging.
+#'
+#' @param dat A pharmacokinetic dataset passed through to \code{sf.mod.run()}.
+#' @param state A list-like state that may contain:
+#'   \itemize{
+#'     \item \code{best_code}: named integer vector for the current model code (may be \code{NULL})
+#'     \item \code{modi}: optional value forwarded to \code{sf.mod.run()} (if absent, defaults to 1)
+#'   }
+#' @param search.space Character scalar, e.g. \code{"ivbase"} or \code{"oralbase"}.
+#' @param param_table Object passed through to \code{sf.mod.run()}.
+#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. Must include
+#'   \code{custom_base} (a numeric vector) used by \code{base_model()} to
+#'   initialize the starting code when \code{state$best_code} is \code{NULL}.
+#'
+#' @details
+#' Candidates are formed by copying the starting code and changing only the
+#' \code{no.cmpt} element to \{1, 2, 3\}. Named codes are converted to unnamed
+#' numeric vectors (\code{unname()}) when passed to \code{sf.mod.run()}.
+#' If \code{state$modi} is \code{NULL}, a default of \code{1} is used.
+#'
+#' @return A list with:
 #' \itemize{
-#'   \item \code{penalty.type = 1}: Considers constraints on RSE.
-#'   \item \code{penalty.type = 2}: Considers constraints on RSE and shrinkage.
-#'   \item \code{penalty.type = 3}: Considers constraints on RSE, shrinkage, and sigma values (variance of residual error).
+#'   \item \code{results_table}: \code{data.frame} with columns
+#'         \code{Step}, \code{"Model name"}, \code{"Model code"}, \code{Fitness}
+#'   \item \code{best_code}: named integer vector of the best candidate’s model code
+#'   \item \code{best_row}: one-row \code{data.frame} (the best candidate)
 #' }
-#' @param penalty.value The value of the penalty to apply during the fitness evaluation.
-#' @param foldername The name of the folder for output storage. Defaults to "test".
-#' @param filename The name of the output file. Defaults to "test".
-#' @param ... Additional arguments passed to the model fitting function.
 #'
-#' @return A list include the best model selection and stepwise history running.
+#' @examples
+#' Initialize state (if needed)
+#' state <- modlog_state()
+
+#' # Run the compartment screening (custom_base is required and forwarded via ...):
+#'res <- step_compartments(
+#'  dat = dat,
+#'  state = state,
+#'  search.space = "ivbase",
+#'  param_table = param_table,
+#'  saem.control = saemControl(nBurn = 10,nEm = 10),
+#'  table.control = tableControl(cwres = T)
+#')
+#'
+#' # Log both all candidates and the best candidate, and update state$best_code:
+#' state <- modlog_state(state, results_table = res$results_table, step_name = "no. of compartments")
+#'
+#' @export
+
+step_compartments <-
+  function(dat, state, search.space, param_table,penalty.control=NULL,precomputed_results_file=NULL,filename=NULL,...) {
+    dots <- list(...)
+    # custom_base <- dots$custom_base
+    if (!is.null(dots$custom_base)) {
+      custom_base <- dots$custom_base
+    } else {
+      custom_base <- NULL
+    }
+
+    if (!is.null(state$best_code)) {
+      current_code <- state$best_code
+    } else {
+      current_code <- base_model(search.space=search.space, custom_base = custom_base)
+    }
+
+    candidate_codes <- lapply(1:3, function(k) {
+      code <- current_code
+      code["no.cmpt"] <- k
+      code
+    })
+
+    fits <- vapply(candidate_codes, function(code_vec) {
+      sf.mod.run(
+        modi         = modi,
+        string       = unname(code_vec),
+        dat          = dat,
+        search.space = search.space,
+        param_table  = param_table,
+        precomputed_results_file =   precomputed_results_file,
+        filename=filename,
+        ...
+      )
+    }, numeric(1))
+
+    # 4) results table
+    model_names <- vapply(candidate_codes,
+                          function(code)
+                            CodetoMod(search.space, unname(code)),
+                          character(1))
+    model_codes_chr <- vapply(candidate_codes,
+                              function(code)
+                                paste(unname(code), collapse = ","),
+                              character(1))
+
+    results_table <- data.frame(
+      Step          = "No. of compartments",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name"  = model_names,
+      "Model code"  = model_codes_chr,
+      Fitness       = fits,
+      stringsAsFactors = FALSE
+    )
+
+    # 5) pick best
+    best_idx  <- which.min(results_table$Fitness)
+    best_row  <- results_table[best_idx, , drop = FALSE]
+    best_code <- candidate_codes[[best_idx]]
+
+    r<<-r+1
+    list(results_table = results_table,
+         best_code     = best_code,
+         best_row      = best_row)
+  }
+
+
+#' Screen elimination type (Michaelis–Menten on/off)
+#'
+#' This step compares a standard linear elimination model (`mm = 0`)
+#' versus a Michaelis–Menten elimination model (`mm = 1`) while keeping
+#' all other positions of the current model code unchanged.
+#'
+#' If `mm = 0`, any IIV term for Km (`eta.km`) will be automatically set to 0.
+#'
+#' @param dat Dataset passed to \code{sf.mod.run()}.
+#' @param state List-like with optional fields:
+#'   \itemize{
+#'     \item \code{best_code}: named integer vector (starting code). If NULL, \code{base_model()} is used.
+#'     \item \code{modi}: forwarded to \code{sf.mod.run()} (default \code{1} if NULL).
+#'   }
+#' @param search.space Character scalar: either \code{"ivbase"} or \code{"oralbase"}.
+#' @param param_table Parameter table passed to \code{sf.mod.run()}.
+#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#'   \code{custom_base} used by \code{base_model()}.
+#'
+#' @return A list with:
+#' \itemize{
+#'   \item \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness
+#'   \item \code{best_code}: named integer vector of the best candidate’s model code
+#'   \item \code{best_row}: one-row \code{data.frame} (the best candidate)
+#' }
 #'
 #' @examples
 #' \dontrun{
-#' library(nlmixr2autoinit)
-#' dat<-pheno_sd
-#' filename =  "pheno_sd"
-#' foldername =   "pheno_sd"
-#' inits.out<-getppkinit(dat = dat,runnpd = 0)
-#' autosetinit(dat = dat,
-#' inits= inits.out$Recommended_initial_estimates)
-#'sf.operator(dat,
-#' no.cores = 4,
-#' thetalower=c(vp=1,
-#'  vp2=1),
-#'  control = saemControl(
-#'   seed = 1234,
-#'  print = 5,
-#'  nBurn = 20,
-#'  nEm = 30,
-#'  logLik = T,
-#'  rxControl = rxControl(cores = 4,
-#'  maxsteps =70000)),
-#'  table=tableControl(cwres=T),
-#'  filename =  "Bolus_1CPT",
-#'  foldername =   "Bolus_1CPT"  )
-#'}
+#' # Example dataset and parameter table would normally come from your workflow
+#' dat <- your_data_frame
+#' param_table <- your_param_table
+#'
+#' # Initialize state with a base model
+#' state <- list(best_code = base_model("ivbase"), modi = 1)
+#'
+#' # Run elimination type screening
+#' res_mm <- step_elimination(
+#'   dat = dat,
+#'   state = state,
+#'   search.space = "ivbase",
+#'   param_table = param_table
+#' )
+#'
+#' # View results
+#' res_mm$results_table
+#' res_mm$best_code
+#' }
+#'
+#' @export
+step_elimination <-
+  function(dat, state, search.space, param_table,penalty.control=NULL,precomputed_results_file=NULL,filename=NULL, ...) {
+    dots <- list(...)
+    if (!is.null(dots$custom_base)) {
+      custom_base <- dots$custom_base
+    } else {
+      custom_base <- NULL
+    }
+    # starting code
+    if (!is.null(state$best_code)) {
+      current_code <- state$best_code
+    } else {
+      current_code <-
+        base_model(search.space = search.space, custom_base = custom_base)
+    }
 
+    # candidates: mm = 0 and mm = 1
+    candidate_codes <- lapply(c(0L, 1L), function(m) {
+      code <- current_code
+      code["mm"] <- m
+      # Optional: if no MM, Km IIV should be off
+      if (m == 0L && "eta.km" %in% names(code))
+        code["eta.km"] <- 0L
+      code
+    })
+
+    fits <- vapply(candidate_codes, function(code_vec) {
+      sf.mod.run(
+        modi         = modi,
+        string       = unname(code_vec),
+        dat          = dat,
+        search.space = search.space,
+        param_table  = param_table,
+        precomputed_results_file=   precomputed_results_file,
+        filename = filename,
+        ...
+      )
+    }, numeric(1))
+
+    to_name <- function(code) {
+      if (exists("CodetoMod", mode = "function")) {
+        CodetoMod(search.space, unname(code))
+      } else {
+        paste0("Model_", paste(unname(code), collapse = "_"))
+      }
+    }
+
+    model_names <- vapply(candidate_codes, to_name, character(1))
+    model_codes_chr <-
+      vapply(candidate_codes, function(code)
+        paste(unname(code), collapse = ","), character(1))
+
+    results_table <- data.frame(
+       Step        = "Elimination type",
+       "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name" = model_names,
+      "Model code" = model_codes_chr,
+      Fitness      = fits,
+      stringsAsFactors = FALSE
+    )
+
+    best_idx <- which.min(results_table$Fitness)
+
+    r<<-r+1
+
+    list(
+      results_table = results_table,
+      best_code     = candidate_codes[[best_idx]],
+      best_row      = results_table[best_idx, , drop = FALSE]
+    )
+  }
+
+
+
+#' Stepwise inclusion of inter-individual variability (IIV)
+#'
+#' Two-stage procedure:
+#' 1) Special IIV:
+#'    - If \code{mm = 1} and \code{eta.km = 0}, test \code{eta.km = 1}.
+#'    - If \code{search.space = "oralbase"} and \code{eta.ka = 0}, test \code{eta.ka = 1}.
+#' 2) Structural IIV (forward selection):
+#'    - 1-compartment: \code{eta.vc}
+#'    - 2-compartment: \code{eta.vc, eta.vp, eta.q}
+#'    - 3-compartment: \code{eta.vc, eta.vp, eta.q, eta.vp2, eta.q2}
+#'    At each iteration, turn exactly one available IIV from 0 to 1, evaluate all candidates,
+#'    accept the single best improvement, and stop when no improvement occurs.
+#'
+#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param state List-like object with:
+#'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
+#'   - \code{modi}: optional; forwarded to \code{sf.mod.run()} (default \code{1L}).
+#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
+#' @param param_table Parameter table passed to \code{sf.mod.run()}.
+#' @param penalty.control Optional penalty control object passed to \code{sf.mod.run()}.
+#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
+#'
+#' @return A list with:
+#'   - \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness.
+#'   - \code{best_code}: final best model code (named integer vector).
+#'   - \code{best_row}: one-row \code{data.frame} for the best entry.
+#'
+#' @examples
+#' \dontrun{
+#'
+#' dat <- pheno_sd
+#' param_table <-   param_table<-auto_param_table(dat = dat,
+#'                                 param_table = param_table,
+#'                                 nlmixr2autoinits = T)
+#'results_iiv <- step_iiv(
+#'  dat = dat,
+#'  state = list(),
+#'  search.space = "ivbase",
+#'  param_table = param_table,
+#'  penalty.control =   penalty.control
+#')
+#'
+#' results_iiv$results_table
+#' results_iiv$best_code
+#'results_iiv$best_row
+#' }
+#'
+#' @export
+step_iiv <- function(dat,
+                     state=list(),
+                     search.space="ivbase",
+                     param_table=NULL,
+                     penalty.control = NULL,
+                     precomputed_results_file=NULL,
+                     filename=NULL,
+                     ...) {
+
+  dots <- list(...)
+  if (!is.null(dots$custom_base)) {
+    custom_base <- dots$custom_base
+  } else {
+    custom_base <- NULL
+  }
+
+  # Starting code
+  if (!is.null(state$best_code)) {
+    current_code <- state$best_code
+  } else {
+    current_code <- base_model(search.space = search.space, custom_base = custom_base)
+  }
+
+  all_results <- NULL
+
+  # ---------------- Special IIV: eta.km (only if mm = 1) ----------------
+  if ("mm" %in% names(current_code) && current_code["mm"] == 1L &&
+      "eta.km" %in% names(current_code) && current_code["eta.km"] == 0L) {
+
+    candidate_codes <- list(
+      current_code,
+      {tmp <- current_code; tmp["eta.km"] <- 1L; tmp}
+    )
+
+    fits <- vapply(candidate_codes, function(code_vec) {
+      sf.mod.run(
+        modi             = modi,
+        string           = unname(code_vec),
+        dat              = dat,
+        search.space     = search.space,
+        param_table      = param_table,
+        penalty.control  = penalty.control,
+        precomputed_results_file =   precomputed_results_file,
+        filename=filename,
+        ...
+      )
+    }, numeric(1))
+
+    model_names <- vapply(candidate_codes, function(code) {
+      if (exists("CodetoMod", mode = "function")) {
+        CodetoMod(search.space = search.space, sel.best.code = unname(code))
+      } else {
+        paste0("Model_", paste(unname(code), collapse = "_"))
+      }
+    }, character(1))
+
+    model_codes_chr <- vapply(candidate_codes, function(code) {
+      paste(unname(code), collapse = ",")
+    }, character(1))
+
+    results_table <- data.frame(
+      Step         = "IIV on Km",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name" = model_names,
+      "Model code" = model_codes_chr,
+      Fitness      = fits,
+      stringsAsFactors = FALSE
+    )
+    all_results <- rbind(all_results, results_table)
+
+    best_idx <- which.min(results_table$Fitness)
+    current_code <- candidate_codes[[best_idx]]
+  }
+
+  # ---------------- Special IIV: eta.ka (only for oralbase) ----------------
+  if (identical(search.space, "oralbase") &&
+      "eta.ka" %in% names(current_code) && current_code["eta.ka"] == 0L) {
+
+    candidate_codes <- list(
+      current_code,
+      {tmp <- current_code; tmp["eta.ka"] <- 1L; tmp}
+    )
+
+    fits <- vapply(candidate_codes, function(code_vec) {
+      sf.mod.run(
+        modi             = modi,
+        string           = unname(code_vec),
+        dat              = dat,
+        search.space     = search.space,
+        param_table      = param_table,
+        penalty.control  = penalty.control,
+        precomputed_results_file=   precomputed_results_file,
+        filename=filename,
+        ...
+      )
+    }, numeric(1))
+
+    model_names <- vapply(candidate_codes, function(code) {
+      if (exists("CodetoMod", mode = "function")) {
+        CodetoMod(search.space = search.space, sel.best.code = unname(code))
+      } else {
+        paste0("Model_", paste(unname(code), collapse = "_"))
+      }
+    }, character(1))
+
+    model_codes_chr <- vapply(candidate_codes, function(code) {
+      paste(unname(code), collapse = ",")
+    }, character(1))
+
+    results_table <- data.frame(
+      Step         = "IIV on Ka",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name" = model_names,
+      "Model code" = model_codes_chr,
+      Fitness      = fits,
+      stringsAsFactors = FALSE
+    )
+    all_results <- rbind(all_results, results_table)
+
+    best_idx <- which.min(results_table$Fitness)
+    current_code <- candidate_codes[[best_idx]]
+  }
+
+  # ---------------- Structural IIV (forward selection) ----------------
+  struct_iiv <- c("eta.vc")
+
+  no.cmpt <- suppressWarnings(as.integer(current_code[["no.cmpt"]]))
+  if (no.cmpt >= 2L) struct_iiv <- c(struct_iiv, "eta.vp", "eta.q")
+  if (no.cmpt >= 3L) struct_iiv <- c(struct_iiv, "eta.vp2", "eta.q2")
+  # struct_iiv <- struct_iiv[struct_iiv %in% names(current_code)]
+
+  keep_going <- TRUE
+  while (keep_going) {
+    available <- struct_iiv[current_code[struct_iiv] == 0L]
+    if (length(available) == 0L) break
+    # Baseline + "add one IIV" candidates
+    candidate_codes <- vector("list", length(available) + 1L)
+    candidate_codes[[1L]] <- current_code
+    for (i in seq_along(available)) {
+      nm <- available[i]
+      tmp <- current_code
+      tmp[nm] <- 1L
+      candidate_codes[[i + 1L]] <- tmp
+    }
+
+    fits <- vapply(candidate_codes, function(code_vec) {
+      sf.mod.run(
+        modi             = modi,
+        string           = unname(code_vec),
+        dat              = dat,
+        search.space     = search.space,
+        param_table      = param_table,
+        penalty.control  = penalty.control,
+        precomputed_results_file=   precomputed_results_file,
+        filename=filename,
+        ...
+      )
+    }, numeric(1))
+
+    model_names <- vapply(candidate_codes, function(code) {
+      if (exists("CodetoMod", mode = "function")) {
+        CodetoMod(search.space = search.space, sel.best.code = unname(code))
+      } else {
+        paste0("Model_", paste(unname(code), collapse = "_"))
+      }
+    }, character(1))
+
+    model_codes_chr <- vapply(candidate_codes, function(code) {
+      paste(unname(code), collapse = ",")
+    }, character(1))
+
+    results_table <- data.frame(
+      Step         = "IIV (forward)",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name" = model_names,
+      "Model code" = model_codes_chr,
+      Fitness      = fits,
+      stringsAsFactors = FALSE
+    )
+    all_results <- rbind(all_results, results_table)
+
+    best_idx <- which.min(results_table$Fitness)
+
+    # If baseline remains best (index 1), stop; else accept improvement and continue
+    if (best_idx == 1L) {
+      keep_going <- FALSE
+    } else {
+      current_code <- candidate_codes[[best_idx]]
+    }
+  }
+
+  # ---------------- Finalize outputs ----------------
+  if (!is.null(all_results)) {
+    best_row <- all_results[which.min(all_results$Fitness), , drop = FALSE]
+  } else {
+
+    base_fit <- sf.mod.run(
+      modi             = modi,
+      string           = unname(current_code),
+      dat              = dat,
+      search.space     = search.space,
+      param_table      = param_table,
+      penalty.control  = penalty.control,
+      precomputed_results_file=   precomputed_results_file,
+      filename=filename,
+      ...
+    )
+    best_row <- data.frame(
+      Step = "IIV (none)",
+      "Model name" = if (exists("CodetoMod", mode = "function")) {
+        CodetoMod(search.space = search.space, sel.best.code = unname(current_code))
+      } else {
+        paste0("Model_", paste(unname(current_code), collapse = "_"))
+      },
+      "Model code" = paste(unname(current_code), collapse = ","),
+      Fitness = base_fit,
+      stringsAsFactors = FALSE
+    )
+    all_results <- best_row
+  }
+  r<<-r+1
+  list(
+    results_table = all_results,
+    best_code     = current_code,
+    best_row      = best_row
+  )
+}
+
+#' Screen ETA correlation (on vs off)
+#'
+#' Tests whether enabling ETA correlation (\code{mcorr = 1}) improves the fitness
+#' over keeping it disabled (\code{mcorr = 0}), while keeping all other fields fixed.
+#'
+#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param state List-like with:
+#'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
+#'   - \code{modi}: optional; forwarded to \code{sf.mod.run()} (default \code{1L}).
+#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
+#' @param param_table Parameter table passed to \code{sf.mod.run()}.
+#' @param penalty.control Optional penalty control object forwarded to \code{sf.mod.run()}.
+#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
+#'
+#' @return A list with:
+#'   - \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness.
+#'   - \code{best_code}: named integer vector of the best candidate’s model code.
+#'   - \code{best_row}: one-row \code{data.frame} (the best candidate).
+#'
+#' @examples
+#' \dontrun{
+#' dat <- your_data
+#' param_table <- your_param_table
+#' state <- list(best_code = base_model("ivbase"), modi = 1L)
+#'
+#'result_corr <- step_correlation(
+#'  dat = dat,
+#'  search.space = "ivbase",
+#'  param_table = param_table,
+#'  penalty.control = penaltyControl()
+#')
+#'result_corr$results_table
+#'result_corr$best_code
+#'result_corr$best_row
+#'}
+#'
+#' @export
+step_correlation <- function(dat,
+                             state=list(),
+                             search.space="ivbase",
+                             param_table=NULL,
+                             penalty.control = NULL,
+                             precomputed_results_file=NULL,
+                             filename=NULL,
+                             ...) {
+  dots <- list(...)
+  if (!is.null(dots$custom_base)) {
+    custom_base <- dots$custom_base
+  } else {
+    custom_base <- NULL
+  }
+
+  # starting code
+  if (!is.null(state$best_code)) {
+    current_code <- state$best_code
+  } else {
+    current_code <-
+      base_model(search.space = search.space, custom_base = custom_base)
+  }
+
+  corrcode <- suppressWarnings(as.integer(current_code["mcorr"]))
+  alt_val <- if (corrcode == 0L)
+    1L
+  else
+    0L
+
+  candidate_codes <- list(current_code,
+                          {
+                            tmp <- current_code
+                            tmp["mcorr"] <- alt_val
+                            tmp
+                          })
+
+  fits <- vapply(candidate_codes, function(code_vec) {
+    sf.mod.run(
+      modi             = modi,
+      string           = unname(code_vec),
+      dat              = dat,
+      search.space     = search.space,
+      param_table      = param_table,
+      penalty.control  = penalty.control,
+      precomputed_results_file= precomputed_results_file,
+      filename=filename,
+      ...
+    )
+  }, numeric(1))
+
+  model_names <- vapply(candidate_codes, function(code) {
+    if (exists("CodetoMod", mode = "function")) {
+      CodetoMod(search.space = search.space,
+                sel.best.code = unname(code))
+    } else {
+      paste0("Model_", paste(unname(code), collapse = "_"))
+    }
+  }, character(1))
+
+  model_codes_chr <- vapply(candidate_codes, function(code) {
+    paste(unname(code), collapse = ",")
+  }, character(1))
+
+  results_table <- data.frame(
+    Step         = "ETA correlation",
+    "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+    "Model name" = model_names,
+    "Model code" = model_codes_chr,
+    Fitness      = fits,
+    stringsAsFactors = FALSE
+  )
+
+  best_idx <- which.min(results_table$Fitness)
+
+  list(
+    results_table = results_table,
+    best_code     = candidate_codes[[best_idx]],
+    best_row      = results_table[best_idx, , drop = FALSE]
+  )
+}
+
+
+#' Screen residual error model (rv)
+#'
+#' Uses the current model as baseline and, if \code{rv == 3}, also evaluates
+#' \code{rv = 1} and \code{rv = 2} while keeping all other fields fixed.
+#' Chooses the candidate with the lowest Fitness.
+#'
+#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param state List with optional \code{best_code} (named integer vector) and \code{modi}.
+#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
+#' @param param_table Parameter table passed to \code{sf.mod.run()}.
+#' @param penalty.control Optional penalty control passed to \code{sf.mod.run()}.
+#' @param ... Forwarded to \code{sf.mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).
+#'
+#' @return List with:
+#'   \itemize{
+#'     \item \code{results_table}: data.frame (Step, Model name, Model code, Fitness)
+#'     \item \code{best_code}: named integer vector of the best candidate
+#'     \item \code{best_row}: one-row data.frame (the best candidate)
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' state <- list(best_code = base_model("ivbase"), modi = 1L)
+#' res_rv <- step_rv(
+#'   dat = dat,
+#'   state = state,
+#'   search.space = "ivbase",
+#'   param_table = param_table,
+#'   penalty.control = penaltyControl()
+#' )
+#' res_rv$results_table
+#' res_rv$best_code
+#' }
+#'
+#' @export
+step_rv <- function(dat,
+                    state = list(),
+                    search.space = "ivbase",
+                    param_table = NULL,
+                    penalty.control = NULL,
+                    precomputed_results_file=NULL,
+                    filename=NULL,
+                    ...) {
+  dots <- list(...)
+  custom_base <-
+    if (!is.null(dots$custom_base))
+      dots$custom_base
+  else
+    NULL
+
+  # starting code
+  if (!is.null(state$best_code)) {
+    current_code <- state$best_code
+  } else {
+    current_code <-
+      base_model(search.space = search.space, custom_base = custom_base)
+  }
+
+  # baseline candidate
+  candidate_codes <- list(current_code)
+
+  candidate_codes <- lapply(1:3, function(rv_val) {
+    code <- current_code
+    code["rv"] <- rv_val
+    code
+  })
+
+  # evaluate all candidates
+  fits <- vapply(candidate_codes, function(code_vec) {
+    sf.mod.run(
+      modi             = modi,
+      string           = unname(code_vec),
+      dat              = dat,
+      search.space     = search.space,
+      param_table      = param_table,
+      penalty.control  = penalty.control,
+      precomputed_results_file=   precomputed_results_file,
+      filename=filename,
+      ...
+    )
+  }, numeric(1))
+
+  # names & codes
+  model_names <- vapply(candidate_codes,
+                        function(code)
+                          CodetoMod(search.space = search.space, sel.best.code = unname(code)),
+                        character(1))
+
+  model_codes_chr <- vapply(candidate_codes, function(code) {
+    paste(unname(code), collapse = ",")
+  }, character(1))
+
+  results_table <- data.frame(
+    Step         = "Residual error types",
+    "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+    "Model name" = model_names,
+    "Model code" = model_codes_chr,
+    Fitness      = fits,
+    stringsAsFactors = FALSE
+  )
+
+  # choose best
+  best_idx <- which.min(results_table$Fitness)
+  r<<-r+1
+  list(
+    results_table = results_table,
+    best_code     = candidate_codes[[best_idx]],
+    best_row      = results_table[best_idx, , drop = FALSE]
+  )
+}
+
+
+
+#' Stepwise Model Building for Nonlinear Mixed-Effects Models
+#'
+#' The `sf.operator` function performs a stepwise model-building procedure
+#' for nonlinear mixed-effects (NLME) models, including testing the number of
+#' compartments, elimination type (e.g., Michaelis-Menten), inter-individual
+#' variability (IIV), correlations, and residual error models.
+#'
+#' This function is designed to work with the `nlmixr2` and `rxode2` workflow
+#' and will create intermediate model runs and results in a temporary directory.
+#'
+#' @param dat A dataset containing the pharmacokinetic/pharmacodynamic (PK/PD) data
+#'   to be modeled.
+#' @param search.space Character string specifying the structural model search space.
+#'   Must be either `"ivbase"` (intravenous bolus) or `"oralbase"` (oral administration).
+#' @param param_table Optional parameter table. If `NULL`, the function will generate
+#'   one automatically using \code{auto_param_table()}.
+#' @param penalty.control An object created by \code{penaltyControl()} specifying
+#'   penalty terms to be used in model selection.
+#' @param no.cores Integer specifying the number of threads for parallel execution.
+#'   Defaults to \code{rxode2::getRxThreads()}.
+#' @param foldername Character string for naming the output folder.
+#' @param filename Character string for naming output files.
+#' @param custom_base Optional custom base model to use instead of the default generated one.
+#' @param dynamic_fitness Logical; if `TRUE`, penalty terms change dynamically
+#'   during different steps of model building.
+#' @param precomputed_results_file Optional path to a file containing precomputed
+#'   stepwise search results to avoid rerunning steps.
+#' @param ... Additional arguments passed to the underlying stepwise functions.
+#'
+#' @details
+#' The procedure follows these steps:
+#' \enumerate{
+#'   \item **Step 1:** Select the optimal number of compartments.
+#'   \item **Step 2:** Determine the elimination type (linear vs. Michaelis–Menten).
+#'   \item **Step 3:** Test inclusion of inter-individual variability (IIV) terms.
+#'   \item **Step 4:** Explore correlations between random effects (if any `eta.*` terms exist).
+#'   \item **Step 5:** Explore different residual error models.
+#' }
+#'
+#' If no `eta.*` parameters remain after Step 3 (sum equals zero), Step 4
+#' (correlation testing) will be skipped.
+#'
+#' All intermediate results are stored in \code{Store.all} and the final best
+#' model code is returned in a structured object of class \code{"sfOperatorResult"}.
+#'
+#' @return An object of class \code{"sfOperatorResult"} containing:
+#' \itemize{
+#'   \item \code{"Final Best Code"} – Best model code parameters.
+#'   \item \code{"Final Best Model Name"} – Name of the best model.
+#'   \item \code{"Stepwise Best Models"} – Summary of best models per step.
+#'   \item \code{"Stepwise History"} – Detailed results from each step.
+#'   \item \code{"Model Run History"} – All model runs performed.
+#' }
+#'
+#' @seealso \code{\link{step_compartments}}, \code{\link{step_elimination}},
+#'   \code{\link{step_iiv}}, \code{\link{step_correlation}}, \code{\link{step_rv}}
+#'
+#' @examples
+
+#' \dontrun{
+#' result<-sf.operator(dat = pheno_sd)
+#' print(result)
+#' }
+#'
 #' @export
 
 sf.operator <- function(dat,
-                        search.space,
-                        no.cores,
-                        thetalower,
-                        crse,
-                        cshrink,
-                        cadd,
-                        cprop,
-                        ccorr,
-                        penalty.type,
-                        penalty.value,
-                        foldername,
-                        filename,
+                        search.space = "ivbase",
+                        param_table = NULL,
+                        penalty.control = penaltyControl(),
+                        no.cores = rxode2::getRxThreads(),
+                        foldername = "test",
+                        filename = "test",
+                        custom_base = NULL,
+                        dynamic_fitness = TRUE,
+                        precomputed_results_file =NULL,
                         ...) {
-  # If exists, then create a new one
-  # Output directory
-  if (missing(foldername)) {
-    foldername <- "test"
-  }
-  if (missing(filename)) {
-    filename <- "test"
-  }
 
-  foldername <<- foldername
-  filename <<- filename
-
-  current.date <- Sys.Date()
-
+  current.date<-Sys.Date()
   outputdir <-
     paste0("Step_",
            current.date,
@@ -89,1483 +941,206 @@ sf.operator <- function(dat,
            digest::digest(dat),
            "_temp")
 
-  # for linux ubuntu
-  if (dir.exists(outputdir)) {
-    print("Warning: current directory for stepwsie analysis already exists")
-    unlink(outputdir, recursive = T, force = T)
-    print("Warning: a new one was created and replace the previous one")
-    dir.create(outputdir, showWarnings = F, recursive = T)
-  }
-
   if (!dir.exists(outputdir)) {
-    print("Output directory for stepwise analysis is created")
-    dir.create(outputdir, showWarnings = F, recursive = T)
+    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+  } else {
+    message(
+      sprintf(
+        "Output directory '%s' already exists. Using existing directory.",
+        outputdir
+      )
+    )
   }
-  setwd(paste0(getwd(), "/", outputdir))
-  storage.path <- getwd()
 
-  if (missing(search.space)) {
-    search.space <- 1
-  }
+  setwd(outputdir)
 
-  ################################## Default Modelling setting###########################
-  # Default of constraint setting
-  # RSE<=20%
-  # Shrinkage <=30%
-  # Theta lower boundary, default=0
-  # SD of additive >=1 (approximately ) 1/1000-
-  # SD of proportional >= 5%
-  # R square for omega correlation coefficient < 0.1
-  thetalower0 <- c(
-    lbka = 0,
-    lbvc = 0,
-    lbcl = 0,
-    lbvp = 0,
-    lbvp2 = 0,
-    lbq = 0,
-    lbq2 = 0,
-    lbtlag = 0,
-    lbvmax = 0,
-    lbkm = 0
+  # Set initial estimate
+  param_table <- auto_param_table(
+    dat = dat,
+    param_table = param_table,
+    nlmixr2autoinits = T,
+    foldername = foldername
   )
 
-  if (missing(thetalower)) {
-    thetalower = thetalower0
-  }
+  current <- base_model(search.space = search.space,
+                        custom_base = custom_base)
 
-  if (is.na(thetalower["ka"]) == F) {
-    thetalower0["lbka"] = thetalower["ka"]
-  }
-  if (is.na(thetalower["cl"]) == F) {
-    thetalower0["lbcl"] = thetalower["cl"]
-  }
-  if (is.na(thetalower["vc"]) == F) {
-    thetalower0["lbvc"] = thetalower["vc"]
-  }
-  if (is.na(thetalower["vp"]) == F) {
-    thetalower0["lbvp"] = thetalower["vp"]
-  }
-  if (is.na(thetalower["vp2"]) == F) {
-    thetalower0["lbvp2"] = thetalower["vp2"]
-  }
-  if (is.na(thetalower["q"]) == F) {
-    thetalower0["lbq"] = thetalower["q"]
-  }
-  if (is.na(thetalower["q2"]) == F) {
-    thetalower0["lbq2"] = thetalower["q2"]
-  }
-  if (is.na(thetalower["tlag"]) == F) {
-    thetalower0["lbtlag"] = thetalower["tlag"]
-  }
-  if (is.na(thetalower["vmax"]) == F) {
-    thetalower0["lbvmax"] = thetalower["vmax"]
-  }
-  if (is.na(thetalower["km"]) == F) {
-    thetalower0["lbkm"] = thetalower["km"]
-  }
-
-  lbka = thetalower0["lbka"]
-  lbcl = thetalower0["lbcl"]
-  lbvc = thetalower0["lbvc"]
-  lbvp = thetalower0["lbvp"]
-  lbvp2 = thetalower0["lbvp2"]
-  lbq = thetalower0["lbq"]
-  lbq2 = thetalower0["lbq2"]
-  lbtlag = thetalower0["lbtlag"]
-  lbvmax = thetalower0["lbvmax"]
-  lbkm = thetalower0["lbkm"]
-
-
-  if (missing(crse)) {
-    crse <- 20
-  }
-  if (missing(cshrink)) {
-    cshrink <- 30
-  }
-
-
-  if (missing(cadd) & search.space == 1) {
-    dat.obs <- dat[dat$EVID == 0, ]
-    pop.cmax <- aggregate(dat.obs, by = list(dat.obs$ID), FUN = max)
-    dat.cmax <<- median(pop.cmax$DV)
-    cadd <- round(dat.cmax / 1000, 0)
-  }
-
-  if (missing(cprop)) {
-    cprop <- 0.05
-  }
-
-  if (missing(ccorr)) {
-    ccorr <- 0 # default 0, no constraint on the correlation
-  }
-
-  if (missing(no.cores)) {
-    no.cores <-
-      getRxThreads() # default 0, no constraint on the correlation
-  }
-
-  #Initial Blank setting
-  mod.record.best.all <- NULL
-  mod.record.all <- NULL
-  model.tried. <- 0
-  mod.record.best <- NULL
-  mod.record <- NULL
-
+  precomputed_cache_loaded <<- FALSE
+  Store.all <<- NULL
+  r <<- 1
+  modi <<- 1
   #################################Step1. No. of compartment##########################
-  message(blue(
+  message(crayon::blue(
     paste0(
       "Running Stepwise 1. Structural Model----------------------------------------------------"
     )
   ))
 
-  message(blue(
+  message(crayon::blue(
     paste0(
       "Test number of compartments----------------------------------------------------"
     )
   ))
 
-  # set as the variable in the global environment.
-  modi <<- 1
-  r <<- 1
-  dat <<- dat
-  search.space <<- search.space
-  crse <<- crse
-  cshrink <<- cshrink
-  lbcl <<- lbcl
-  lbvc <<- lbvc
-  lbvp <<- lbvp
-  lbq <<- lbq
-  lbvp2 <<- lbvp2
-  lbq2 <<- lbq2
-  cadd <<- cadd
-  cprop <<- cprop
-  ccorr <<- ccorr
+  state <- list()
 
-  penalty.type <<- 1
-  penalty.value <<- 10000
+   if (isTRUE(dynamic_fitness)) {
+     penalty.control$penalty.terms = c("rse", "theta", "covariance")
+   }
 
-
-  # Start from no. of compartment, only random effects on CL, combined residual error model
-  mod.string1 <- c(1, 0, 0, 0, 0, 0, 0, 0, 0, 3)
-  mod.string2 <- c(2, 0, 0, 0, 0, 0, 0, 0, 0, 3)
-  mod.string3 <- c(3, 0, 0, 0, 0, 0, 0, 0, 0, 3)
-
-  mod1.fit <- sf.mod.run(modi = modi, string = mod.string1, ...)
-  mod2.fit <- sf.mod.run(modi = modi, string = mod.string2, ...)
-  mod3.fit <- sf.mod.run(modi = modi, string = mod.string3, ...)
-
-  mod.step1 <-
-    data.frame(
-      modname = c(
-        read.code2(search.space = search.space, sel.best.code = mod.string1),
-        read.code2(search.space = search.space, sel.best.code =
-                     mod.string2),
-        read.code2(search.space = search.space, sel.best.code =
-                     mod.string3)
-      ),
-      cmpt = c(mod.string1[1], mod.string2[1], mod.string3[1]),
-      fitness = c(mod1.fit,
-                  mod2.fit,
-                  mod3.fit),
-      mod = c(
-        toString(mod.string1),
-        toString(mod.string2),
-        toString(mod.string3)
-      )
-    )
-
-  mod.step1$step = "no. of compartments"
-  mod.record <- rbind(mod.record, mod.step1)
-  # Select the minimum fitness values
-  mod.step1 <-
-    mod.step1[mod.step1$fitness == min(mod.step1$fitness), ]
-  # Record the best solution for current steps
-
-  mod.record.best <- rbind(mod.record.best, mod.step1)
-
-  model.tried. <- model.tried. + 3
-
-
-  r <<- 1.2
-  ##################### Step 1.2. Analyse the nonlinear elimination###############
-
-  message(blue(
+  result.steps.compartments <-   step_compartments(
+    dat = dat,
+    state = state,
+    search.space = search.space,
+    param_table = param_table,
+    penalty.control = penalty.control,
+    precomputed_results_file=  precomputed_results_file,
+    filename=filename,
+    ...
+  )
+  ##################### Step2. Michaelis-Menten kinetics###############
+  message(crayon::blue(
     paste0(
       "Analyse elimination type----------------------------------------------------"
     )
   ))
+  result.steps.MM <-   step_elimination(
+    dat = dat,
+    state = result.steps.compartments,
+    search.space = search.space,
+    param_table = param_table,
+    penalty.control = penalty.control,
+    filename = filename,
+    ...
+  )
 
-
-  mod.step1.string <- as.numeric(strsplit(mod.step1$mod, ",")[[1]])
-  mod.step1.string.fit <-
-    sf.mod.run(modi = modi, string = mod.step1.string, ...)
-  mod.string.r <- mod.step1.string
-  mod.string.r[8] <- 1
-
-
-  mod.string.r.fit <-
-    sf.mod.run(modi = modi, string = mod.string.r, ...)
-  mod.step1.2 <-
-    data.frame(
-      modname = c(
-        read.code2(search.space = search.space, sel.best.code = mod.step1.string),
-        read.code2(search.space = search.space, sel.best.code = mod.string.r)
-      ),
-      cmpt = c(mod.step1.string[1], mod.string.r[1]),
-      fitness = c(mod.step1.string.fit,
-                  mod.string.r.fit),
-      mod = c(toString(mod.step1.string),
-              toString(mod.string.r))
-    )
-
-  mod.step1.2$step = "elimination type"
-  mod.record <- rbind(mod.record, mod.step1.2)
-  mod.step1.2 <-
-    mod.step1.2[mod.step1.2$fitness == min(mod.step1.2$fitness), ]
-  mod.record.best <- rbind(mod.record.best, mod.step1.2)
-
-  model.tried. <- model.tried. + 1
-
-
-  r <<- 1.3
-  ##################### Step 1.3. Introduce Km #################################
-
-  type <<- 2
-  penalty <<- 10000
-
-  message(blue(
+  ####################### Step3. Random effects############################
+  message(crayon::blue(
     paste0(
-      "Test IIV on Km----------------------------------------------------"
+      "Test IIV on parameters----------------------------------------------------"
     )
   ))
 
-
-  mod.step1.2.string <-
-    as.numeric(strsplit(mod.step1.2$mod, ",")[[1]])
-  mod.step1.2.string.fit <-
-    sf.mod.run(modi = modi, string = mod.step1.2.string, ...)
-  mod.string.r <- mod.step1.2.string
-
-  if (mod.string.r[8] == 1) {
-    message(blue(
-      paste0(
-        "Running Stepwise 2. Analyse the elimination type---------------------------------------- "
-      )
-    ))
-
-
-    mod.string.r[2] <- 1
-
-
-    mod.string.r.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r, ...)
-    mod.step1.3 <-
-      data.frame(
-        modname = c(
-          read.code2(search.space = search.space, mod.step1.2.string),
-          read.code2(search.space = search.space, mod.string.r)
-        ),
-        cmpt = c(mod.step1.2.string[1], mod.string.r[1]),
-        fitness = c(mod.step1.2.string.fit,
-                    mod.string.r.fit),
-        mod = c(toString(mod.step1.2.string),
-                toString(mod.string.r))
-      )
-
-    mod.step1.3$step = "IIV on Km"
-    mod.record <- rbind(mod.record, mod.step1.3)
-    mod.step1.3 <-
-      mod.step1.3[mod.step1.3$fitness == min(mod.step1.3$fitness), ]
-    mod.record.best <- rbind(mod.record.best, mod.step1.3)
-    model.tried. <- model.tried. + 1
-
+  if (isTRUE(dynamic_fitness)) {
+    penalty.control$penalty.terms = c("rse", "theta", "covariance", "shrinkage", "omega")
   }
 
-
-
-  # Temporarily use model.step1 name
-  mod.step1 <- mod.step1.2
-  if (exists("mod.step1.3")) {
-    mod.step1 <- mod.step1.3
-  }
-
-  ############ Step 3. Introduce random effects by stepwise method###############
-
-  message(blue(
-    paste0(
-      "Introduce IIV on parameters----------------------------------------------------"
-    )
-  ))
-
-  r <<- 2
-  mod.step1.string <- as.numeric(strsplit(mod.step1$mod, ",")[[1]])
-  # Re-run the best solution by the new fitness function
-  mod.step1.string.fit <-
-    sf.mod.run(modi = modi, string = mod.step1.string, ...)
-  # 1Cmpt
-
-  if (mod.step1$cmpt == 1) {
-    mod.string.r <- mod.step1.string
-    mod.string.r[3] <- 1
-
-    mod.string.r.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r, ...)
-    mod.step2 <-
-      data.frame(
-        modname = c(
-          read.code2(1, mod.step1.string),
-          read.code2(1, mod.string.r)
-        ),
-        cmpt = c(mod.step1.string[1], mod.string.r[1]),
-        fitness = c(mod.step1.string.fit, mod.string.r.fit),
-        mod = c(toString(mod.step1.string), toString(mod.string.r))
-      )
-
-    mod.step2$step = "IIV on parameters"
-    mod.record <- rbind(mod.record, mod.step2)
-    mod.step2 <-
-      mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-    mod.record.best <- rbind(mod.record.best, mod.step2)
-
-    model.tried. <- model.tried. + 1
-  }
-
-
-  if (mod.step1$cmpt > 1) {
-    mod.test <- mod.step1
-    mod.test.string.fit <-
-      sf.mod.run(modi = modi, string = mod.step1.string, ...)
-  }
-
-  # 2Cmpt
-  if (mod.step1$cmpt == 2) {
-    mod.string.r1 <- mod.step1.string
-    mod.string.r2 <- mod.step1.string
-    mod.string.r3 <- mod.step1.string
-
-    mod.string.r1[3] <- 1
-    mod.string.r2[4] <- 1
-    mod.string.r3[6] <- 1
-
-    mod.string.r1.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r1, ...)
-    mod.string.r2.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r2, ...)
-    mod.string.r3.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r3, ...)
-
-
-    mod.step2 <-
-      data.frame(
-        modname = c(
-          read.code2(search.space = search.space, mod.step1.string),
-          read.code2(search.space = search.space, mod.string.r1),
-          read.code2(search.space = search.space, mod.string.r2),
-          read.code2(search.space = search.space, mod.string.r3)
-        ),
-        cmpt = c(
-          mod.step1.string[1],
-          mod.string.r1[1],
-          mod.string.r2[1],
-          mod.string.r3[1]
-        ),
-        fitness = c(
-          mod.step1.string.fit,
-          mod.string.r1.fit,
-          mod.string.r2.fit,
-          mod.string.r3.fit
-        ),
-        mod = c(
-          toString(mod.test$mod),
-          toString(mod.string.r1),
-          toString(mod.string.r2),
-          toString(mod.string.r3)
-        )
-      )
-
-    mod.step2$step = "IIV on parameters"
-    mod.record <- rbind(mod.record, mod.step2)
-
-    mod.step2 <-
-      mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-    mod.record.best <- rbind(mod.record.best, mod.step2)
-    model.tried. <- model.tried. + 3
-
-    if (mod.step2$mod != mod.test$mod) {
-      mod.test <- mod.step2
-      mod.step2.string <-
-        as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-      if (mod.step2.string [3] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-
-        mod.string.r1[4] <- 1
-        mod.string.r2[6] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2)
-            ),
-            cmpt = c(mod.step2.string[1], mod.string.r1[1], mod.string.r2[1]),
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit
-            ),
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 2
-      }
-
-
-      if (mod.step2.string [4] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-
-        mod.string.r1[3] <- 1
-        mod.string.r2[6] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2)
-            ),
-            cmpt = c(mod.step2.string, mod.string.r1[1], mod.string.r2[1]),
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit
-            ),
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 2
-      }
-
-
-      if (mod.step2.string [6] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-
-        mod.string.r1[3] <- 1
-        mod.string.r2[4] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2)
-            ),
-            cmpt = c(mod.step2.string[1], mod.string.r1[1], mod.string.r2[1]),
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit
-            ),
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 2
-      }
-
-
-      if (mod.step2$mod != mod.test$mod) {
-        mod.test <- mod.step2
-
-        mod.step2.string <-
-          as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-        if (mod.step2.string [3] != 1) {
-          mod.string.r1 <- mod.step2.string
-
-          mod.string.r1[3] <- 1
-
-          mod.string.r1.fit <-
-            sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-          mod.step2 <-
-            data.frame(
-              modname = c(
-                read.code2(search.space = search.space, mod.step2.string),
-                read.code2(search.space = search.space, mod.string.r1)
-              ),
-              cmpt = c(mod.step2.string[1], mod.string.r1[1]),
-              fitness = c(mod.test$fitness, mod.string.r1.fit),
-              mod = c(toString(mod.test$mod), toString(mod.string.r1))
-            )
-
-          mod.step2$step = "IIV on parameters"
-          mod.record <- rbind(mod.record, mod.step2)
-
-          mod.step2 <-
-            mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-          mod.record.best <- rbind(mod.record.best, mod.step2)
-          model.tried. <- model.tried. + 1
-        }
-
-
-        if (mod.step2.string [4] != 1) {
-          mod.string.r1 <- mod.step2.string
-
-          mod.string.r1[4] <- 1
-
-          mod.string.r1.fit <-
-            sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-          mod.step2 <-
-            data.frame(
-              modname = c(
-                read.code2(search.space = search.space, mod.step2.string),
-                read.code2(search.space = search.space, mod.string.r1)
-              ),
-              cmpt = c(mod.step2.string[1], mod.string.r1[1]),
-              fitness = c(mod.step2$fitness, mod.string.r1.fit),
-              mod = c(toString(mod.step2$mod), toString(mod.string.r1))
-            )
-
-          mod.step2$step = "IIV on parameters"
-          mod.record <- rbind(mod.record, mod.step2)
-
-          mod.step2 <-
-            mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-          mod.record.best <- rbind(mod.record.best, mod.step2)
-          model.tried. <- model.tried. + 1
-        }
-
-
-        if (mod.step2.string [6] != 1) {
-          mod.string.r1 <- mod.step2.string
-
-          mod.string.r1[6] <- 1
-
-          mod.string.r1.fit <-
-            sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-          mod.step2 <-
-            data.frame(
-              modname = c(
-                read.code2(search.space = search.space, mod.step2.string),
-                read.code2(search.space = search.space, mod.string.r1)
-              ),
-              cmpt = c(mod.step2.string[1], mod.string.r1[1]),
-              fitness = c(mod.test$fitness, mod.string.r1.fit),
-              mod = c(toString(mod.test$mod), toString(mod.string.r1))
-            )
-
-          mod.step2$step = "IIV on parameters"
-          mod.record <- rbind(mod.record, mod.step2)
-
-          mod.step2 <-
-            mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-          mod.record.best <- rbind(mod.record.best, mod.step2)
-          model.tried. <- model.tried. + 1
-        }
-
-
-      }
-
-
-    }
-
-
-  }
-
-
-  # 3Cmpt
-
-  if (mod.step1$cmpt == 3) {
-    mod.string.r1 <- mod.step1.string
-    mod.string.r2 <- mod.step1.string
-    mod.string.r3 <- mod.step1.string
-    mod.string.r4 <- mod.step1.string
-    mod.string.r5 <- mod.step1.string
-
-
-    mod.string.r1[3] <- 1
-    mod.string.r2[4] <- 1
-    mod.string.r3[6] <- 1
-    mod.string.r4[5] <- 1
-    mod.string.r5[7] <- 1
-
-    mod.string.r1.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r1, ...)
-    mod.string.r2.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r2, ...)
-    mod.string.r3.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r3, ...)
-    mod.string.r4.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r4, ...)
-    mod.string.r5.fit <-
-      sf.mod.run(modi = modi, string = mod.string.r5, ...)
-
-    mod.step2 <-
-      data.frame(
-        modname = c(
-          read.code2(search.space = search.space, mod.step1.string),
-          read.code2(search.space = search.space, mod.string.r1),
-          read.code2(search.space = search.space, mod.string.r2),
-          read.code2(search.space = search.space, mod.string.r3),
-          read.code2(search.space = search.space, mod.string.r4),
-          read.code2(search.space = search.space, mod.string.r5)
-        ),
-
-        cmpt = c(
-          mod.step1.string[1],
-          mod.string.r1[1],
-          mod.string.r2[1],
-          mod.string.r3[1],
-          mod.string.r4[1],
-          mod.string.r5[1]
-        ),
-
-        fitness = c(
-          mod.step1.string.fit,
-          mod.string.r1.fit,
-          mod.string.r2.fit,
-          mod.string.r3.fit,
-          mod.string.r4.fit,
-          mod.string.r5.fit
-        ),
-
-        mod = c(
-          toString(mod.test$mod),
-          toString(mod.string.r1),
-          toString(mod.string.r2),
-          toString(mod.string.r3),
-          toString(mod.string.r4),
-          toString(mod.string.r5)
-        )
-      )
-
-    mod.step2$step = "IIV on parameters"
-    mod.record <- rbind(mod.record, mod.step2)
-
-    mod.step2 <-
-      mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-    mod.record.best <- rbind(mod.record.best, mod.step2)
-    model.tried. <- model.tried. + 5
-
-    if (mod.step2$mod != mod.test$mod) {
-      mod.test <- mod.step2
-
-      mod.step2.string <-
-        as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-      if (mod.step2.string [3] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-        mod.string.r3 <- mod.step2.string
-        mod.string.r4 <- mod.step2.string
-
-        mod.string.r1[4] <- 1
-        mod.string.r2[6] <- 1
-        mod.string.r3[5] <- 1
-        mod.string.r4[7] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-        mod.string.r3.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r3, ...)
-        mod.string.r4.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r4, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2),
-              read.code2(search.space = search.space, mod.string.r3),
-              read.code2(search.space = search.space, mod.string.r4)
-            ),
-            cmpt = c(
-              mod.step2.string[1],
-              mod.string.r1[1],
-              mod.string.r2[1],
-              mod.string.r3[1],
-              mod.string.r4[1]
-            ),
-
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit,
-              mod.string.r3.fit,
-              mod.string.r4.fit
-            ),
-
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2),
-              toString(mod.string.r3),
-              toString(mod.string.r4)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 4
-      }
-
-
-      if (mod.step2.string [4] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-        mod.string.r3 <- mod.step2.string
-        mod.string.r4 <- mod.step2.string
-
-        mod.string.r1[3] <- 1
-        mod.string.r2[6] <- 1
-        mod.string.r3[5] <- 1
-        mod.string.r4[7] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-        mod.string.r3.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r3, ...)
-        mod.string.r4.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r4, ...)
-
-        mod.step2 <- data.frame(
-          modname = c(
-            read.code2(search.space = search.space, mod.step2.string),
-            read.code2(search.space = search.space, mod.string.r1),
-            read.code2(search.space = search.space, mod.string.r2),
-            read.code2(search.space = search.space, mod.string.r3),
-            read.code2(search.space = search.space, mod.string.r4)
-          ),
-          cmpt = c(
-            mod.step2.string[1],
-            mod.string.r1[1],
-            mod.string.r2[1],
-            mod.string.r3[1],
-            mod.string.r4[1]
-          ),
-
-          fitness = c(
-            mod.test$fitness,
-            mod.string.r1.fit,
-            mod.string.r2.fit,
-            mod.string.r3.fit,
-            mod.string.r4.fit
-          ),
-
-          mod = c(
-            toString(mod.test$mod),
-            toString(mod.string.r1),
-            toString(mod.string.r2),
-            toString(mod.string.r3),
-            toString(mod.string.r4)
-          )
-        )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 4
-      }
-
-
-      if (mod.step2.string [6] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-        mod.string.r3 <- mod.step2.string
-        mod.string.r4 <- mod.step2.string
-
-        mod.string.r1[3] <- 1
-        mod.string.r2[4] <- 1
-        mod.string.r3[5] <- 1
-        mod.string.r4[7] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-        mod.string.r3.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r3, ...)
-        mod.string.r4.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r4, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2),
-              read.code2(search.space = search.space, mod.string.r3),
-              read.code2(search.space = search.space, mod.string.r4)
-            ),
-            cmpt = c(
-              mod.step2.string[1],
-              mod.string.r1[1],
-              mod.string.r2[1],
-              mod.string.r3[1],
-              mod.string.r4[1]
-            ),
-
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit,
-              mod.string.r3.fit,
-              mod.string.r4.fit
-            ),
-
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2),
-              toString(mod.string.r3),
-              toString(mod.string.r4)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 4
-      }
-
-
-
-      if (mod.step2.string [7] == 1) {
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-        mod.string.r3 <- mod.step2.string
-        mod.string.r4 <- mod.step2.string
-
-        mod.string.r1[3] <- 1
-        mod.string.r2[4] <- 1
-        mod.string.r3[6] <- 1
-        mod.string.r4[5] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-        mod.string.r3.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r3, ...)
-        mod.string.r4.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r4, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2),
-              read.code2(search.space = search.space, mod.string.r3),
-              read.code2(search.space = search.space, mod.string.r4)
-            ),
-            cmpt = c(
-              mod.step2.string[1],
-              mod.string.r1[1],
-              mod.string.r2[1],
-              mod.string.r3[1],
-              mod.string.r4[1]
-            ),
-
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit,
-              mod.string.r3.fit,
-              mod.string.r4.fit
-            ),
-
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2),
-              toString(mod.string.r3),
-              toString(mod.string.r4)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 4
-      }
-
-
-      if (mod.step2$mod != mod.test$mod) {
-        mod.test <- mod.step2
-
-        mod.step2.string <-
-          as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-        mod.string.r1 <- mod.step2.string
-        mod.string.r2 <- mod.step2.string
-        mod.string.r3 <- mod.step2.string
-
-        count1 <- NULL
-
-        for (check.cycle in 3:7) {
-          if (mod.string.r1[check.cycle] == 1) {
-            count1 <- c(count1, check.cycle)
-          }
-
-        }
-
-        all.string <- c(3, 4, 5, 6, 7)
-        all_string <-
-          all.string[all.string != count1[1] &
-                       all.string != count1[2]]
-
-        mod.string.r1[all_string[1]] <- 1
-        mod.string.r2[all_string[2]] <- 1
-        mod.string.r3[all_string[3]] <- 1
-
-        mod.string.r1.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r1, ...)
-        mod.string.r2.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r2, ...)
-        mod.string.r3.fit <-
-          sf.mod.run(modi = modi, string = mod.string.r3, ...)
-
-        mod.step2 <-
-          data.frame(
-            modname = c(
-              read.code2(search.space = search.space, mod.step2.string),
-              read.code2(search.space = search.space, mod.string.r1),
-              read.code2(search.space = search.space, mod.string.r2),
-              read.code2(search.space = search.space, mod.string.r3)
-            ),
-
-            cmpt = c(
-              mod.step2.string[1],
-              mod.string.r1[1],
-              mod.string.r2[1],
-              mod.string.r3[1]
-            ),
-
-            fitness = c(
-              mod.test$fitness,
-              mod.string.r1.fit,
-              mod.string.r2.fit,
-              mod.string.r3.fit
-            ),
-
-            mod = c(
-              toString(mod.test$mod),
-              toString(mod.string.r1),
-              toString(mod.string.r2),
-              toString(mod.string.r3)
-            )
-          )
-
-        mod.step2$step = "IIV on parameters"
-        mod.record <- rbind(mod.record, mod.step2)
-
-        mod.step2 <-
-          mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-        mod.record.best <- rbind(mod.record.best, mod.step2)
-        model.tried. <- model.tried. + 3
-
-        if (mod.step2$mod != mod.test$mod) {
-          mod.step2.string <- as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-          mod.string.r1 <- mod.step2.string
-          mod.string.r2 <- mod.step2.string
-
-          count1 <- NULL
-
-          for (check.cycle in 3:7) {
-            if (mod.string.r1[check.cycle] == 1) {
-              count1 <- c(count1, check.cycle)
-            }
-
-          }
-
-          # all string
-          all.string <- c(3, 4, 5, 6, 7)
-          all_string <-
-            all.string[all.string != count1[1] &
-                         all.string != count1[2] &
-                         all.string != count1[3]]
-
-          mod.string.r1[all_string[1]] <- 1
-          mod.string.r2[all_string[2]] <- 1
-
-
-          mod.string.r1.fit <-
-            sf.mod.run(modi = modi, string = mod.string.r1, ...)
-          mod.string.r2.fit <-
-            sf.mod.run(modi = modi, string = mod.string.r2, ...)
-
-
-          mod.step2 <-
-            data.frame(
-              modname = c(
-                read.code2(search.space = search.space, mod.step2.string),
-                read.code2(search.space = search.space, mod.string.r1),
-                read.code2(search.space = search.space, mod.string.r2)
-              ),
-
-              cmpt = c(mod.step2.string[1],
-                       mod.string.r1[1],
-                       mod.string.r2[1]),
-
-              fitness = c(
-                mod.test$fitness,
-                mod.string.r1.fit,
-                mod.string.r2.fit
-              ),
-
-              mod = c(
-                toString(mod.test$mod),
-                toString(mod.string.r1),
-                toString(mod.string.r2)
-              )
-            )
-
-          mod.step2$step = "IIV on parameters"
-          mod.record <- rbind(mod.record, mod.step2)
-
-          mod.step2 <-
-            mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-          mod.record.best <- rbind(mod.record.best, mod.step2)
-          model.tried. <- model.tried. + 2
-
-          if (mod.step2$mod != mod.test$mod) {
-            mod.step2.string <- as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-
-            if (mod.step2.string [3] != 1) {
-              mod.string.r1 <- mod.step2.string
-
-              mod.string.r1[3] <- 1
-              mod.string.r1.fit <-
-                sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-
-              mod.step2 <-
-                data.frame(
-                  modname = c(
-                    read.code2(search.space = search.space, mod.step2.string),
-                    read.code2(search.space = search.space, mod.string.r1)
-                  ),
-
-                  cmpt = c(mod.step2.string[1],
-                           mod.string.r1[1]),
-
-                  fitness = c(mod.test$fitness, mod.string.r1.fit),
-                  mod = c(
-                    toString(mod.test$mod),
-                    toString(mod.string.r1)
-                  )
-                )
-
-              mod.step2$step = "IIV on parameters"
-              mod.record <- rbind(mod.record, mod.step2)
-
-              mod.step2 <-
-                mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-              mod.record.best <- rbind(mod.record.best, mod.step2)
-
-            }
-
-
-            if (mod.step2.string [4] != 1) {
-              mod.string.r1 <- mod.step2.string
-
-              mod.string.r1[4] <- 1
-
-              mod.string.r1.fit <-
-                sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-              mod.step2 <-
-                data.frame(
-                  modname = c(
-                    read.code2(search.space = search.space, mod.step2.string),
-                    read.code2(search.space = search.space, mod.string.r1)
-                  ),
-
-                  cmpt = c(mod.step2.string[1],
-                           mod.string.r1[1]),
-
-                  fitness = c(mod.test$fitness, mod.string.r1.fit),
-                  mod = c(
-                    toString(mod.test$mod),
-                    toString(mod.string.r1)
-                  )
-                )
-
-              mod.step2$step = "IIV on parameters"
-              mod.record <- rbind(mod.record, mod.step2)
-
-              mod.step2 <-
-                mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-              mod.record.best <- rbind(mod.record.best, mod.step2)
-              model.tried. <- model.tried. + 1
-            }
-
-            if (mod.step2.string [5] != 1) {
-              mod.string.r1 <- mod.step2.string
-
-              mod.string.r1[5] <- 1
-              mod.string.r1.fit <-
-                sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-
-              mod.step2 <-
-                data.frame(
-                  modname = c(
-                    read.code2(search.space = search.space, mod.step2.string),
-                    read.code2(search.space = search.space, mod.string.r1)
-                  ),
-
-                  cmpt = c(mod.step2.string[1],
-                           mod.string.r1[1]),
-
-                  fitness = c(mod.test$fitness, mod.string.r1.fit),
-                  mod = c(
-                    toString(mod.test$mod),
-                    toString(mod.string.r1)
-                  )
-                )
-
-              mod.step2$step = "IIV on parameters"
-              mod.record <- rbind(mod.record, mod.step2)
-
-              mod.step2 <-
-                mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-              mod.record.best <- rbind(mod.record.best, mod.step2)
-
-            }
-
-            if (mod.step2.string [6] != 1) {
-              mod.string.r1 <- mod.step2.string
-
-              mod.string.r1[6] <- 1
-
-              mod.string.r1.fit <-
-                sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-              mod.step2 <-
-                data.frame(
-                  modname = c(
-                    read.code2(search.space = search.space, mod.step2.string),
-                    read.code2(search.space = search.space, mod.string.r1)
-                  ),
-
-                  cmpt = c(mod.step2.string[1],
-                           mod.string.r1[1]),
-
-                  fitness = c(mod.test$fitness, mod.string.r1.fit),
-                  mod = c(
-                    toString(mod.test$mod),
-                    toString(mod.string.r1)
-                  )
-                )
-
-              mod.step2$step = "IIV on parameters"
-              mod.record <- rbind(mod.record, mod.step2)
-
-              mod.step2 <-
-                mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-              mod.record.best <- rbind(mod.record.best, mod.step2)
-              model.tried. <- model.tried. + 1
-            }
-
-
-            if (mod.step2.string [7] != 1) {
-              mod.string.r1 <- mod.step2.string
-
-              mod.string.r1[7] <- 1
-
-              mod.string.r1.fit <-
-                sf.mod.run(modi = modi, string = mod.string.r1, ...)
-
-              mod.step2 <-
-                data.frame(
-                  modname = c(
-                    read.code2(search.space = search.space, mod.step2.string),
-                    read.code2(search.space = search.space, mod.string.r1)
-                  ),
-
-                  cmpt = c(mod.step2.string[1],
-                           mod.string.r1[1]),
-
-                  fitness = c(mod.test$fitness, mod.string.r1.fit),
-                  mod = c(
-                    toString(mod.test$mod),
-                    toString(mod.string.r1)
-                  )
-                )
-
-              mod.step2$step = "IIV on parameters"
-              mod.record <- rbind(mod.record, mod.step2)
-
-              mod.step2 <-
-                mod.step2[mod.step2$fitness == min(mod.step2$fitness), ]
-              mod.record.best <- rbind(mod.record.best, mod.step2)
-              model.tried. <- model.tried. + 1
-            }
-
-          }
-
-
-        }
-
-
-
-      }
-
-
-    }
-
-  }
-
+  result.steps.iiv <-   step_iiv(
+    dat = dat,
+    state = result.steps.MM,
+    search.space = search.space,
+    param_table = param_table,
+    penalty.control = penalty.control,
+    filename = filename,
+    ...
+  )
 
   ######################## Step 3. Explore correlation. ##########################
-  message(blue(
+  message(crayon::blue(
     paste0(
       "Test Correlation between parameters----------------------------------------------------"
     )
   ))
 
-  r <<- 3
-  mod.step2.string <- as.numeric(strsplit(mod.step2$mod, ",")[[1]])
-  type <<- 3
-  penalty <<- 10000
-
-
-  if (mod.step2.string[9] == 0) {
-    mod.step3.string <- mod.step2.string
-    mod.step3.string.fit <-
-      sf.mod.run(modi = modi, string = mod.step3.string, ...)
-    mod.step2$fitness <- mod.step3.string.fit
-    mod.step3.string[9] = 1
-
-    mod.step3.string.fit <-
-      sf.mod.run(modi = modi, string = mod.step3.string, ...)
-
-    if (mod.step3.string.fit < mod.step2$fitness) {
-      mod.step3 <-
-        data.frame(
-          modname = read.code2(search.space = search.space, mod.step3.string),
-          cmpt = c(mod.step3.string[1]),
-
-          fitness = mod.step3.string.fit,
-          mod = toString(mod.step3.string)
-        )
-
-      mod.step3$step = "Correlation between parameters"
-      mod.record <- rbind(mod.record, mod.step3)
-
-      mod.record.best <- rbind(mod.record.best, mod.step3)
-      model.tried. <- model.tried. + 1
-    }
-
-    else{
-      mod.step3 <- mod.step2
-
-      mod.step3$step = "Correlation between parameters"
-      mod.record <- rbind(mod.record, mod.step3)
-
-      mod.record.best <- rbind(mod.record.best, mod.step3)
-      model.tried. <- model.tried. + 1
-    }
-
+ if (isTRUE(dynamic_fitness)) {
+   penalty.control$penalty.terms = c(
+     "rse",
+     "theta",
+     "covariance",
+     "shrinkage",
+     "omega",
+     "correlation"
+   )
   }
 
+  eta_core_sum <-
+    sum(result.steps.iiv$best_code[c("eta.vc", "eta.vp", "eta.vp2", "eta.q", "eta.q2")], na.rm = TRUE)
+   mm <- result.steps.iiv$best_code["mm"]
 
-  # Step 4. Explore RV model
-  #################################################################################
+  result.steps.corr <- NULL
+  if ((mm == 0 && eta_core_sum > 0) ||
+      (mm == 1 && (result.steps.iiv$best_code["eta.km"] == 1 || eta_core_sum > 1))) {
 
-  message(blue(
+    result.steps.corr <- step_correlation(
+      dat = dat,
+      state = result.steps.iiv,
+      search.space = search.space,
+      param_table = param_table,
+      penalty.control = penalty.control,
+      filename = filename,
+      ...
+    )
+  }
+  ######################## Step 4. Explore RV model ##############################
+
+  message(crayon::blue(
     paste0(
       "Explore types of residual errors----------------------------------------------------"
     )
   ))
 
-  r <<- 4
-  type <<- 3
-  penalty <<- 10000
+  if (!is.null( result.steps.corr)){
+  result.steps.rv <-   step_rv(
+    dat = dat,
+    state = result.steps.corr,
+    search.space = search.space,
+    param_table = param_table,
+    penalty.control = penalty.control,
+    ...
+  )
+ }
 
-  mod.step3.string <- as.numeric(strsplit(mod.step3$mod, ",")[[1]])
-
-
-  if (mod.step3.string[10] == 3) {
-    mod.step4.string1 <- mod.step3.string
-    mod.step4.string2 <- mod.step3.string
-
-    mod.step4.string1[10] <- 1
-    mod.step4.string2[10] <- 2
-
-    mod.step4.string1.fit <-
-      sf.mod.run(modi = modi, string = mod.step4.string1, ...)
-    mod.step4.string2.fit <-
-      sf.mod.run(modi = modi, string = mod.step4.string2, ...)
-
-
-    mod.step4 <-
-      data.frame(
-        modname = c(
-          read.code2(search.space = search.space, mod.step3.string),
-          read.code2(search.space = search.space, mod.step4.string1),
-          read.code2(search.space = search.space, mod.step4.string2)
-        ),
-
-        cmpt = c(
-          mod.step3.string[1],
-          mod.step4.string1[1],
-          mod.step4.string2[1]
-        ),
-
-        fitness = c(
-          mod.step3$fitness,
-          mod.step4.string1.fit,
-          mod.step4.string2.fit
-        ),
-        mod = c(
-          toString(mod.step3.string),
-          toString(mod.step4.string1),
-          toString(mod.step4.string2)
-        )
-      )
-
+  if (is.null( result.steps.corr)){
+    result.steps.rv <-   step_rv(
+      dat = dat,
+      state = result.steps.iiv,
+      search.space = search.space,
+      param_table = param_table,
+      penalty.control = penalty.control,
+      ...
+    )
   }
 
-  mod.step4$step = "Residual error types"
-  mod.record <- rbind(mod.record, mod.step4)
+  out <- new.env(parent = emptyenv())
+  class(out) <- "sfOperatorResult"
 
-  mod.step4 <-
-    mod.step4[mod.step4$fitness == min(mod.step4$fitness), ]
+  # Use names with spaces
+  out[["Final Best Code"]]      <- result.steps.rv$best_code
+  out[["Final Best Model Name"]] <-
+    result.steps.rv$best_row$Model.name
+  out[["Stepwise Best Models"]] <- data.frame(
+    rbind(
+      result.steps.compartments$best_row,
+      result.steps.MM$best_row,
+      result.steps.iiv$best_row,
+      result.steps.corr$best_row,
+      result.steps.rv$best_row
+    ),
+    row.names = NULL,
+    stringsAsFactors = FALSE
+  )
 
-  mod.record.best <- rbind(mod.record.best, mod.step4)
-  model.tried. <- model.tried. + 2
+  out[["Stepwise History"]]     <- list(
+    "Step 1 Compartments" = result.steps.compartments,
+    "Step 2 Elimination"  = result.steps.MM,
+    "Step 3 IIV"          = result.steps.iiv,
+    "Step 4 Correlation"  = result.steps.corr,
+    "Step 5 RV"           = result.steps.rv
+  )
 
-  mod.record$penalty.type = NA
+  out[["Model Run History"]] <-
+    as.data.frame(Store.all, stringsAsFactors = FALSE)
 
-  mod.record[mod.record$step == "no. of compartments", ]$penalty.type <-
-    "RSE"
-
-  mod.record[mod.record$step == "elimination type", ]$penalty.type <-
-    "RSE, Shrinkage"
-
-  if (nrow(mod.record[mod.record$step == "IIV on Km", ]) > 0) {
-    mod.record[mod.record$step == "IIV on Km", ]$penalty.type <-
-      "RSE, Shrinkage, RV model"
-  }
-
-  mod.record[mod.record$step == "IIV on parameters", ]$penalty.type <-
-    "RSE, Shrinkage, RV model"
-  mod.record[mod.record$step == "Correlation between parameters", ]$penalty.type <-
-    "RSE, Shrinkage, RV model"
-  mod.record[mod.record$step == "Residual error types", ]$penalty.type <-
-    "RSE, Shrinkage, RV model"
-
-  mod.record <- mod.record[, c(5, 1, 4, 3, 6)]
-  colnames(mod.record) <-
-    c("Step", "Model name", "Model code", "Fitness", "Penalty terms")
-
-  mod.record.best$penalty.type = NA
-  mod.record.best[mod.record.best$step == "no. of compartments", ]$penalty.type <-
-    "RSE"
-  mod.record.best[mod.record.best$step == "elimination type", ]$penalty.type <-
-    "RSE"
-  if (nrow(mod.record.best[mod.record.best$step == "IIV on Km", ]) > 0) {
-    mod.record.best[mod.record.best$step == "IIV on Km", ]$penalty.type <-
-      "RSE, Shrinkage"
-  }
-
-  mod.record.best[mod.record.best$step == "IIV on parameters", ]$penalty.type <-
-    "RSE, Shrinkage"
-  mod.record.best[mod.record.best$step == "Correlation between parameters", ]$penalty.type <-
-    "RSE, Shrinkage, RV model"
-  mod.record.best[mod.record.best$step == "Residual error types", ]$penalty.type <-
-    "RSE, Shrinkage, RV model"
-
-  mod.record.best <- mod.record.best[, c(5, 1, 4, 3, 6)]
-  colnames(mod.record.best) <-
-    c("Step", "Model name", "Model code", "Fitness", "Penalty terms")
-
-  rownames(mod.record)<-c(seq(1,nrow(mod.record),1))
-  rownames(mod.record.best)<-c(seq(1,nrow(mod.record.best),1))
-
-  history.list <- list(local.best.models = mod.record.best,
-                       allmodels = mod.record)
-
-  finalstep = mod.record.best[mod.record.best$Step=="Residual error types", ]
-
-  bestmodel = finalstep[finalstep$Fitness == min(finalstep$Fitness), ]
-
-  return(list(bestmodel = bestmodel,
-              history = history.list))
-
-
+  return(out)
 }
+
+print.sfOperatorResult <- function(x, ...) {
+  cat(crayon::green$bold("\n=== Best Model Code ===\n"))
+  print(x$`Final Best Code`)
+  cat(crayon::green$bold("\n=== Best Model Name ===\n"))
+  cat(x$`Final Best Model Name`, "\n")
+  cat("\n=== Stepwise Selection History ===\n")
+  print(x$`Stepwise Best Models`)
+}
+
+
