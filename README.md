@@ -15,118 +15,80 @@ Automated Modelling Examples:
 
 Stepwsie example
 ``` r
+
 library(nlmixr2autoinit)
 library(nlmixr2auto)
-d1<-pheno_sd
-inits.out<-getPPKinits(dat = d1)
-# Processing data....................
-# 
-# 
-# Infometrics                               Values 
-# ----------------------------------------  -------
-#   Dose Route                                bolus  
-# Total Number of Subjects                  59     
-# Total Number of Observations              155    
-# Subjects with First-Dose Interval Data    35     
-# Observations in the First-Dose Interval   35     
-# Subjects with Multiple-Dose Data          56     
-# Observations after Multiple Doses         120    
-# ------------------------------------  ------
-#   Run adaptive single-point method to calculate PK parameters....................
-# Estimating half-life....................
-# Estimated half-life : 131.08
-# Run non-compartmental analysis on naive pooling data....................
-# Run graphical analysis on naive pooling data only after the first dose....................
-# Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0098, estimated Vd: 1.31 
-# Run parameter sweeping on nonlinear eliminiation kinetics PK parameters....................
-# |=================================================================================================================================| 100%
-# Run parameter sweeping on multi-compartmental PK parameters....................
-# |=================================================================================================================================| 100%
-# |=================================================================================================================================| 100%
 
-autosetinit(dat = d1,
-            inits= inits.out$Recommended_initial_estimates)
-
-sf.operator(dat=d1,
-            no.cores = getRxThreads(),
-            thetalower=c(vp=1,
-                         vp2=1),
-            control = saemControl(
-              seed = 1234,
-              print = 5,
-              nBurn = 50,
-              nEm = 30,
-              logLik = T),
-            table=tableControl(cwres=T),
+outs<-sf.operator(dat=pheno_sd,
+            search.space = "ivbase",
             filename =  "pheno_sd",
             foldername =   "pheno_sd" )
+print(outs)
 
-# [1] "Output directory for stepwise analysis is created"
+# Infometrics                               Value          
+# ----------------------------------------  ---------------
+#   Dose Route                                bolus          
+# Dose Type                                 combined_doses 
+# Total Number of Subjects                  59             
+# Total Number of Observations              155            
+# Subjects with First-Dose Interval Data    35             
+# Observations in the First-Dose Interval   35             
+# Subjects with Multiple-Dose Data          56             
+# Observations after Multiple Doses         120            
+# ----------------------------------------  ------
+#   Estimating half-life....................
+# Half-life estimation complete: Estimated t½ = 16.44 h
+# Evaluating the predictive performance of calculated one-compartment model parameters....................
+# (hybrid mode: parameters combined across sources)....................
+# Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
+# Run parameter sweeping on nonlinear eliminiation kinetics PK parameters....................
+# Run parameter sweeping on multi-compartmental PK parameters.................... 
 # Running Stepwise 1. Structural Model----------------------------------------------------
 #   Test number of compartments----------------------------------------------------
-#   Model: 1-------------------------------------------------------------------------------------------------------------
-#   Model: 2-------------------------------------------------------------------------------------------------------------
-#   Model: 3-------------------------------------------------------------------------------------------------------------
-#   Analyse elimination type----------------------------------------------------
-#   Model: 4-------------------------------------------------------------------------------------------------------------
-#   Model: 5-------------------------------------------------------------------------------------------------------------
-#   Test IIV on Km----------------------------------------------------
-#   Model: 6-------------------------------------------------------------------------------------------------------------
-#   Introduce IIV on parameters----------------------------------------------------
-#   Model: 7-------------------------------------------------------------------------------------------------------------
-#   Model: 8-------------------------------------------------------------------------------------------------------------
-#   Test Correlation between parameters----------------------------------------------------
-#   Model: 9-------------------------------------------------------------------------------------------------------------
-#   Model: 10-------------------------------------------------------------------------------------------------------------
-#   Explore types of residual errors----------------------------------------------------
-#   Model: 11-------------------------------------------------------------------------------------------------------------
-#   Model: 12-------------------------------------------------------------------------------------------------------------
-#   $bestmodel
-# Step                                                         Model name                   Model code  Fitness
-# 5 Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1 1033.184
-# Penalty terms
-# 5 RSE, Shrinkage, RV model
+#   [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod1.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod2.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod3.txt
+# Analyse elimination type----------------------------------------------------
+#   [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod4.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod5.txt
+# Test IIV on parameters----------------------------------------------------
+#   [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod6.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod7.txt
+# Test Correlation between parameters----------------------------------------------------
+#   [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod8.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod9.txt
+# Explore types of residual errors----------------------------------------------------
+#   [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod10.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod11.txt
+# [Success] Model file created in current working directory:
+#   /home/zhonghuihuang/Step_2025-08-11-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod12.txt
+# > print(outs)
 # 
-# $history
-# $history$local.best.models
-# Step                                                         Model name                   Model code  Fitness
-# 1            no. of compartments               1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1219.086
-# 2               elimination type               1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3 1219.086
-# 3              IIV on parameters            1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3 1138.516
-# 4 Correlation between parameters 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3 1124.493
-# 5           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1 1033.184
-# Penalty terms
-# 1                      RSE
-# 2                      RSE
-# 3           RSE, Shrinkage
-# 4 RSE, Shrinkage, RV model
-# 5 RSE, Shrinkage, RV model
+# === Best Model Code ===
+#   no.cmpt  eta.km  eta.vc  eta.vp eta.vp2   eta.q  eta.q2      mm   mcorr      rv 
+# 1       0       1       0       0       0       0       0       1       1 
 # 
-# $history$allmodels
-# Step                                                             Model name                   Model code
-# 1             no. of compartments                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
-# 2             no. of compartments                   2Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 2, 0, 0, 0, 0, 0, 0, 0, 0, 3
-# 3             no. of compartments                   3Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 3, 0, 0, 0, 0, 0, 0, 0, 0, 3
-# 4                elimination type                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
-# 5                elimination type                           1Cmpt,IIV.cl,M-M_elimination,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 1, 0, 3
-# 6               IIV on parameters                   1Cmpt,IIV.cl,first-order_elminiation,nocorr,combined 1, 0, 0, 0, 0, 0, 0, 0, 0, 3
-# 7               IIV on parameters                1Cmpt,IIV.cl.vc,first-order_elminiation,nocorr,combined 1, 0, 1, 0, 0, 0, 0, 0, 0, 3
-# 8  Correlation between parameters     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3
-# 9            Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,combined 1, 0, 1, 0, 0, 0, 0, 0, 1, 3
-# 10           Residual error types     1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,additive 1, 0, 1, 0, 0, 0, 0, 0, 1, 1
-# 11           Residual error types 1Cmpt,IIV.cl.vc,first-order_elminiation,full_omega_matrix,proportional 1, 0, 1, 0, 0, 0, 0, 0, 1, 2
-# Fitness            Penalty terms
-# 1   1219.086                      RSE
-# 2  41220.176                      RSE
-# 3  71212.583                      RSE
-# 4   1219.086           RSE, Shrinkage
-# 5  21261.182           RSE, Shrinkage
-# 6   1219.086 RSE, Shrinkage, RV model
-# 7   1138.516 RSE, Shrinkage, RV model
-# 8   1124.493 RSE, Shrinkage, RV model
-# 9   1124.493 RSE, Shrinkage, RV model
-# 10  1033.184 RSE, Shrinkage, RV model
-# 11  1035.156 RSE, Shrinkage, RV model
+# === Best Model Name ===
+#   iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_additive 
+# 
+# === Stepwise Selection History ===
+#   Step                                         Penalty.terms                                                       Model.name          Model.code    Fitness
+# 1  No. of compartments                                rse, theta, covariance   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11167.0409
+# 2     Elimination type                                rse, theta, covariance   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11167.0409
+# 3        IIV (forward)              rse, theta, covariance, shrinkage, omega iv_1cmpt_etaCLVC_First-order elimination_No correlation_combined 1,0,1,0,0,0,0,0,0,3 11076.5477
+# 4      ETA correlation rse, theta, covariance, shrinkage, omega, correlation iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_combined 1,0,1,0,0,0,0,0,1,3  1065.5562
+# 5 Residual error types rse, theta, covariance, shrinkage, omega, correlation iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_additive 1,0,1,0,0,0,0,0,1,1   995.9198
 ```
 GA example
 ``` r
