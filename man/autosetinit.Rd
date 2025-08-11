@@ -95,9 +95,9 @@ It updates global variables with the specified or default initial values.
 \dontrun{
 
 library(nlmixr2autoinit)
-d1<-pheno_sd
-inits.out<-getppkinit(dat = d1,runnpd = 0)
-autosetinit(dat = d1,
+dat<-pheno_sd
+inits.out<-getppkinit(dat = dat,runnpd = 0)
+autosetinit(dat = dat,
            inits= inits.out$Recommended_initial_estimates)
 }
 

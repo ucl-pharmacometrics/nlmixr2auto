@@ -2,88 +2,95 @@
 % Please edit documentation in R/sf.operator.R
 \name{sf.operator}
 \alias{sf.operator}
-\title{Run stepwise algorithm for automated model selection}
+\title{Stepwise Model Building for Nonlinear Mixed-Effects Models}
 \usage{
 sf.operator(
   dat,
-  search.space,
-  no.cores,
-  thetalower,
-  crse,
-  cshrink,
-  cadd,
-  cprop,
-  ccorr,
-  penalty.type,
-  penalty.value,
-  foldername,
-  filename,
+  search.space = "ivbase",
+  param_table = NULL,
+  penalty.control = penaltyControl(),
+  no.cores = rxode2::getRxThreads(),
+  foldername = "test",
+  filename = "test",
+  custom_base = NULL,
+  dynamic_fitness = TRUE,
+  precomputed_results_file = NULL,
   ...
 )
 }
 \arguments{
-\item{dat}{A data frame containing the pharmacokinetic data to be used for model fitting.}
+\item{dat}{A dataset containing the pharmacokinetic/pharmacodynamic (PK/PD) data
+to be modeled.}
 
-\item{search.space}{An integer specifying the search space type (1 for standard).}
+\item{search.space}{Character string specifying the structural model search space.
+Must be either \code{"ivbase"} (intravenous bolus) or \code{"oralbase"} (oral administration).}
 
-\item{no.cores}{The number of CPU cores to use for parallel processing.}
+\item{param_table}{Optional parameter table. If \code{NULL}, the function will generate
+one automatically using \code{auto_param_table()}.}
 
-\item{thetalower}{A named vector specifying lower bounds for model parameters.}
+\item{penalty.control}{An object created by \code{penaltyControl()} specifying
+penalty terms to be used in model selection.}
 
-\item{crse}{Constraint value for the relative standard error (RSE).}
+\item{no.cores}{Integer specifying the number of threads for parallel execution.
+Defaults to \code{rxode2::getRxThreads()}.}
 
-\item{cshrink}{Constraint value for the shrinkage.}
+\item{foldername}{Character string for naming the output folder.}
 
-\item{cadd}{Constraint value for the additive error.}
+\item{filename}{Character string for naming output files.}
 
-\item{cprop}{Constraint value for the proportional error.}
+\item{custom_base}{Optional custom base model to use instead of the default generated one.}
 
-\item{ccorr}{Constraint value for the correlation between parameters.}
+\item{dynamic_fitness}{Logical; if \code{TRUE}, penalty terms change dynamically
+during different steps of model building.}
 
-\item{penalty.type}{The type of penalty to apply during the fitness evaluation:
-\itemize{
-\item \code{penalty.type = 1}: Considers constraints on RSE.
-\item \code{penalty.type = 2}: Considers constraints on RSE and shrinkage.
-\item \code{penalty.type = 3}: Considers constraints on RSE, shrinkage, and sigma values (variance of residual error).
-}}
+\item{precomputed_results_file}{Optional path to a file containing precomputed
+stepwise search results to avoid rerunning steps.}
 
-\item{penalty.value}{The value of the penalty to apply during the fitness evaluation.}
-
-\item{foldername}{The name of the folder for output storage. Defaults to "test".}
-
-\item{filename}{The name of the output file. Defaults to "test".}
-
-\item{...}{Additional arguments passed to the model fitting function.}
+\item{...}{Additional arguments passed to the underlying stepwise functions.}
 }
 \value{
-A list include the best model selection and stepwise history running.
+An object of class \code{"sfOperatorResult"} containing:
+\itemize{
+\item \code{"Final Best Code"} – Best model code parameters.
+\item \code{"Final Best Model Name"} – Name of the best model.
+\item \code{"Stepwise Best Models"} – Summary of best models per step.
+\item \code{"Stepwise History"} – Detailed results from each step.
+\item \code{"Model Run History"} – All model runs performed.
+}
 }
 \description{
-Perform a stepwise algorithm to select the best model for pharmacokinetic modelling
+The \code{sf.operator} function performs a stepwise model-building procedure
+for nonlinear mixed-effects (NLME) models, including testing the number of
+compartments, elimination type (e.g., Michaelis-Menten), inter-individual
+variability (IIV), correlations, and residual error models.
+}
+\details{
+This function is designed to work with the \code{nlmixr2} and \code{rxode2} workflow
+and will create intermediate model runs and results in a temporary directory.
+
+The procedure follows these steps:
+\enumerate{
+\item \strong{Step 1:} Select the optimal number of compartments.
+\item \strong{Step 2:} Determine the elimination type (linear vs. Michaelis–Menten).
+\item \strong{Step 3:} Test inclusion of inter-individual variability (IIV) terms.
+\item \strong{Step 4:} Explore correlations between random effects (if any \verb{eta.*} terms exist).
+\item \strong{Step 5:} Explore different residual error models.
+}
+
+If no \verb{eta.*} parameters remain after Step 3 (sum equals zero), Step 4
+(correlation testing) will be skipped.
+
+All intermediate results are stored in \code{Store.all} and the final best
+model code is returned in a structured object of class \code{"sfOperatorResult"}.
 }
 \examples{
 \dontrun{
-library(nlmixr2autoinit)
-dat<-pheno_sd
-filename =  "pheno_sd"
-foldername =   "pheno_sd"
-inits.out<-getppkinit(dat = dat,runnpd = 0)
-autosetinit(dat = dat,
-inits= inits.out$Recommended_initial_estimates)
-sf.operator(dat,
-no.cores = 4,
-thetalower=c(vp=1,
- vp2=1),
- control = saemControl(
-  seed = 1234,
- print = 5,
- nBurn = 20,
- nEm = 30,
- logLik = T,
- rxControl = rxControl(cores = 4,
- maxsteps =70000)),
- table=tableControl(cwres=T),
- filename =  "Bolus_1CPT",
- foldername =   "Bolus_1CPT"  )
+result<-sf.operator(dat = pheno_sd)
+print(result)
 }
+
+}
+\seealso{
+\code{\link{step_compartments}}, \code{\link{step_elimination}},
+\code{\link{step_iiv}}, \code{\link{step_correlation}}, \code{\link{step_rv}}
 }

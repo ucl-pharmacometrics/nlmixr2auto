@@ -1134,6 +1134,38 @@ sf.operator <- function(dat,
   return(out)
 }
 
+
+#' Print Method for sfOperatorResult Objects
+#'
+#' Defines a custom print method for objects of class
+#' \code{sfOperatorResult}. It displays the best model code, best model name,
+#' and the stepwise selection history with formatted colors using the
+#' \pkg{crayon} package.
+#'
+#' @param x An object of class \code{sfOperatorResult}, typically returned by
+#'   a model selection procedure.
+#' @param ... Further arguments passed to or from other methods (currently unused).
+#'
+#' @return Invisibly returns \code{x}, after printing its contents to the console.
+#'
+#' @details
+#' This method prints:
+#' \itemize{
+#'   \item \strong{Best Model Code}: The final chosen model's code.
+#'   \item \strong{Best Model Name}: The final chosen model's name.
+#'   \item \strong{Stepwise Selection History}: A record of the best models
+#'         found at each step of a stepwise selection process.
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming `res` is an object of class "sfOperatorResult"
+#' print(res)
+#' }
+#'
+#' @seealso \code{\link[crayon]{crayon}} for text formatting utilities.
+#'
+#' @export
 print.sfOperatorResult <- function(x, ...) {
   cat(crayon::green$bold("\n=== Best Model Code ===\n"))
   print(x$`Final Best Code`)

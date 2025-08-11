@@ -5,110 +5,86 @@
 \title{Evaluate fitness of a population pharmacokinetic model}
 \usage{
 fitness(
-  search.space,
-  fit.results,
-  string,
-  crse,
-  cshrink,
-  lbcl,
-  lbvc,
-  lbvp,
-  lbq,
-  lbvp2,
-  lbq2,
-  cadd,
-  cprop,
-  ccorr,
-  penalty.type,
-  penalty.value
+  search.space = "ivbase",
+  fit = NULL,
+  dat = NULL,
+  penalty.control = penaltyControl(),
+  objf = "AIC"
 )
 }
 \arguments{
-\item{search.space}{An integer indicating the search space.}
+\item{search.space}{Character. Defines the structural model type (e.g., \code{"ivbase"}, \code{"oralbase"}).}
 
-\item{fit.results}{A data frame containing the results of the model fitting, obtained from \code{get.mod.lst}.}
+\item{fit}{Data frame. Model summary from tools such as \code{get.mod.lst()}, with parameter estimates and diagnostics.}
 
-\item{string}{A binary string representing the model.}
+\item{dat}{Data frame. Observed data containing columns \code{EVID}, \code{DV}, and \code{ID}; used for estimating default additive error if missing.}
 
-\item{crse}{Constraint value for the relative standard error (RSE).}
+\item{penalty.control}{List. Created using \code{penaltyControl()}, includes:
+\describe{
+\item{\code{penalty.value}}{Numeric. Default penalty multiplier used in binary violations.}
+\item{\code{step.penalties}}{Numeric vector of length 2. Penalties applied to step violations (mild, severe).}
+\item{\code{bounds}}{List. Parameter lower/upper bounds, created via \code{param.bounds()}.}
+\item{\code{thresholds}}{Named list. Diagnostic constraints (e.g., RSE, shrinkage), each with \code{method} ("binary" or "step"), and corresponding threshold or step levels.}
+\item{\code{penalty.terms}}{Character vector. Constraint categories to penalize. Valid terms include \code{"theta"}, \code{"rse"}, \code{"omega"}, \code{"shrinkage"}, \code{"sigma"}, \code{"correlation"}, \code{"covariance"}, and \code{"total"}.}
+}}
 
-\item{cshrink}{Constraint value for the shrinkage.}
-
-\item{lbcl}{Lower bound for the clearance parameter.}
-
-\item{lbvc}{Lower bound for the central volume of distribution parameter.}
-
-\item{lbvp}{Lower bound for the peripheral volume of distribution parameter.}
-
-\item{lbq}{Lower bound for the intercompartmental clearance parameter.}
-
-\item{lbvp2}{Lower bound for the second peripheral volume of distribution parameter.}
-
-\item{lbq2}{Lower bound for the second intercompartmental clearance parameter.}
-
-\item{cadd}{Constraint value for the additive error.}
-
-\item{cprop}{Constraint value for the proportional error.}
-
-\item{ccorr}{Constraint value for the correlation between parameters.}
-
-\item{penalty.type}{The type of penalty to apply during the fitness evaluation:
-\itemize{
-\item \code{penalty.type = 1}: Considers constraints on RSE.
-\item \code{penalty.type = 2}: Considers constraints on RSE and shrinkage.
-\item \code{penalty.type = 3}: Considers constraints on RSE, shrinkage, and sigma values (variance of residual error).
-}
-All types also consider whether the model covariance step was successful.}
-
-\item{penalty.value}{The value of the penalty to apply during the fitness evaluation.}
+\item{objf}{Character. Column name in \code{fit} used as the base objective function (e.g., \code{"AIC"}, \code{"BIC"}, \code{"OBJFV"}).}
 }
 \value{
-A data frame with updated fitness values and constraints flags.
+A data frame extending \code{fit} with the following:
+\itemize{
+\item \code{flag.*} columns: indicators of constraint violations (0 = no violation, 1 = mild, 2 = severe).
+\item \code{count.constraint.*} columns: number of violations per constraint type.
+\item \code{fitness}: penalized objective function value, computed from the specified \code{objf} plus applicable penalties.
+}
 }
 \description{
-Evaluate the fitness of model performance based on various constraints and penalty criteria.
+This function evaluates the quality of a fitted model based on parameter bounds and
+diagnostic thresholds (e.g., relative standard error \link{RSE}, shrinkage, residual error,
+and inter-individual correlation). Violations are flagged and penalized, either via
+binary (yes/no) or stepwise (graded) penalties.
 }
 \examples{
 \dontrun{
 # Define the model
 pheno <- function() {
   ini({
-    tcl <- log(0.008) # typical value of clearance
-    tv <-  log(0.6)   # typical value of volume
-    eta.cl + eta.v ~ c(1,
+    lcl <- log(0.008) # typical value of clearance
+    lvc  <- log(0.6)   # typical value of volume
+    eta.cl + eta.vc ~ c(1,
                        0.01, 1)
     add.err <- 0.1    # residual variability
   })
   model({
-    cl <- exp(tcl + eta.cl) # individual value of clearance
-    v <- exp(tv + eta.v)    # individual value of volume
-    ke <- cl / v            # elimination rate constant
+    cl <- exp(lcl + eta.cl) # individual value of clearance
+    vc  <- exp(lvc + eta.vc)   # individual value of volume
+    ke <- cl / vc            # elimination rate constant
     d/dt(A1) = - ke * A1    # model differential equation
-    cp = A1 / v             # concentration in plasma
+    cp = A1 / vc             # concentration in plasma
     cp ~ add(add.err)       # define error model
   })
 }
-fit <- nlmixr(pheno, pheno_sd, "saem",control=list(print=0),
-table=list(cwres=TRUE, npde=TRUE))
-
-# Fit the model using nlmixr2
-fit.results <- get.mod.lst(fit,1)
-string <- c(0, 0, 0, 1, 0, 0, 0, 0, 1, 1)
-search.space<-1
-crse <- 20
-cshrink <- 20
-lbcl <- 0.1
-lbvc <- 0.1
-lbvp <- 0.1
-lbq <- 0.1
-lbvp2 <- 0.1
-lbq2 <- 0.1
-cadd <- 0.1
-cprop <- 0.1
-ccorr <- 0.1
-penalty.type <- 3
-penalty.value <- 10000
-fitness_results <- aco.fitness(search.space,fit.results, string, crse, cshrink, lbcl, lbvc, lbvp, lbq, lbvp2, lbq2, cadd, cprop, ccorr, penalty.type, penalty.value)
-print(fitness_results)
+fit <- nlmixr(pheno, pheno_sd, "saem", control = list(print = 0),
+              table = list(cwres = TRUE, npde = TRUE))
+Store. <- get.mod.lst(fit.s = fit, 1)
+# --- Example 1: Default settings (step penalties) ---
+result.default <- fitness(
+  fit = Store.,
+  dat = pheno_sd
+)
+print(result.default)
+# --- Example 2: Use binary penalties for RSE and shrinkage ---
+result.binary <- fitness(
+  fit = Store.,
+  dat = pheno_sd,
+  penalty.control = penaltyControl(
+    thresholds = list(
+      rse = list(method = "binary"),
+      shrinkage = list(method = "binary")
+    )
+  )
+)
+print(result.binary)
 }
+
 }
