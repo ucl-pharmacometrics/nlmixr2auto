@@ -136,8 +136,7 @@ base_model <- function(search.space = "ivbase",
 #' }
 #'
 #' @examples
-#' Initialize state (if needed)
-#' state <- modlog_state()
+#' # Initialize state (if needed)
 
 #' # Run the compartment screening (custom_base is required and forwarded via ...):
 #'res <- step_compartments(
@@ -913,8 +912,8 @@ step_rv <- function(dat,
 #' @examples
 
 #' \dontrun{
-#' result<-sf.operator(dat = pheno_sd)
-#' print(result)
+result<-sf.operator(dat = pheno_sd)
+print(result)
 #' }
 #'
 #' @export
@@ -1103,9 +1102,26 @@ sf.operator <- function(dat,
 
   out <- new.env(parent = emptyenv())
   class(out) <- "sfOperatorResult"
+  latest_round <- subset(Store.all, round.num == max(Store.all$round.num, na.rm = TRUE))
+  best_row <- latest_round[which.min(latest_round$fitness), ]
 
-  # Use names with spaces
-  out[["Final Best Code"]]      <- result.steps.rv$best_code
+  if (search.space == "ivbase") {
+    cols_to_extract <- c(
+      "no.cmpt", "eta.vmax", "eta.km", "eta.cl", "eta.vc",
+      "eta.vp", "eta.vp2", "eta.q", "eta.q2",
+      "mm", "mcorr", "rv"
+    )
+  } else {
+    cols_to_extract <- c(
+      "no.cmpt", "eta.vmax", "eta.km", "eta.cl", "eta.vc",
+      "eta.vp", "eta.vp2", "eta.q", "eta.q2", "eta.ka",
+      "mm", "mcorr", "rv"
+    )
+  }
+
+  # Assign the selected columns from the best row to the output
+  out[["Final Best Code"]] <- best_row[, cols_to_extract, drop = FALSE]
+
   out[["Final Best Model Name"]] <-
     result.steps.rv$best_row$Model.name
   out[["Stepwise Best Models"]] <- data.frame(
