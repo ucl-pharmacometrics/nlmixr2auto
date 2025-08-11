@@ -10,9 +10,6 @@ install_github("ucl-pharmacometrics/nlmixr2autoinit")
 install_github("ucl-pharmacometrics/nlmixr2auto")
 ```
 
-Automated Modelling Examples: 
-（The following example runs the model with a small quantity of runs and iterations. These numbers can be set according to actual needs or just set simply default values.）
-
 Stepwsie example
 ``` r
 
@@ -90,6 +87,9 @@ print(outs)
 # 4      ETA correlation rse, theta, covariance, shrinkage, omega, correlation iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_combined 1,0,1,0,0,0,0,0,1,3  1065.5562
 # 5 Residual error types rse, theta, covariance, shrinkage, omega, correlation iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_additive 1,0,1,0,0,0,0,0,1,1   995.9198
 ```
+
+Automated Modelling Examples: 
+（The following example runs the model with a small quantity of runs and iterations. These numbers can be set according to actual needs or just set simply default values.）
 GA example
 ``` r
 ga.operator(dat = d1,
