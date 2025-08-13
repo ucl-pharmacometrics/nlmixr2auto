@@ -16,19 +16,19 @@ step_elimination(
 )
 }
 \arguments{
-\item{dat}{Dataset passed to \code{sf.mod.run()}.}
+\item{dat}{Dataset passed to \code{mod.run()}.}
 
 \item{state}{List-like with optional fields:
 \itemize{
 \item \code{best_code}: named integer vector (starting code). If NULL, \code{base_model()} is used.
-\item \code{modi}: forwarded to \code{sf.mod.run()} (default \code{1} if NULL).
+\item \code{modi}: forwarded to \code{mod.run()} (default \code{1} if NULL).
 }}
 
 \item{search.space}{Character scalar: either \code{"ivbase"} or \code{"oralbase"}.}
 
-\item{param_table}{Parameter table passed to \code{sf.mod.run()}.}
+\item{param_table}{Parameter table passed to \code{mod.run()}.}
 
-\item{...}{Additional arguments forwarded to \code{sf.mod.run()}. May include
+\item{...}{Additional arguments forwarded to \code{mod.run()}. May include
 \code{custom_base} used by \code{base_model()}.}
 }
 \value{

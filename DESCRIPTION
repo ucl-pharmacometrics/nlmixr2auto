@@ -8,7 +8,8 @@ Authors@R: c(person("Zhonghui","Huang", role = c("aut", "cre"), email = "zhonghu
 Description: This package offers serveral optimisation algorithms designed for automated population pharmacokinetic modeling, serving as a valuable tool for pharmacokinetic model selection.
 Depends:
     R (>= 3.5.0),
-    dplyr
+    dplyr,
+    nlmixr2
 Imports:
     stringr,
     crayon,

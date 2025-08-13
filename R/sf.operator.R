@@ -106,25 +106,25 @@ base_model <- function(search.space = "ivbase",
 #' \code{base_model(search.space, custom_base = ...)} if \code{state$best_code}
 #' is \code{NULL}) and generates three candidates by setting
 #' \code{no.cmpt} to 1, 2, and 3 while keeping all other positions unchanged.
-#' Each candidate is evaluated with \code{sf.mod.run()} and the best (lowest
+#' Each candidate is evaluated with \code{mod.run()} and the best (lowest
 #' \code{Fitness}) is returned alongside a results table for logging.
 #'
-#' @param dat A pharmacokinetic dataset passed through to \code{sf.mod.run()}.
+#' @param dat A pharmacokinetic dataset passed through to \code{mod.run()}.
 #' @param state A list-like state that may contain:
 #'   \itemize{
 #'     \item \code{best_code}: named integer vector for the current model code (may be \code{NULL})
-#'     \item \code{modi}: optional value forwarded to \code{sf.mod.run()} (if absent, defaults to 1)
+#'     \item \code{modi}: optional value forwarded to \code{mod.run()} (if absent, defaults to 1)
 #'   }
 #' @param search.space Character scalar, e.g. \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Object passed through to \code{sf.mod.run()}.
-#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. Must include
+#' @param param_table Object passed through to \code{mod.run()}.
+#' @param ... Additional arguments forwarded to \code{mod.run()}. Must include
 #'   \code{custom_base} (a numeric vector) used by \code{base_model()} to
 #'   initialize the starting code when \code{state$best_code} is \code{NULL}.
 #'
 #' @details
 #' Candidates are formed by copying the starting code and changing only the
 #' \code{no.cmpt} element to \{1, 2, 3\}. Named codes are converted to unnamed
-#' numeric vectors (\code{unname()}) when passed to \code{sf.mod.run()}.
+#' numeric vectors (\code{unname()}) when passed to \code{mod.run()}.
 #' If \code{state$modi} is \code{NULL}, a default of \code{1} is used.
 #'
 #' @return A list with:
@@ -176,7 +176,7 @@ step_compartments <-
     })
 
     fits <- vapply(candidate_codes, function(code_vec) {
-      sf.mod.run(
+      mod.run(
         modi         = modi,
         string       = unname(code_vec),
         dat          = dat,
@@ -227,15 +227,15 @@ step_compartments <-
 #'
 #' If `mm = 0`, any IIV term for Km (`eta.km`) will be automatically set to 0.
 #'
-#' @param dat Dataset passed to \code{sf.mod.run()}.
+#' @param dat Dataset passed to \code{mod.run()}.
 #' @param state List-like with optional fields:
 #'   \itemize{
 #'     \item \code{best_code}: named integer vector (starting code). If NULL, \code{base_model()} is used.
-#'     \item \code{modi}: forwarded to \code{sf.mod.run()} (default \code{1} if NULL).
+#'     \item \code{modi}: forwarded to \code{mod.run()} (default \code{1} if NULL).
 #'   }
 #' @param search.space Character scalar: either \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{sf.mod.run()}.
-#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#' @param param_table Parameter table passed to \code{mod.run()}.
+#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
 #'   \code{custom_base} used by \code{base_model()}.
 #'
 #' @return A list with:
@@ -295,7 +295,7 @@ step_elimination <-
     })
 
     fits <- vapply(candidate_codes, function(code_vec) {
-      sf.mod.run(
+      mod.run(
         modi         = modi,
         string       = unname(code_vec),
         dat          = dat,
@@ -355,14 +355,14 @@ step_elimination <-
 #'    At each iteration, turn exactly one available IIV from 0 to 1, evaluate all candidates,
 #'    accept the single best improvement, and stop when no improvement occurs.
 #'
-#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param dat Data frame passed to \code{mod.run()}.
 #' @param state List-like object with:
 #'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
-#'   - \code{modi}: optional; forwarded to \code{sf.mod.run()} (default \code{1L}).
+#'   - \code{modi}: optional; forwarded to \code{mod.run()} (default \code{1L}).
 #' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{sf.mod.run()}.
-#' @param penalty.control Optional penalty control object passed to \code{sf.mod.run()}.
-#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#' @param param_table Parameter table passed to \code{mod.run()}.
+#' @param penalty.control Optional penalty control object passed to \code{mod.run()}.
+#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
 #'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
 #'
 #' @return A list with:
@@ -426,7 +426,7 @@ step_iiv <- function(dat,
     )
 
     fits <- vapply(candidate_codes, function(code_vec) {
-      sf.mod.run(
+      mod.run(
         modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
@@ -475,7 +475,7 @@ step_iiv <- function(dat,
     )
 
     fits <- vapply(candidate_codes, function(code_vec) {
-      sf.mod.run(
+      mod.run(
         modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
@@ -537,7 +537,7 @@ step_iiv <- function(dat,
     }
 
     fits <- vapply(candidate_codes, function(code_vec) {
-      sf.mod.run(
+      mod.run(
         modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
@@ -587,7 +587,7 @@ step_iiv <- function(dat,
     best_row <- all_results[which.min(all_results$Fitness), , drop = FALSE]
   } else {
 
-    base_fit <- sf.mod.run(
+    base_fit <- mod.run(
       modi             = modi,
       string           = unname(current_code),
       dat              = dat,
@@ -624,14 +624,14 @@ step_iiv <- function(dat,
 #' Tests whether enabling ETA correlation (\code{mcorr = 1}) improves the fitness
 #' over keeping it disabled (\code{mcorr = 0}), while keeping all other fields fixed.
 #'
-#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param dat Data frame passed to \code{mod.run()}.
 #' @param state List-like with:
 #'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
-#'   - \code{modi}: optional; forwarded to \code{sf.mod.run()} (default \code{1L}).
+#'   - \code{modi}: optional; forwarded to \code{mod.run()} (default \code{1L}).
 #' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{sf.mod.run()}.
-#' @param penalty.control Optional penalty control object forwarded to \code{sf.mod.run()}.
-#' @param ... Additional arguments forwarded to \code{sf.mod.run()}. May include
+#' @param param_table Parameter table passed to \code{mod.run()}.
+#' @param penalty.control Optional penalty control object forwarded to \code{mod.run()}.
+#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
 #'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
 #'
 #' @return A list with:
@@ -694,7 +694,7 @@ step_correlation <- function(dat,
                           })
 
   fits <- vapply(candidate_codes, function(code_vec) {
-    sf.mod.run(
+    mod.run(
       modi             = modi,
       string           = unname(code_vec),
       dat              = dat,
@@ -745,12 +745,12 @@ step_correlation <- function(dat,
 #' \code{rv = 1} and \code{rv = 2} while keeping all other fields fixed.
 #' Chooses the candidate with the lowest Fitness.
 #'
-#' @param dat Data frame passed to \code{sf.mod.run()}.
+#' @param dat Data frame passed to \code{mod.run()}.
 #' @param state List with optional \code{best_code} (named integer vector) and \code{modi}.
 #' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{sf.mod.run()}.
-#' @param penalty.control Optional penalty control passed to \code{sf.mod.run()}.
-#' @param ... Forwarded to \code{sf.mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).
+#' @param param_table Parameter table passed to \code{mod.run()}.
+#' @param penalty.control Optional penalty control passed to \code{mod.run()}.
+#' @param ... Forwarded to \code{mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).
 #'
 #' @return List with:
 #'   \itemize{
@@ -808,7 +808,7 @@ step_rv <- function(dat,
 
   # evaluate all candidates
   fits <- vapply(candidate_codes, function(code_vec) {
-    sf.mod.run(
+    mod.run(
       modi             = modi,
       string           = unname(code_vec),
       dat              = dat,

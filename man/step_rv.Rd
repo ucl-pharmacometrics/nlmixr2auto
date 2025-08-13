@@ -16,17 +16,17 @@ step_rv(
 )
 }
 \arguments{
-\item{dat}{Data frame passed to \code{sf.mod.run()}.}
+\item{dat}{Data frame passed to \code{mod.run()}.}
 
 \item{state}{List with optional \code{best_code} (named integer vector) and \code{modi}.}
 
 \item{search.space}{Character scalar: \code{"ivbase"} or \code{"oralbase"}.}
 
-\item{param_table}{Parameter table passed to \code{sf.mod.run()}.}
+\item{param_table}{Parameter table passed to \code{mod.run()}.}
 
-\item{penalty.control}{Optional penalty control passed to \code{sf.mod.run()}.}
+\item{penalty.control}{Optional penalty control passed to \code{mod.run()}.}
 
-\item{...}{Forwarded to \code{sf.mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).}
+\item{...}{Forwarded to \code{mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).}
 }
 \value{
 List with:

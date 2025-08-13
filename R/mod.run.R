@@ -73,7 +73,7 @@
 #' # Example IV base structure (10 elements; mm at position 9 in this layout):
 #' string <- c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1)
 #' param_table <- auto_param_table(dat = dat, nlmixr2autoinits = TRUE)
-#' fit_val <- sf.mod.run(
+#' fit_val <- mod.run(
 #'   modi = 1,
 #'   string = string,
 #'   dat = dat,
@@ -88,7 +88,7 @@
 
 
 
-sf.mod.run <- function(modi = 1,
+mod.run <- function(modi = 1,
                        string = NULL,
                        dat = NULL,
                        search.space = "ivbase",

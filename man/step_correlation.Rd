@@ -16,21 +16,21 @@ step_correlation(
 )
 }
 \arguments{
-\item{dat}{Data frame passed to \code{sf.mod.run()}.}
+\item{dat}{Data frame passed to \code{mod.run()}.}
 
 \item{state}{List-like with:
 \itemize{
 \item \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
-\item \code{modi}: optional; forwarded to \code{sf.mod.run()} (default \code{1L}).
+\item \code{modi}: optional; forwarded to \code{mod.run()} (default \code{1L}).
 }}
 
 \item{search.space}{Character scalar: \code{"ivbase"} or \code{"oralbase"}.}
 
-\item{param_table}{Parameter table passed to \code{sf.mod.run()}.}
+\item{param_table}{Parameter table passed to \code{mod.run()}.}
 
-\item{penalty.control}{Optional penalty control object forwarded to \code{sf.mod.run()}.}
+\item{penalty.control}{Optional penalty control object forwarded to \code{mod.run()}.}
 
-\item{...}{Additional arguments forwarded to \code{sf.mod.run()}. May include
+\item{...}{Additional arguments forwarded to \code{mod.run()}. May include
 \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.}
 }
 \value{

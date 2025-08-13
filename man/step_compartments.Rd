@@ -16,19 +16,19 @@ step_compartments(
 )
 }
 \arguments{
-\item{dat}{A pharmacokinetic dataset passed through to \code{sf.mod.run()}.}
+\item{dat}{A pharmacokinetic dataset passed through to \code{mod.run()}.}
 
 \item{state}{A list-like state that may contain:
 \itemize{
 \item \code{best_code}: named integer vector for the current model code (may be \code{NULL})
-\item \code{modi}: optional value forwarded to \code{sf.mod.run()} (if absent, defaults to 1)
+\item \code{modi}: optional value forwarded to \code{mod.run()} (if absent, defaults to 1)
 }}
 
 \item{search.space}{Character scalar, e.g. \code{"ivbase"} or \code{"oralbase"}.}
 
-\item{param_table}{Object passed through to \code{sf.mod.run()}.}
+\item{param_table}{Object passed through to \code{mod.run()}.}
 
-\item{...}{Additional arguments forwarded to \code{sf.mod.run()}. Must include
+\item{...}{Additional arguments forwarded to \code{mod.run()}. Must include
 \code{custom_base} (a numeric vector) used by \code{base_model()} to
 initialize the starting code when \code{state$best_code} is \code{NULL}.}
 }
@@ -46,13 +46,13 @@ Clones the current model code (from \code{state$best_code}, or from
 \code{base_model(search.space, custom_base = ...)} if \code{state$best_code}
 is \code{NULL}) and generates three candidates by setting
 \code{no.cmpt} to 1, 2, and 3 while keeping all other positions unchanged.
-Each candidate is evaluated with \code{sf.mod.run()} and the best (lowest
+Each candidate is evaluated with \code{mod.run()} and the best (lowest
 \code{Fitness}) is returned alongside a results table for logging.
 }
 \details{
 Candidates are formed by copying the starting code and changing only the
 \code{no.cmpt} element to \{1, 2, 3\}. Named codes are converted to unnamed
-numeric vectors (\code{unname()}) when passed to \code{sf.mod.run()}.
+numeric vectors (\code{unname()}) when passed to \code{mod.run()}.
 If \code{state$modi} is \code{NULL}, a default of \code{1} is used.
 }
 \examples{
