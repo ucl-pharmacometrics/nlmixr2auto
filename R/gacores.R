@@ -50,7 +50,7 @@ ga.sel.tournament <- function(data.pop,
       sel.population.s <-
         population[as.numeric(rownames(test1)), , drop = F]
     }
-    
+
     sel.population <- rbind(sel.population, sel.population.s)
   }
   return(sel.population)
@@ -97,7 +97,7 @@ ga.crossover <- function(sel.population,
                          npopsize,
                          nbits,
                          bit.names) {
-  children.all <- NULL
+  children.cross <- NULL
   # Sequential pairing
   target <- seq(1, npopsize, 2)
   for (chromo in target) {
@@ -120,7 +120,7 @@ ga.crossover <- function(sel.population,
       # print(parents.cross)
       cross.point.1 <- min(cross.points)
       cross.point.2 <- max(cross.points)
-      
+
       # Only one valid crossover point
       if (cross.point.1 == cross.point.2 ||
           cross.point.2 == nbits || cross.point.1 == 0) {
@@ -157,69 +157,54 @@ ga.crossover <- function(sel.population,
           children[1,] <- c(parents.cross[1, 1:cross.point.1],
                             parents.cross[2, (cross.point.1 + 1):cross.point.2],
                             parents.cross[1, (cross.point.2 + 1):nbits])
-          
-          
+
+
           children[2,] <- c(parents.cross[2, 1:cross.point.1],
                             parents.cross[1, (cross.point.1 + 1):cross.point.2],
                             parents.cross[2, (cross.point.2 + 1):nbits])
         }
       }
     }
-    children.all <- rbind(children.all, children)
+    children.cross <- rbind(children.cross, children)
   }
-  colnames(children.all) <- bit.names
-  return(children.all)
+  colnames(children.cross) <- bit.names
+  return(children.cross)
 }
+
 
 #' Mutation in Genetic Algorithm
 #'
-#' Perform a mutation operation on a population of chromosomes in a genetic algorithm.
-#' Each bit in the chromosome has a chance to mutate based on a predefined mutation probability.
+#' Perform a mutation operation on a binary population of chromosomes in a genetic algorithm.
+#' Each bit in a chromosome has a probability to flip (0 → 1, 1 → 0) based on the given mutation rate.
 #'
-#' @param children.all A matrix representing the population of children chromosomes.
-#' @param prob.mutation The probability of mutation for each bit in the chromosome.
-#' @param npopsize An integer specifying the size of the population.
-#' @param nbits An integer specifying the number of bits in each chromosome.
+#' @param children.cross A binary matrix representing the population of children chromosomes.
+#'   Rows are individuals, columns are bits (genes).
+#' @param prob.mutation Numeric. The probability of mutation for each bit in the chromosome.
 #'
-#' @return A matrix representing the population of children chromosomes after mutation.
+#' @return A binary matrix representing the population of children chromosomes after mutation.
 #'
 #' @examples
 #' \dontrun{
-#' children.all <- matrix(sample(0:1, 120, replace = TRUE), nrow = 10)
+#' # Create a random population: 10 individuals, 12 bits each
+#' children.cross <- matrix(sample(0:1, 120, replace = TRUE), nrow = 10)
 #' prob.mutation <- 0.1
-#' npopsize <- 10
-#' nbits <- 12
-#' mutated_population <- ga.mutation(children.all, prob.mutation, npopsize, nbits)
+#' mutated_population <- ga.mutation(children.cross, prob.mutation)
 #' print(mutated_population)
 #' }
 #'
 #' @export
 
-ga.mutation <- function(children.all,
-                        prob.mutation,
-                        npopsize,
-                        nbits) {
-  for (mutate.j in 1:nbits) {
-    for (mutate.i in 1:npopsize) {
-      # 0 means no mutation, 1 means mutation
-      prob.test = sample(
-        x = c(0, 1),
-        size = 1,
-        replace = T,
-        prob = c((1 - prob.mutation), prob.mutation)
-      )
-      if (prob.test == 0) {
-        children.all[mutate.i , mutate.j] = children.all[mutate.i, mutate.j]
-      }
-      else{
-        if (children.all[mutate.i , mutate.j] == 0) {
-          children.all[mutate.i , mutate.j] = 1
-        }
-        else{
-          children.all[mutate.i, mutate.j] = 0
-        }
-      }
-    }
-  }
-  return(children.all)
+
+ga.mutation <- function(children.cross, prob.mutation) {
+  # Create a logical mask: TRUE where mutation occurs
+  mutation.mask <- matrix(
+    rbinom(length(children.cross), 1, prob.mutation) == 1,
+    nrow = nrow(children.cross),
+    ncol = ncol(children.cross)
+  )
+
+  # Flip bits in positions selected for mutation
+  children.cross[mutation.mask] <- 1 - children.cross[mutation.mask]
+
+  return(children.cross)
 }

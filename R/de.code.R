@@ -20,8 +20,8 @@ de.code <- function(string,
   if (search.space == 1) {
     string <- as.numeric(as.vector(as.matrix(string)))
     # de.code, revise the invalid model into valid models
-    cmpt.iv1 = string[1]
-    cmpt.iv2 = string[2]
+    no.cmpt1 = string[1]
+    no.cmpt2 = string[2]
     eta.km   = string[3]
     eta.vc   = string[4]
     eta.vp   = string[5]
@@ -32,36 +32,36 @@ de.code <- function(string,
     mcorr    = string[10]
     rv1      = string[11]
     rv2      = string[12]
-    
+
     if (cmpt.iv1 == 0 & cmpt.iv2 == 0) {
       cmpt.iv2 = 1
     }
-    
+
     if (cmpt.iv1 == 0) {
       eta.vp = 0
       eta.vp2 = 0
       eta.q = 0
       eta.q2 = 0
     }
-    
+
     if (cmpt.iv2 == 0) {
       eta.vp2 = 0
       eta.q2 = 0
     }
-    
+
     if (mm == 0) {
       eta.km = 0
     }
-    
+
     if ((eta.vc + eta.vp + eta.vp2 + eta.q + eta.q2) == 0 & mm == 0) {
       mcorr = 0
     }
-    
+
     if ((eta.vc + eta.vp + eta.vp2 + eta.q + eta.q2) <2 &
         mm == 1 & eta.km == 0) {
       mcorr = 0
     }
-    
+
     if (rv1 == 0 & rv2 == 0) {
       rv2 = 1
     }
@@ -106,7 +106,7 @@ de.code <- function(string,
 de.code2 <- function(string,
                     search.space) {
   if (search.space == 1) {
-  
+
     # de.code, revise the invalid model into valid models
     cmpt.iv = string[1]
     eta.km   = string[2]
@@ -118,7 +118,7 @@ de.code2 <- function(string,
     mm       = string[8]
     mcorr    = string[9]
     rv    = string[10]
-    
+
     string<-c(cmpt.iv,
               eta.km,
               eta.vc,
@@ -129,16 +129,16 @@ de.code2 <- function(string,
               mm,
               mcorr,
               rv)
-    
+
     if ((eta.vc + eta.vp + eta.vp2 + eta.q + eta.q2) == 0 & mm == 0) {
       mcorr = 0
     }
-    
+
     if (( eta.vc +eta.vp + eta.vp2 + eta.q + eta.q2) < 2 &
         mm == 1 & eta.km == 0) {
       mcorr = 0
     }
-    
+
 
     string <- c(
       cmpt.iv,
@@ -153,6 +153,6 @@ de.code2 <- function(string,
       rv
     )
   }
- 
+
   return(string)
 }

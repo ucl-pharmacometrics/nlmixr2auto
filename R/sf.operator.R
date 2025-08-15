@@ -177,7 +177,6 @@ step_compartments <-
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        modi         = modi,
         string       = unname(code_vec),
         dat          = dat,
         search.space = search.space,
@@ -296,7 +295,6 @@ step_elimination <-
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        modi         = modi,
         string       = unname(code_vec),
         dat          = dat,
         search.space = search.space,
@@ -427,7 +425,6 @@ step_iiv <- function(dat,
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
         search.space     = search.space,
@@ -476,7 +473,6 @@ step_iiv <- function(dat,
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
         search.space     = search.space,
@@ -538,7 +534,6 @@ step_iiv <- function(dat,
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        modi             = modi,
         string           = unname(code_vec),
         dat              = dat,
         search.space     = search.space,
@@ -588,7 +583,6 @@ step_iiv <- function(dat,
   } else {
 
     base_fit <- mod.run(
-      modi             = modi,
       string           = unname(current_code),
       dat              = dat,
       search.space     = search.space,
@@ -695,7 +689,6 @@ step_correlation <- function(dat,
 
   fits <- vapply(candidate_codes, function(code_vec) {
     mod.run(
-      modi             = modi,
       string           = unname(code_vec),
       dat              = dat,
       search.space     = search.space,
@@ -730,7 +723,7 @@ step_correlation <- function(dat,
   )
 
   best_idx <- which.min(results_table$Fitness)
-
+  r<<-r+1
   list(
     results_table = results_table,
     best_code     = candidate_codes[[best_idx]],
@@ -809,7 +802,6 @@ step_rv <- function(dat,
   # evaluate all candidates
   fits <- vapply(candidate_codes, function(code_vec) {
     mod.run(
-      modi             = modi,
       string           = unname(code_vec),
       dat              = dat,
       search.space     = search.space,
@@ -951,7 +943,7 @@ sf.operator <- function(dat,
     )
   }
 
-  setwd(outputdir)
+  setwd(paste0(getwd(), "/", outputdir))
 
   # Set initial estimate
   param_table <- auto_param_table(
@@ -964,10 +956,7 @@ sf.operator <- function(dat,
   current <- base_model(search.space = search.space,
                         custom_base = custom_base)
 
-  precomputed_cache_loaded <<- FALSE
-  Store.all <<- NULL
   r <<- 1
-  modi <<- 1
   #################################Step1. No. of compartment##########################
   message(crayon::blue(
     paste0(
@@ -1147,6 +1136,10 @@ sf.operator <- function(dat,
   out[["Model Run History"]] <-
     as.data.frame(Store.all, stringsAsFactors = FALSE)
 
+  on.exit({
+    rm(modi, r, Store.all, precomputed_cache_loaded, envir = .GlobalEnv)
+  }, add = TRUE)
+
   return(out)
 }
 
@@ -1190,5 +1183,3 @@ print.sfOperatorResult <- function(x, ...) {
   cat("\n=== Stepwise Selection History ===\n")
   print(x$`Stepwise Best Models`)
 }
-
-

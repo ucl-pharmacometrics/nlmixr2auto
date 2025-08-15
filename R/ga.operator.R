@@ -1,3 +1,23 @@
+
+gaControl <- function(
+    npopsize       = 10,
+    max.iter       = 15,
+    prob.crossover = 0.8,
+    prob.mutation  = 0.2,
+    sig.diff       = 1,
+    nlocal.search  = 5
+) {
+  list(
+    npopsize       = npopsize,
+    max.iter       = max.iter,
+    prob.crossover = prob.crossover,
+    prob.mutation  = prob.mutation,
+    sig.diff       = sig.diff,
+    nlocal.search  = nlocal.search
+  )
+}
+
+
 #' Run genetic algorithm (GA) for automated model selection
 #'
 #' Perform a genetic algorithm to select the best model for pharmacokinetic modelling
@@ -70,39 +90,19 @@
 #'
 #' @export
 ga.operator <- function(dat,
-                        npopsize,
-                        max.iter,
-                        prob.crossover,
-                        prob.mutation,
-                        nlocal.search,
-                        sig.diff,
-                        search.space,
-                        no.cores,
-                        thetalower,
-                        crse,
-                        cshrink,
-                        cadd,
-                        cprop,
-                        ccorr,
-                        penalty.type,
-                        penalty.value,
-                        foldername,
-                        filename,
+                        param_table=NULL,
+                        search.space="ivbase",
+                        no.cores = rxode2::getRxThreads(),
+                        foldername = "test",
+                        filename = "test",
+                        ga.control=gaControl(),
+                        penalty.control=penaltyControl(),
+                        precomputed_results_file=NULL,
+                        seed.no=1234,
                         ...) {
   #####################Create temporary storage folder for output###############
-  # If exists, then create a new one
-  # Output directory
-  if (missing(foldername)) {
-    foldername <- "test"
-  }
-  if (missing(filename)) {
-    filename <- "test"
-  }
-
-  foldername <<- foldername
-  filename <<- filename
-
   current.date <- Sys.Date()
+  set.seed(seed.no)
 
   outputdir <-
     paste0("GA_",
@@ -113,398 +113,275 @@ ga.operator <- function(dat,
            digest::digest(dat),
            "_temp")
 
-  # for linux ubuntu
-  if (dir.exists(outputdir)) {
-    print("Warning: current directory for GA analysis already exists")
-    unlink(outputdir, recursive = T, force = T)
-    print("Warning: a new one was created and replace the previous one")
-    dir.create(outputdir, showWarnings = F, recursive = T)
+  if (!dir.exists(outputdir)) {
+    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+  } else {
+    message(
+      sprintf(
+        "Output directory '%s' already exists. Using existing directory.",
+        outputdir
+      )
+    )
   }
 
-  if (!dir.exists(outputdir)) {
-    print("Output directory for GA analysis is created")
-    dir.create(outputdir, showWarnings = F, recursive = T)
-  }
+  npopsize       <- ga.control$npopsize
+  max.iter       <- ga.control$max.iter
+  prob.crossover <- ga.control$prob.crossover
+  prob.mutation  <- ga.control$prob.mutation
+  sig.diff       <- ga.control$sig.diff
+  nlocal.search  <- ga.control$nlocal.search
+
   setwd(paste0(getwd(), "/", outputdir))
   storage.path <- getwd()
-  ################################ Default setting#################################
-  if (missing(npopsize)) {
-    npopsize = 10
-  }
-  if (missing(max.iter)) {
-    max.iter = 15
-  }
+  #################################Initial estimate###############################
 
-  if (missing(prob.crossover)) {
-    prob.crossover = 0.8
-  }
-
-  if (missing(prob.mutation)) {
-    prob.mutation = 0.2
-  }
-
-  if (missing(sig.diff)) {
-    sig.diff = 1
-  }
-
-  if (missing(search.space)) {
-    search.space = 1
-  }
-
-  # Default of constraint setting
-  # RSE<=20%
-  # Shrinkage <=30%
-  # Theta lower boundary, default=0
-  # SD of additive >=1 (approximately ) 1/1000-
-  # SD of proportional >= 5%
-  # R square for omega correlation coefficient < 0.1
-  thetalower0 <- c(
-    lbka = 0,
-    lbvc = 0,
-    lbcl = 0,
-    lbvp = 0,
-    lbvp2 = 0,
-    lbq = 0,
-    lbq2 = 0,
-    lbtlag = 0,
-    lbvmax = 0,
-    lbkm = 0
+  param_table <- auto_param_table(
+    dat = dat,
+    param_table = param_table,
+    nlmixr2autoinits = T,
+    foldername = foldername
   )
+  # Global variable for model and round number run index
 
-  if (missing(thetalower)) {
-    thetalower = thetalower0
-  }
-
-  if (is.na(thetalower["ka"]) == F) {
-    thetalower0["lbka"] = thetalower["ka"]
-  }
-  if (is.na(thetalower["cl"]) == F) {
-    thetalower0["lbcl"] = thetalower["cl"]
-  }
-  if (is.na(thetalower["vc"]) == F) {
-    thetalower0["lbvc"] = thetalower["vc"]
-  }
-  if (is.na(thetalower["vp"]) == F) {
-    thetalower0["lbvp"] = thetalower["vp"]
-  }
-  if (is.na(thetalower["vp2"]) == F) {
-    thetalower0["lbvp2"] = thetalower["vp2"]
-  }
-  if (is.na(thetalower["q"]) == F) {
-    thetalower0["lbq"] = thetalower["q"]
-  }
-  if (is.na(thetalower["q2"]) == F) {
-    thetalower0["lbq2"] = thetalower["q2"]
-  }
-  if (is.na(thetalower["tlag"]) == F) {
-    thetalower0["lbtlag"] = thetalower["tlag"]
-  }
-  if (is.na(thetalower["vmax"]) == F) {
-    thetalower0["lbvmax"] = thetalower["vmax"]
-  }
-  if (is.na(thetalower["km"]) == F) {
-    thetalower0["lbkm"] = thetalower["km"]
-  }
-
-  lbka = thetalower0["lbka"]
-  lbcl = thetalower0["lbcl"]
-  lbvc = thetalower0["lbvc"]
-  lbvp = thetalower0["lbvp"]
-  lbvp2 = thetalower0["lbvp2"]
-  lbq = thetalower0["lbq"]
-  lbq2 = thetalower0["lbq2"]
-  lbtlag = thetalower0["lbtlag"]
-  lbvmax = thetalower0["lbvmax"]
-  lbkm = thetalower0["lbkm"]
-
-
-  if (missing(crse)) {
-    crse <- 20
-  }
-  if (missing(cshrink)) {
-    cshrink <- 30
-  }
-
-
-  if (missing(cadd) & search.space == 1) {
-    dat.obs <- dat[dat$EVID == 0,]
-    pop.cmax <- aggregate(dat.obs, by = list(dat.obs$ID), FUN = max)
-    dat.cmax <<- median(pop.cmax$DV)
-    cadd <- round(dat.cmax / 1000, 0)
-  }
-
-  if (missing(cprop)) {
-    cprop <- 0.05
-  }
-
-  if (missing(ccorr)) {
-    ccorr <- 0 # default 0, no constraint on the correlation
-  }
-
-  if (missing(penalty.type)) {
-    penalty.type <- 3
-  }
-
-  if (missing(penalty.value)) {
-    penalty.value <- 10000
-  }
-
-  sel.best.code.list = NULL
-  data.pop.list = NULL
-  sel.population.list = NULL
-  ls.population.list = NULL
-  children.cross.list = NULL
-  children.mutation.list = NULL
-
-  ##########Search space#########################################################
-  # Search space (BASE). intravenous case, ,Michaelis–Menten elimination included.
-  if (search.space == 1) {
+  ##########Search Space Definiation ###########################################
+  if (search.space == "ivbase") {
     bit.names <- c(
-      "cmpt.iv1",
-      "cmpt.iv2",
-      "eta.km",
-      "eta.vc",
-      "eta.vp",
-      "eta.vp2",
-      "eta.q",
-      "eta.q2",
-      "mm",
-      "mcorr",
-      "rv1",
-      "rv2"
+      "no.cmpt1",   # IV compartment code 1
+      "no.cmpt2",   # IV compartment code 2
+      "eta.km",     # Eta on Michaelis–Menten constant Km
+      "eta.vc",     # Eta on central volume of distribution
+      "eta.vp",     # Eta on peripheral volume 1
+      "eta.vp2",    # Eta on peripheral volume 2
+      "eta.q",      # Eta on intercompartmental clearance 1
+      "eta.q2",     # Eta on intercompartmental clearance 2
+      "mm",         # Michaelis–Menten elimination included
+      "mcorr",      # Random effect correlation included
+      "rv1",        # Residual error code 1
+      "rv2"         # Residual error code 2
     )
-    nbits <- length(bit.names)
+
+  } else if (search.space == "oralbase") {
+    bit.names <- c(
+      "no.cmpt1",   # Oral compartment 1
+      "no.cmpt2",   # Oral compartment 2
+      "eta.km",     # Eta on Michaelis–Menten constant Km
+      "eta.vc",     # Eta on central volume of distribution
+      "eta.vp",     # Eta on peripheral volume 1
+      "eta.vp2",    # Eta on peripheral volume 2
+      "eta.q",      # Eta on intercompartmental clearance 1
+      "eta.q2",     # Eta on intercompartmental clearance 2
+      "eta.ka",     # Eta on absorption rate constant ka
+      "mm",         # Michaelis–Menten elimination included
+      "mcorr",      # Random effect correlation included
+      "rv1",        # Residual error code 1
+      "rv2"         # Residual error code 2
+    )
+
+  } else {
+    stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
 
+  nbits <- length(bit.names)  # Total number of bits in the chromosome
 
-  ################################ GA running###################################
-  ######Population generation.====================================================
-  modi <<- 1 # Set i as the global variable
-  setRxThreads(no.cores)
+  # --- GA Main Loop ---
+  # Runs genetic algorithm over multiple generations:
+  # 1) Init/update population
+  # 2) Decode to valid models
+  # 3) Evaluate fitness (mod.run + penalty.control)
+  # 4) Local search every nlocal.search gens
+  # 5) Selection → crossover → mutation
+  # 6) Elitism: keep best model
+  # 7) Save iteration results in history
+
+  history <- vector("list", max.iter)  # Store results for each iteration
+
   for (ga.iter in 1:max.iter) {
+    # 1. Initialize or update population
     if (ga.iter == 1) {
-      population = create.pop(npopsize, nbits)
-    }
-    # Use the children chromosomes as the new population in the next iterations
-    else{
-      population <- children.all
-    }
-    # Revise the column names to the model element names.
-    colnames(population) <- c(bit.names)
-
-    # Decode- interpret invalid model code into valid model code.
-    for (decode.num in 1:nrow(population)) {
-      population[decode.num,] <-
-        de.code(string = population[decode.num,], search.space = search.space)
+      population <-
+        create.pop(npopsize, nbits)   # Initial random population
+    } else {
+      population <-
+        children.all                  # Offspring from previous generation
     }
 
-    ######Fitness calculation.===================================================
+    colnames(population) <- bit.names
 
+    population <- t(vapply(seq_len(nrow(population)),
+                           function(i)
+                             validateModels(
+                               string = population[i,],
+                               search.space = search.space,
+                               code.source = "GA"
+                             ),
+                           numeric(nbits)))
+
+    colnames(population) <- bit.names
+    # 3. Model running and fitness evaluation
     data.pop <- as.data.frame(population)
-    data.pop$fitness <- NA
 
-    for (k in 1:nrow(data.pop)) {
-      results <- try(ga.mod.run(
-        modi = modi,
-        r = ga.iter,
-        dat = dat,
-        search.space = search.space,
-        string = population[k, 1:nbits],
-        crse = crse,
-        cshrink = cshrink,
-        lbcl = lbcl,
-        lbvc = lbvc,
-        lbvp = lbvp,
-        lbq = lbq,
-        lbvp2 = lbvp2,
-        lbq2 = lbq2,
-        cadd = cadd,
-        cprop = cprop,
-        ccorr = ccorr,
-        penalty.type = penalty.type,
-        penalty.value = penalty.value,
-        ...
-      ),
+    data.pop$fitness <- vapply(seq_len(nrow(data.pop)),
+                               function(k) {
+                                 result <- try(mod.run(
+                                   r                = ga.iter,
+                                   dat              = dat,
+                                   search.space     = search.space,
+                                   string           = parseCode(population[k, 1:nbits]),
+                                   param_table      = param_table,
+                                   penalty.control  = penalty.control,
+                                   precomputed_results_file = precomputed_results_file,
+                                   filename         = filename
+                                 ),
+                                 silent = TRUE)
+                                 if (is.numeric(result) && length(result) == 1)
+                                   result
+                                 else
+                                   NA_real_
+                               },
+                               numeric(1))
 
-      silent = T)
-
-      # results<-try(ga.mod.run(  modi=modi,
-      #                           r = ga.iter,
-      #                           dat=dat,
-      #                           search.space=search.space,
-      #                           string=population[k,1:nbits],
-      #                           crse=crse,
-      #                           cshrink=cshrink,
-      #                           lbcl=lbcl,
-      #                           lbvc=lbvc,
-      #                           lbvp=lbvp,
-      #                           lbq=lbq,
-      #                           lbvp2=lbvp2,
-      #                           lbq2=lbq2,
-      #                           cadd=cadd,
-      #                           cprop=cprop,
-      #                           ccorr=ccorr,
-      #                           penalty.type=penalty.type,
-      #                           penalty.value=penalty.value,
-      #                           control = saemControl(
-      #                             seed = 1234,
-      #                             print = 5,
-      #                             nBurn = 20,
-      #                             nEm = 30,
-      #                             logLik = T,
-      #                             rxControl = rxControl(cores = 22,
-      #                                                   maxsteps =70000))),
-      #
-      #              silent = T)
-      data.pop[k,]$fitness <- results
-    }
-
-    # Sort out the fitness for each individuals
-    # A customized ranking function is used where very small differences between numbers
-    # (less than 1, as default setting) do not change their rank.
-    # data.pop$fitness<-as.numeric(data.pop$fitness)
+    # Rank individuals
     data.pop$rank <- rank_new(data.pop$fitness, sig.diff)
-    data.pop.list[[ga.iter]] <- data.pop
-    # write.csv(data.pop, file=paste0(storage.path,'/pop.iter',ga.iter,'.fitness..csv'),row.names = F)
 
-    ######Calculate global best and local best======================================
-    # Local best, the best individual of the current iteration
-    # Global best, the best individual including models run by local exhaustive search
-    # Local best is used as reference model for the local exhaustive search.
-    # Current elitism strategy of GA is to keep (global best) in each generation.
-    data.pop$local.num <- seq(1, nrow(data.pop), 1)
-    rownames(data.pop) <- seq(1, nrow(data.pop), 1)
-
-    # If there is no local exhaustive search, then the local best is the global best
-    # as well given of the elitism strategy (keep best always)
+    # 4. Chromosome selection
+    data.pop$local.num <- seq_len(nrow(data.pop))
     sel.best <- data.pop[data.pop$rank == min(data.pop$rank),][1,]
-    sel.best <- as.numeric (sel.best$local.num)
-    sel.best.code = population[sel.best, , drop = FALSE]
+    sel.best <- as.numeric(sel.best$local.num)
+    sel.best.code <- population[sel.best, , drop = FALSE]
 
-    ######Local exhaustive search===================================================
-    # Generate models based on the 1-bit rule, and the local best individual as reference
-    # Binary code was used as reference
+    # 5. Local exhaustive search
+    # ls.population <- NULL
     if (ga.iter %% nlocal.search == 0) {
       ls.population <- runlocal(
-        ga.iter,
-        dat,
-        search.space,
-        sel.best.code,
-        nbits,
-        sig.diff,
-        crse,
-        cshrink,
-        lbcl,
-        lbvc,
-        lbvp,
-        lbq,
-        lbvp2,
-        lbq2,
-        cadd,
-        cprop,
-        ccorr,
-        penalty.type,
-        penalty.value,
+        ga.iter                   = ga.iter,
+        dat                       = dat,
+        search.space              = search.space,
+        sel.best.code             = sel.best.code,
+        sig.diff                  = sig.diff,
+        param_table               = param_table,
+        penalty.control           = penalty.control,
+        precomputed_results_file  = precomputed_results_file,
+        filename                  = filename,
+        bit.names                 = bit.names,
         ...
       )
-
-      ls.population.list[[ga.iter]] <- ls.population
-      # ls.population<-runlocal( ga.iter,
-      #                         dat,
-      #                         sel.best.code,
-      #                         nbits,
-      #                         sig.diff,
-      #                         crse,
-      #                         cshrink,
-      #                         lbcl,
-      #                         lbvc,
-      #                         lbvp,
-      #                         lbq,
-      #                         lbvp2,
-      #                         lbq2,
-      #                         cadd,
-      #                         cprop,
-      #                         ccorr,
-      #                         penalty.type,
-      #                         penalty.value,
-      #                         control = saemControl(
-      #                           seed = 1234,
-      #                           print = 5,
-      #                           nBurn = 20,
-      #                           nEm = 30,
-      #                           logLik = T,
-      #                           rxControl = rxControl(cores = 22,
-      #                                                 maxsteps =70000)))
-      if (min(data.pop$fitness) > min(ls.population$fitness)) {
-        rownames(ls.population) <- seq(1, nrow(ls.population), 1)
+      if (min(data.pop$fitness, na.rm = TRUE) > min(ls.population$fitness, na.rm = TRUE)) {
         sel.best <-
-          as.numeric (rownames(ls.population[ls.population$rank == min(ls.population$rank),][1,]))
+          as.numeric(rownames(ls.population[ls.population$rank == min(ls.population$rank), ][1, ]))
         ls.population2 <- data.matrix(ls.population[, 1:nbits])
-        sel.best.code = ls.population2[sel.best, , drop = FALSE]
+        sel.best.code <- ls.population2[sel.best, , drop = FALSE]
       }
     }
 
-    sel.best.code.list[[ga.iter]] <- sel.best.code
-
-    ###### Selection================================================================
-    # Tournament method used
+    # 6. Selection (tournament)
     sel.population <-
-      ga.sel.tournament(data.pop, population, npopsize, nbits)
-    sel.population.list[[ga.iter]] <- sel.population
+      ga.sel.tournament(data.pop = data.pop, population=population, npopsize=npopsize, nbits=nbits)
 
-    ###### Crossover================================================================
-    children.all <-
-      ga.crossover(sel.population, prob.crossover, npopsize, nbits, bit.names)
-    # iter0 means before the crossover.
-    # write.csv(children.all,file=paste0('children.cross.iter0',ga.iter,'.csv'),row.names = F)
-    children.cross.list[[ga.iter]] <- children.all
+    # 7. Crossover
+    children.cross <-
+      ga.crossover(sel.population=sel.population,
+                   prob.crossover=prob.crossover,
+                   npopsize=npopsize,
+                   nbits=nbits,
+                   bit.names=bit.names)
 
-    #decode
-    for (decode.num in 1:nrow(children.all)) {
-      children.all[decode.num,] <-
-        de.code(string = children.all[decode.num,], search.space = search.space)
-    }
-
-
-
-    ###### Mutation==================================================================
-    children.all <-
-      ga.mutation(children.all, prob.mutation, npopsize, nbits)
-    children.mutation.list[[ga.iter]] <- children.all
-
-    # covert to the valid model structure.
-    for (decode.num in 1:nrow(children.all)) {
-      children.all[decode.num,] <-
-        de.code(string = children.all[decode.num,], search.space = search.space)
-    }
+    children.cross <- t(apply(children.cross, 1, function(x) {
+      validateModels(
+        string       = x,
+        search.space = search.space,
+        code.source  = "GA"
+      )
+    }))
 
 
-    ######Elitism strategy===========================================================
-    # Current elitism strategy of GA is to keep the best individual in that local iterations.
-    children.all <-
-      rbind(children.all[1:(nrow(children.all) - 1),], sel.best.code)
-    rownames(children.all) <- seq(1, nrow(children.all), 1)
+    # 8. Mutation
+    children.mutation <-
+      ga.mutation(children.cross=children.cross,
+                  prob.mutation=prob.mutation)
+
+    children.mutation <- t(apply(children.mutation, 1, function(x) {
+      validateModels(
+        string       = x,
+        search.space = search.space,
+        code.source  = "GA"
+      )
+    }))
 
 
+    # 9. Elitism: Keep best model in next generation
+    children.all <- rbind(children.mutation[1:(nrow(children.mutation) - 1),],
+                          sel.best.code)
+    rownames(children.all) <- seq_len(nrow(children.all))
+
+
+    # 10. Save results to history
+    history[[ga.iter]] <- list(
+      iteration              = ga.iter,
+      population        = population,
+      data.pop          = data.pop,
+      sel.best.code     = sel.best.code,
+      sel.population    = sel.population,
+      ls.population     = ls.population,
+      children.cross    = children.cross,
+      children.mutation = children.all
+    )
   }
 
-  # analysis sel.best.code
-  best_model_name <- read.code(1, sel.best.code)
+  # ----------------------------
+  # Final output
+  # ----------------------------
+  names(sel.best.code) <- bit.names
+  best_model_name <- CodetoMod(sel.best.code = parseCode(sel.best.code,search.space=search.space),search.space=search.space)
 
-  history_list <- list(
-    sel.best.code.list = sel.best.code.list,
-    data.pop.list = data.pop.list,
-    sel.population.list = sel.population.list,
-    ls.population.list = ls.population.list,
-    children.cross.list = children.cross.list,
-    children.mutation.list = children.mutation.list
-  )
 
-  return(
-    list(
-      final.selected.code = sel.best.code,
-      final.selected.model = best_model_name,
-      history = history_list
-    )
-  )
+  out <- new.env(parent = emptyenv())
+  class(out) <- "gaOperatorResult"
+  out[["Final Selected Code"]] <- sel.best.code
+  out[["Final Selected Model Name"]] <- best_model_name
+  out[["Model Run History"]] <- as.data.frame(Store.all, stringsAsFactors = FALSE)
+  out[["Selection History"]] <- history
+
+  on.exit({
+  rm(modi, r, Store.all, precomputed_cache_loaded, envir = .GlobalEnv)
+  }, add = TRUE)
+
+  return(out)
 }
+
+
+#' Print method for gaOperatorResult objects
+#'
+#' Custom print method for results returned by the GA operator.
+#' Displays only:
+#'   - Final selected model code
+#'   - Final selected model name
+#'
+#' @param x An object containing GA operator output (class gaOperatorResult).
+#' @param ... Additional arguments (currently unused).
+#'
+#' @return Invisibly returns the input object.
+#' @export
+print.gaOperatorResult <- function(x, ...) {
+  # Print final selected model code
+  cat(crayon::green$bold("\n=== Final Selected Model Code ===\n"))
+  print(x$`Final Selected Code`)
+
+  # Print final selected model name
+  cat(crayon::green$bold("\n=== Final Selected Model Name ===\n"))
+  cat(x$`Final Selected Model Name`, "\n")
+
+  invisible(x)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

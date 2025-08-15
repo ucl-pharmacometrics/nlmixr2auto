@@ -88,17 +88,27 @@
 
 
 
-mod.run <- function(modi = 1,
-                       string = NULL,
-                       dat = NULL,
-                       search.space = "ivbase",
-                       penalty.control = penaltyControl(),
-                       param_table = NULL,
-                       nlmixr2autoinits = TRUE,
-                       reuse_cache = 1,
-                       precomputed_results_file = NULL,
-                       filename=NULL,
-                       ...) {
+mod.run <- function(string = NULL,
+                    dat = NULL,
+                    search.space = "ivbase",
+                    penalty.control = penaltyControl(),
+                    param_table = NULL,
+                    nlmixr2autoinits = TRUE,
+                    reuse_cache = 1,
+                    precomputed_results_file = NULL,
+                    filename=NULL,
+                    ...) {
+
+  # Ensure global counters exist
+  if (!exists("modi", envir = .GlobalEnv))
+    assign("modi", 1, envir = .GlobalEnv)
+  if (!exists("r", envir = .GlobalEnv))
+    assign("r", 1, envir = .GlobalEnv)
+  if (!exists("Store.all", envir = .GlobalEnv))
+    assign("Store.all", NULL, envir = .GlobalEnv)
+  if (!exists("precomputed_cache_loaded", envir = .GlobalEnv))
+    assign("precomputed_cache_loaded", FALSE, envir = .GlobalEnv)
+
   if (isTRUE(reuse_cache == 1) && !isTRUE(precomputed_cache_loaded)) {
     if (!is.null(precomputed_results_file) &&
         is.character(precomputed_results_file) &&
@@ -350,6 +360,7 @@ mod.run <- function(modi = 1,
     Store.all <<- rbind(Store.all, Store2)
   }
 
+  rownames(Store.all)<-seq(1,nrow(Store.all),1)
   write.csv(Store.all, paste0(filename, ".csv"), row.names = FALSE)
 
   modi <<- modi + 1
