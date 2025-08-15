@@ -258,8 +258,13 @@ validateModels <-
         rv1 = rv1,
         rv2 = rv2
       )
+
     }
 
+    if (code.source == "ACO") {
+        drop_cols <- intersect(c("eta.vmax", "eta.cl"), names(string.df))
+        string.df <- string.df[, !(names(string.df) %in% drop_cols), drop = FALSE]
+    }
     # --- Step 5: Return as vector ---
     return(as.vector(t(string.df)))
   }
