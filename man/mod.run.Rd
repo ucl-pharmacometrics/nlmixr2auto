@@ -5,7 +5,6 @@
 \title{Run and evaluate a population PK model}
 \usage{
 mod.run(
-  modi = 1,
   string = NULL,
   dat = NULL,
   search.space = "ivbase",
@@ -19,8 +18,6 @@ mod.run(
 )
 }
 \arguments{
-\item{modi}{Integer. Model identifier (also used to name generated code files).}
-
 \item{string}{Numeric/integer vector encoding the model structure. For
 \code{search.space = "ivbase"} it is expected to contain indicators in the
 order used by \code{ppkmodGen()} (e.g., \code{no.cmpt}, \code{eta.km},
@@ -58,6 +55,8 @@ are kept in memory only.}
 \item{...}{Additional controls passed through, notably
 \code{saem.control = nlmixr2::saemControl(...)} and
 \code{table.control = nlmixr2::tableControl(...)}.}
+
+\item{modi}{Integer. Model identifier (also used to name generated code files).}
 }
 \value{
 Numeric scalar: the penalized fitness for the evaluated model.

@@ -4,31 +4,27 @@
 \alias{ga.mutation}
 \title{Mutation in Genetic Algorithm}
 \usage{
-ga.mutation(children.all, prob.mutation, npopsize, nbits)
+ga.mutation(children.cross, prob.mutation)
 }
 \arguments{
-\item{children.all}{A matrix representing the population of children chromosomes.}
+\item{children.cross}{A binary matrix representing the population of children chromosomes.
+Rows are individuals, columns are bits (genes).}
 
-\item{prob.mutation}{The probability of mutation for each bit in the chromosome.}
-
-\item{npopsize}{An integer specifying the size of the population.}
-
-\item{nbits}{An integer specifying the number of bits in each chromosome.}
+\item{prob.mutation}{Numeric. The probability of mutation for each bit in the chromosome.}
 }
 \value{
-A matrix representing the population of children chromosomes after mutation.
+A binary matrix representing the population of children chromosomes after mutation.
 }
 \description{
-Perform a mutation operation on a population of chromosomes in a genetic algorithm.
-Each bit in the chromosome has a chance to mutate based on a predefined mutation probability.
+Perform a mutation operation on a binary population of chromosomes in a genetic algorithm.
+Each bit in a chromosome has a probability to flip (0 → 1, 1 → 0) based on the given mutation rate.
 }
 \examples{
 \dontrun{
-children.all <- matrix(sample(0:1, 120, replace = TRUE), nrow = 10)
+# Create a random population: 10 individuals, 12 bits each
+children.cross <- matrix(sample(0:1, 120, replace = TRUE), nrow = 10)
 prob.mutation <- 0.1
-npopsize <- 10
-nbits <- 12
-mutated_population <- ga.mutation(children.all, prob.mutation, npopsize, nbits)
+mutated_population <- ga.mutation(children.cross, prob.mutation)
 print(mutated_population)
 }
 
