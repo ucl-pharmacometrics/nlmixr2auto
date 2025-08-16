@@ -16,7 +16,7 @@ Imports:
     rxode2,
     nlmixr2,
     rxode2,
-    progressr,
+    progress,
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

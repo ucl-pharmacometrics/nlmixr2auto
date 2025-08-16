@@ -264,8 +264,13 @@ ga.operator <- function(dat,
     )
   )
 
-  with_progress({
-    p <- progressr::progressor(steps = max.iter)
+  pb <-
+    progress::progress_bar$new(
+      format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
+      total = max.iter,
+      clear = FALSE,
+      width = 60
+    )
 
   for (ga.iter in 1:max.iter) {
     # 1. Initialize or update population
@@ -398,8 +403,9 @@ ga.operator <- function(dat,
       children.cross    = children.cross,
       children.mutation = children.all
     )
+    pb$tick()
   }
-  })
+
   # ----------------------------
   # Final output
   # ----------------------------

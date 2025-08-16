@@ -14,7 +14,7 @@
 #' @return A list of Tabu Search hyperparameters.
 #' @export
 tabuControl <- function(tabu.duration = 2,
-                        max.round = 30,
+                        max.round = 15,
                         start.point = NULL,
                         aspiration = TRUE,
                         candidate.size = NULL) {
@@ -190,197 +190,191 @@ tabu.operator <- function(dat,
   prev_string <- NULL
   globalbest <- NULL
 
-  # --- Iterative Tabu Search --
-  progressr::handlers(
-    progressr::handler_progress(
-      format = paste0(
-        crayon::cyan("Tabu Search "),
-        crayon::yellow("[:bar]"),
-        crayon::green(" :percent "),
-        crayon::blue(" (iteration :current/:total)")
-      ),
-      width = 80
+  pb <-
+    progress::progress_bar$new(
+      format = " Tabu Search [:bar] :percent (iteration :current/:total)\n",
+      total = max.round,
+      clear = FALSE,
+      width = 60
     )
-  )
 
-  with_progress({
-    p <- progressr::progressor(steps = max.round)
-  for (r in 1:max.round) {
-    # Step 1: define current starting point
-    if (r == 1) {
-      current_string <- string_vec
-    } else {
-      current_string <- localbest[1, bit.names]
-    }
-    starting.points.history[[r]] <- current_string
-
-    # Step 2: generate neighbors (original + validated)
-    neighbors_list <-
-      generate_neighbors_df(current_string, search.space = search.space)
-    neighbors_orig <-
-      neighbors_list$original_neighbors   # pre-validation
-    neighbors_val  <-
-      neighbors_list$validated_neighbors  # post-validation (legal models)
-
-    # Deduplicate validated neighbors
-    neighbors_val <- distinct(neighbors_val)[, bit.names]
-
-    # Step 3a: Filter tabu neighbors (without aspiration logic)
-    neighbors_eval <- list()
-    aspiration_candidates <- list()
-    move_records <- list()  # store primary moves
-
-    if (!is.null(tabu.elements.all) &&
-        nrow(tabu.elements.all) > 0) {
-      for (row in 1:nrow(neighbors_val)) {
-        # detect primary move using original neighbor
-        move <- detect_move(current_string,
-                            neighbors_val[row,],
-                            original_neighbor = neighbors_orig[row,])
-
-        if (is_move_tabu(move, tabu.elements.all)) {
-          # tabu move
-          if (tabu.control$aspiration) {
-            aspiration_candidates[[length(aspiration_candidates) + 1]] <-
-              neighbors_val[row,]
-          }
-        } else {
-          # non-tabu -> keep
-          neighbors_eval[[length(neighbors_eval) + 1]] <-
-            neighbors_val[row,]
-          move_records[[length(move_records) + 1]] <- move$element
-        }
+    for (r in 1:max.round) {
+      # Step 1: define current starting point
+      if (r == 1) {
+        current_string <- string_vec
+      } else {
+        current_string <- localbest[1, bit.names]
       }
-    } else {
-      # if no tabu elements, all neighbors are valid
-      neighbors_eval <-
-        split(neighbors_val, seq_len(nrow(neighbors_val)))
-      # detect moves for all neighbors
-      move_records <-
-        lapply(seq_len(nrow(neighbors_val)), function(row) {
+      starting.points.history[[r]] <- current_string
+
+      # Step 2: generate neighbors (original + validated)
+      neighbors_list <-
+        generate_neighbors_df(current_string, search.space = search.space)
+      neighbors_orig <-
+        neighbors_list$original_neighbors   # pre-validation
+      neighbors_val  <-
+        neighbors_list$validated_neighbors  # post-validation (legal models)
+
+      # Deduplicate validated neighbors
+      neighbors_val <- distinct(neighbors_val)[, bit.names]
+
+      # Step 3a: Filter tabu neighbors (without aspiration logic)
+      neighbors_eval <- list()
+      aspiration_candidates <- list()
+      move_records <- list()  # store primary moves
+
+      if (!is.null(tabu.elements.all) &&
+          nrow(tabu.elements.all) > 0) {
+        for (row in 1:nrow(neighbors_val)) {
+          # detect primary move using original neighbor
           move <- detect_move(current_string,
-                              neighbors_val[row,],
-                              original_neighbor = neighbors_orig[row,])
-          move$element
-        })
-    }
+                              neighbors_val[row, ],
+                              original_neighbor = neighbors_orig[row, ])
 
-    # Convert lists back to data frames
-    if (length(neighbors_eval) > 0) {
-      neighbors_eval <- do.call(rbind, neighbors_eval)
-      neighbors_eval$move.element <- unlist(move_records)
-    } else {
-      neighbors_eval <- data.frame()
-    }
+          if (is_move_tabu(move, tabu.elements.all)) {
+            # tabu move
+            if (tabu.control$aspiration) {
+              aspiration_candidates[[length(aspiration_candidates) + 1]] <-
+                neighbors_val[row, ]
+            }
+          } else {
+            # non-tabu -> keep
+            neighbors_eval[[length(neighbors_eval) + 1]] <-
+              neighbors_val[row, ]
+            move_records[[length(move_records) + 1]] <- move$element
+          }
+        }
+      } else {
+        # if no tabu elements, all neighbors are valid
+        neighbors_eval <-
+          split(neighbors_val, seq_len(nrow(neighbors_val)))
+        # detect moves for all neighbors
+        move_records <-
+          lapply(seq_len(nrow(neighbors_val)), function(row) {
+            move <- detect_move(current_string,
+                                neighbors_val[row, ],
+                                original_neighbor = neighbors_orig[row, ])
+            move$element
+          })
+      }
 
-    if (length(aspiration_candidates) > 0) {
-      aspiration_candidates <- do.call(rbind, aspiration_candidates)
-    } else {
-      aspiration_candidates <- data.frame()
-    }
+      # Convert lists back to data frames
+      if (length(neighbors_eval) > 0) {
+        neighbors_eval <- do.call(rbind, neighbors_eval)
+        neighbors_eval$move.element <- unlist(move_records)
+      } else {
+        neighbors_eval <- data.frame()
+      }
 
-    # save (store validated neighbors in history)
-    neighbors.history[[r]] <- neighbors_val
-
-    # --- Step 4: Evaluate neighbors (fitness calculation) ---
-    if (nrow(neighbors_eval) > 0) {
-      neighbors_eval$fitness <- vapply(seq_len(nrow(neighbors_eval)),
-                                       function(k) {
-                                         string_vec <- as.numeric(neighbors_eval[k, bit.names])
-                                         result <- try(mod.run(
-                                           r = r,
-                                           dat = dat,
-                                           search.space = search.space,
-                                           string = string_vec,
-                                           param_table = param_table,
-                                           penalty.control = penalty.control,
-                                           precomputed_results_file = precomputed_results_file,
-                                           filename = filename
-                                         ),
-                                         silent = TRUE)
-                                         if (is.numeric(result) &&
-                                             length(result) == 1) {
-                                           result
-                                         } else {
-                                           NA_real_
-                                         }
-                                       },
-                                       numeric(1))
-
-      # --- Aspiration criterion check ---
-      if (tabu.control$aspiration) {
-        best.fitness <- min(Store.all$fitness, na.rm = TRUE)
-        aspiration_candidates <-
-          neighbors_eval[neighbors_eval$fitness < best.fitness,]
+      if (length(aspiration_candidates) > 0) {
+        aspiration_candidates <- do.call(rbind, aspiration_candidates)
       } else {
         aspiration_candidates <- data.frame()
       }
-    } else {
-      neighbors_eval <- data.frame()
-      aspiration_candidates <- data.frame()
-    }
 
-    # Step 5: update local best
-    if (nrow(neighbors_eval) > 0) {
-      localbest <-
-        neighbors_eval[which.min(neighbors_eval$fitness), , drop = FALSE]
-    } else {
-      localbest <- current_string  # fallback, in case no neighbors
-    }
-    local.best.history[[r]] <- localbest
+      # save (store validated neighbors in history)
+      neighbors.history[[r]] <- neighbors_val
 
-    if (r == 1) {
-      prev_string <- string_vec      # starting point
-    } else {
-      prev_string <- local.best.history[[r - 1]][1, bit.names]
-    }
-    current_string <- localbest[1, bit.names]
+      # --- Step 4: Evaluate neighbors (fitness calculation) ---
+      if (nrow(neighbors_eval) > 0) {
+        neighbors_eval$fitness <- vapply(seq_len(nrow(neighbors_eval)),
+                                         function(k) {
+                                           string_vec <- as.numeric(neighbors_eval[k, bit.names])
+                                           result <- try(mod.run(
+                                             r = r,
+                                             dat = dat,
+                                             search.space = search.space,
+                                             string = string_vec,
+                                             param_table = param_table,
+                                             penalty.control = penalty.control,
+                                             precomputed_results_file = precomputed_results_file,
+                                             filename = filename,
+                                             ...
+                                           ),
+                                           silent = TRUE)
+                                           if (is.numeric(result) &&
+                                               length(result) == 1) {
+                                             result
+                                           } else {
+                                             NA_real_
+                                           }
+                                         },
+                                         numeric(1))
 
-    # --- Step X: Update current solution with neighbor or perturbation ---
-    if (all(prev_string == current_string)) {
-      # Case 1: No improvement found in this iteration
-      # → Apply a random 1-bit perturbation to escape local optimum.
-      message(
-        "Iteration ",
-        r,
-        ": no improving neighbor found. Applying 1-bit perturbation to escape local optimum."
+        # --- Aspiration criterion check ---
+        if (tabu.control$aspiration) {
+          best.fitness <- min(Store.all$fitness, na.rm = TRUE)
+          aspiration_candidates <-
+            neighbors_eval[neighbors_eval$fitness < best.fitness, ]
+        } else {
+          aspiration_candidates <- data.frame()
+        }
+      } else {
+        neighbors_eval <- data.frame()
+        aspiration_candidates <- data.frame()
+      }
+
+      # Step 5: update local best
+      if (nrow(neighbors_eval) > 0) {
+        localbest <-
+          neighbors_eval[which.min(neighbors_eval$fitness), , drop = FALSE]
+      } else {
+        localbest <- current_string  # fallback, in case no neighbors
+      }
+      local.best.history[[r]] <- localbest
+
+      if (r == 1) {
+        prev_string <- string_vec      # starting point
+      } else {
+        prev_string <- local.best.history[[r - 1]][1, bit.names]
+      }
+      current_string <- localbest[1, bit.names]
+
+      # --- Step X: Update current solution with neighbor or perturbation ---
+      if (all(prev_string == current_string)) {
+        # Case 1: No improvement found in this iteration
+        # → Apply a random 1-bit perturbation to escape local optimum.
+        message(
+          "Iteration ",
+          r,
+          ": no improving neighbor found. Applying 1-bit perturbation to escape local optimum."
+        )
+
+        perturb <- perturb_1bit(prev_string, search.space)
+        current_string <- perturb$validated_neighbor
+        move <- detect_move(
+          prev_string,
+          new_string = perturb$validated_neighbor,
+          original_neighbor = perturb$original_neighbor
+        )
+
+      } else {
+        move <- detect_move(prev_string,
+                            new_string = current_string,
+                            original_neighbor = current_string)
+      }
+      tabu.elements <- data.frame(
+        tabu.num = r,
+        element  = move$element,
+        from     = unname(move$from),
+        to       = unname(move$to),
+        tabu.iteration.left = tabu.control$tabu.duration,
+        stringsAsFactors = FALSE
       )
 
-      perturb <- perturb_1bit(prev_string, search.space)
-      current_string <- perturb$validated_neighbor
-      move <- detect_move(
-        prev_string,
-        new_string = perturb$validated_neighbor,
-        original_neighbor = perturb$original_neighbor
-      )
+      if (!is.null(tabu.elements.all)) {
+        tabu.elements.all$tabu.iteration.left <-
+          tabu.elements.all$tabu.iteration.left - 1
+      }
+      tabu.elements.all <- rbind(tabu.elements.all, tabu.elements)
+      tabu.elements.all <-
+        tabu.elements.all[tabu.elements.all$tabu.iteration.left > 0, ]
 
-    } else {
-      move <- detect_move(prev_string,
-                          new_string = current_string,
-                          original_neighbor = current_string)
-    }
-    tabu.elements <- data.frame(
-      tabu.num = r,
-      element  = move$element,
-      from     = unname(move$from),
-      to       = unname(move$to),
-      tabu.iteration.left = tabu.control$tabu.duration,
-      stringsAsFactors = FALSE
-    )
+      rownames(tabu.elements.all) <- NULL
+      tabu.elements.history[[r]] <- tabu.elements.all
 
-    if (!is.null(tabu.elements.all)) {
-      tabu.elements.all$tabu.iteration.left <-
-        tabu.elements.all$tabu.iteration.left - 1
-    }
-    tabu.elements.all <- rbind(tabu.elements.all, tabu.elements)
-    tabu.elements.all <-
-      tabu.elements.all[tabu.elements.all$tabu.iteration.left > 0,]
-
-    rownames(tabu.elements.all) <- NULL
-    tabu.elements.history[[r]] <- tabu.elements.all
-
-  } # end loop
-  })
+      pb$tick()
+    } # end loop
 
   # ----------------------------
   # Final output (Tabu Search)

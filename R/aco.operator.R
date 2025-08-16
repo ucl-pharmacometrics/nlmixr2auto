@@ -391,10 +391,16 @@ aco.operator <- function(dat,
     )
   )
 
-  with_progress({
-    p <- progressr::progressor(steps = max.iter)
     ##########################Start###############################
     #  Subsequent iterations ---
+  pb <-
+    progress::progress_bar$new(
+      format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
+      total = max.iter,
+      clear = FALSE,
+      width = 60
+    )
+
     for (aco.iter in 1:max.iter) {
       if (aco.iter == 1) {
         node.list.0 <- initNodeList(search.space = search.space,
@@ -428,7 +434,7 @@ aco.operator <- function(dat,
 
         data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                     function(k) {
-                                      string_vec <- as.vector(initial.ants[k, ])
+                                      string_vec <- as.vector(initial.ants[k,])
                                       result <- try(mod.run(
                                         r                = aco.iter,
                                         dat              = dat,
@@ -479,7 +485,7 @@ aco.operator <- function(dat,
       } else{
         # Identify current best model (elitism)
         bestmodel <-
-          fitness_history[fitness_history$fitness == min(fitness_history$fitness), ]
+          fitness_history[fitness_history$fitness == min(fitness_history$fitness),]
         bestmodelcode <- bestmodel[1, bit.names]
 
         # Generate next generation of ants
@@ -499,20 +505,21 @@ aco.operator <- function(dat,
         cycle.all.list[[aco.iter]] <- cycle.all
 
         # Evaluate all ants in current iteration
-        data.ants <- as.data.frame(t(vapply(seq_len(ncol(cycle.all)),
-                                            function(i) {
-                                              validateModels(
-                                                string = pmax(unname(cycle.all[, i]), 0),
-                                                search.space = search.space,
-                                                code.source = "ACO"
-                                              )
-                                            },
-                                            numeric(nrow(cycle.all)))))
+        data.ants <-
+          as.data.frame(t(vapply(seq_len(ncol(cycle.all)),
+                                 function(i) {
+                                   validateModels(
+                                     string = pmax(unname(cycle.all[, i]), 0),
+                                     search.space = search.space,
+                                     code.source = "ACO"
+                                   )
+                                 },
+                                 numeric(nrow(cycle.all)))))
         colnames(data.ants) <- bit.names
 
         data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                     function(k) {
-                                      string_vec <- as.vector(as.numeric(data.ants[k, ]))
+                                      string_vec <- as.vector(as.numeric(data.ants[k,]))
                                       result <- try(mod.run(
                                         r = aco.iter,
                                         dat = dat,
@@ -564,8 +571,9 @@ aco.operator <- function(dat,
         # Extend node history
         node.list.history <- rbind(node.list.history, node.list.s)
       }
+      pb$tick()
     }
-  })
+
   # ----------------------------
   # Final output (ACO)
   # ----------------------------
@@ -616,11 +624,11 @@ aco.operator <- function(dat,
 
 print.acoOperatorResult <- function(x, ...) {
   # Print final selected model code
-  cat(crayon::blue$bold("\n=== Final Selected Model Code (ACO) ===\n"))
+  cat(crayon::green$bold("\n=== Final Selected Model Code (ACO) ===\n"))
   print(x$`Final Selected Code`)
 
   # Print final selected model name
-  cat(crayon::blue$bold("\n=== Final Selected Model Name (ACO) ===\n"))
+  cat(crayon::green$bold("\n=== Final Selected Model Name (ACO) ===\n"))
   cat(x$`Final Selected Model Name`, "\n")
 
   invisible(x)
