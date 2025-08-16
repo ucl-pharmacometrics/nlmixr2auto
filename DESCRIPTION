@@ -15,7 +15,8 @@ Imports:
     crayon,
     rxode2,
     nlmixr2,
-    rxode2
+    rxode2,
+    progress
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

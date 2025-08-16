@@ -147,8 +147,15 @@ tabu.operator <- function(dat,
   prev_string <- NULL
   globalbest <- NULL
 
-  # --- Iterative Tabu Search ---
+  # --- Iterative Tabu Search --
+  pb <- progress::progress_bar$new(
+    format = " Tabu Search [:bar] :percent (iteration :current/:total) ",
+    total = max.round,
+    clear = FALSE, width = 60
+  )
+
   for (r in 1: max.round) {
+    pb$tick()
     # Step 1: define current starting point
     if (r == 1) {
       current_string <- string_vec
