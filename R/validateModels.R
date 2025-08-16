@@ -1,33 +1,39 @@
 #' Validate and Correct Model Codes
 #'
 #' @description
-#' This function validates and corrects both GA (Genetic Algorithm) binary codes
-#' and ACO (Ant Colony Optimization) categorical codes for pharmacokinetic model structures.
+#' This function validates and corrects model codes for pharmacokinetic model structures.
+#' It is designed to handle inputs from Genetic Algorithm (GA), Ant Colony Optimization (ACO),
+#' and Tabu Search (TS) workflows, ensuring that only valid model structures are retained.
 #'
 #' ## Processing Logic
 #' - **GA**:
 #'   1. Input: GA binary code.
 #'   2. Convert to categorical code via \code{\link{parseCode}}.
 #'   3. Apply model validity corrections (compartment logic, Michaelis–Menten, oral absorption).
-#'   4. Convert corrected categorical code back to GA binary code (no.cmpt1/2, rv1/2 encoding).
+#'   4. Convert corrected categorical code back to GA binary code
+#'      (no.cmpt1/2, rv1/2 encoding).
 #'
-#' - **ACO**:
+#' - **ACO** and **TS**:
 #'   1. Input: categorical code.
 #'   2. Apply model validity corrections directly.
 #'   3. Output corrected categorical code.
 #'
-#' @param string Numeric vector representing either GA binary code or categorical code.
-#' @param search.space Character: `"ivcase"` or `"oralcase"`.
+#' @param string Numeric vector representing either a GA binary code
+#'   or a categorical code (ACO/TS).
+#' @param search.space Character: `"ivbase"` or `"oralbase"`.
 #'   Determines the model structure space (intravenous vs oral).
-#' @param code.source Character: `"GA"` or `"ACO"`.
-#'   Specifies whether the code is binary (GA) or already categorical (ACO).
+#' @param code.source Character: `"GA"`, `"ACO"`, or `"TS"`.
+#'   Specifies the origin of the code:
+#'   - `"GA"` = binary code,
+#'   - `"ACO"` or `"TS"` = categorical code.
 #'
 #' @return A numeric vector:
 #'   - For GA input: corrected GA binary code.
-#'   - For ACO input: corrected categorical code.
+#'   - For ACO/TS input: corrected categorical code.
 #'
 #' @seealso \code{\link{parseCode}}
 #' @export
+#'
 validateModels <-
   function(string,
            search.space = "ivbase",
@@ -261,7 +267,7 @@ validateModels <-
 
     }
 
-    if (code.source == "ACO") {
+    if (code.source %in% c("ACO", "TS")) {
         drop_cols <- intersect(c("eta.vmax", "eta.cl"), names(string.df))
         string.df <- string.df[, !(names(string.df) %in% drop_cols), drop = FALSE]
     }

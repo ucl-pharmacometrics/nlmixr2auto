@@ -1,0 +1,22 @@
+f <- function(){
+ini({
+lcl <- -4.744
+lvc <- 0.223
+lvp <- -2.079
+lq <- -4.051
+eta.cl ~ 0.1
+eta.q ~ 0.1
+sigma_add <-5.0434
+sigma_prop <-0.2
+})
+model({
+cl = exp(lcl+eta.cl)
+vc = exp(lvc)
+vp = exp(lvp)
+q = exp(lq+eta.q)
+d/dt(central) <- - cl / vc * central - q / vc * central + q / vp * peri
+d/dt(peri) <- q / vc * central - q / vp * peri
+cp <- central/vc
+cp ~ prop(sigma_prop) + add(sigma_add)
+})
+}

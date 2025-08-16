@@ -1,0 +1,25 @@
+f <- function(){
+ini({
+lcl <- -4.744
+lvc <- 0.223
+lvp <- -2.079
+lq <- -4.051
+lvp2 <- -2.079
+lq2 <- -4.051
+eta.cl ~ 0.1
+sigma_prop <-0.2
+})
+model({
+cl = exp(lcl+eta.cl)
+vc = exp(lvc)
+vp = exp(lvp)
+q = exp(lq)
+vp2 = exp(lvp2)
+q2 = exp(lq2)
+d/dt(central) <- - cl / vc * central - q / vc * central + q / vp * peri - q2 / vc * central + q2 / vp2 * peri2
+d/dt(peri) <- q / vc * central - q / vp * peri
+d/dt(peri2) <- q2 / vc * central - q2 / vp2 * peri2
+cp <- central/vc
+cp ~ prop(sigma_prop)
+})
+}
