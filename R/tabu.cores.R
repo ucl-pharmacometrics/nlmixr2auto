@@ -6,6 +6,12 @@
 #' through \code{validateModels()} to ensure the resulting code
 #' corresponds to a valid pharmacometric model.
 #'
+#' For each neighbor, both the \emph{original} (pre-validation) and the
+#' \emph{validated} (post-validation) codes are retained. This allows
+#' downstream functions (e.g. \code{detect_move()}) to distinguish
+#' between the intended primary modification and any secondary
+#' adjustments introduced by validation.
+#'
 #' Optionally, the function can restrict the number of neighbors
 #' by random sampling (candidate list strategy).
 #'
@@ -19,17 +25,25 @@
 #'   If specified, a random subset of this size is sampled.
 #' @param seed Optional random seed for reproducibility when sampling neighbors.
 #'
-#' @return A \code{data.frame} of valid neighbor model codes, with
-#'   the same column names as \code{current_string}.
+#' @return A \code{list} with two components:
+#'   \describe{
+#'     \item{\code{original}}{A \code{data.frame} of neighbors as generated
+#'     by single-variable flips, before validation.}
+#'     \item{\code{validated}}{A \code{data.frame} of neighbors after
+#'     applying \code{validateModels()}, representing valid pharmacometric
+#'     models.}
+#'   }
 #'
 #' @examples
 #' current_string <- c(no.cmpt = 2, eta.km = 0, eta.vc = 1,
 #'                     eta.vp = 0, eta.vp2 = 0, eta.q = 1,
 #'                     eta.q2 = 0, mm = 0, mcorr = 1, rv = 2)
 #' neighbors <- generate_neighbors_df(current_string, search.space = "ivbase")
-#' head(neighbors)
+#' head(neighbors$original)   # raw neighbors (pre-validation)
+#' head(neighbors$validated)  # validated neighbors (post-validation)
 #'
 #' @export
+
 generate_neighbors_df <- function(current_string,
                                   search.space = c("ivbase", "oralbase"),
                                   candidate.size = NULL,
@@ -66,10 +80,9 @@ generate_neighbors_df <- function(current_string,
     )
   }
 
-  # Initialize empty neighbor table
-  neighbors <-
-    data.frame(matrix(ncol = length(current_string), nrow = 0))
-  colnames(neighbors) <- names(current_string)
+  # Store both original and validated neighbors
+  orig_neighbors <- list()
+  valid_neighbors <- list()
 
   # Generate neighbors by modifying one variable at a time
   for (variable in names(current_string)) {
@@ -78,79 +91,98 @@ generate_neighbors_df <- function(current_string,
       if (option != current_string[variable]) {
         new_neighbor <- current_string
         new_neighbor[variable] <- option
-        neighbors <- rbind(neighbors, new_neighbor)
+        orig_neighbors <- append(orig_neighbors, list(new_neighbor))
+
+        # validate this neighbor
+        validated <- validateModels(
+          string = as.numeric(new_neighbor),
+          search.space = search.space,
+          code.source = "TS"
+        )
+        valid_neighbors <- append(valid_neighbors, list(validated))
       }
     }
   }
 
-  # Validate neighbors: ensures only legal pharmacometric models remain
-  neighbors <- t(vapply(seq_len(nrow(neighbors)),
-                        function(i) {
-                          validateModels(
-                            string = as.numeric(neighbors[i,]),
-                            search.space = search.space,
-                            code.source = "TS"  # flag to distinguish Tabu Search
-                          )
-                        },
-                        numeric(length(current_string))))
+  # Convert to data.frames
+  orig_df  <- do.call(rbind, orig_neighbors)
+  valid_df <- do.call(rbind, valid_neighbors)
 
-  neighbors <- as.data.frame(neighbors)
-  colnames(neighbors) <- names(current_string)
+  colnames(orig_df)  <- names(current_string)
+  colnames(valid_df) <- names(current_string)
 
-  # Deduplicate after validation
-  neighbors <- neighbors[!duplicated(neighbors), , drop = FALSE]
+  # Deduplicate after validation (based on validated version)
+  keep_idx <- !duplicated(valid_df)
+  orig_df  <- orig_df[keep_idx, , drop = FALSE]
+  valid_df <- valid_df[keep_idx, , drop = FALSE]
 
   # Candidate list sampling (optional)
   if (!is.null(candidate.size) &&
-      nrow(neighbors) > candidate.size) {
+      nrow(valid_df) > candidate.size) {
     if (!is.null(seed))
       set.seed(seed)
-    neighbors <-
-      neighbors[sample(1:nrow(neighbors), candidate.size), , drop = FALSE]
+    idx <- sample(1:nrow(valid_df), candidate.size)
+    orig_df  <- orig_df[idx, , drop = FALSE]
+    valid_df <- valid_df[idx, , drop = FALSE]
   }
 
-  return(neighbors)
+
+  # Return both original and validated neighbors together
+  return(list(
+    original_neighbors  = as.data.frame(orig_df),
+    validated_neighbors = as.data.frame(valid_df)
+  ))
 }
 
 
-#' Detect the move between two solutions
+
+#' Detect the primary move between two model codes
 #'
-#' @description
-#' Given a current solution vector and a neighbor solution vector,
-#' this function identifies the specific move (bit change) required to
-#' transform the current solution into the neighbor solution.
+#' Compares a previous model code with a new one and identifies
+#' the primary intended change. If an \code{original_neighbor}
+#' is provided, this is used to determine the intended change,
+#' ignoring any secondary modifications introduced by validation.
 #'
-#' @param prev_string Numeric vector representing the current solution
-#'   (e.g., the local best).
-#' @param new_string Numeric vector representing a candidate neighbor solution.
+#' @param prev_string A named numeric vector: the starting model code.
+#' @param new_string A named numeric vector: the validated model code.
+#' @param original_neighbor Optional named numeric vector: the original
+#'   neighbor before validation. If provided, this is used to identify
+#'   the primary change.
 #'
-#' @return A named list with elements:
-#'   \itemize{
-#'     \item \code{element} — The variable name that was changed.
-#'     \item \code{from} — The original value in the current solution.
-#'     \item \code{to} — The new value in the neighbor solution.
-#'   }
+#' @return A list with \code{element}, \code{from}, and \code{to}
+#'   describing the primary change.
 #'
 #' @examples
-#' prev <- c(no.cmpt = 2, eta.vc = 0, rv = 2)
-#' new  <- c(no.cmpt = 3, eta.vc = 0, rv = 2)
-#' detect_move(prev, new)
+#' prev <- c(no.cmpt = 2, eta.vc = 1)
+#' orig <- c(no.cmpt = 3, eta.vc = 1)  # original neighbor
+#' new  <- c(no.cmpt = 3, eta.vc = 0)  # validated neighbor (extra fix)
+#' detect_move(prev, new, original_neighbor = orig)
 #'
 #' @export
-detect_move <- function(prev_string, new_string) {
-  diff_idx <- which(prev_string != new_string)
+detect_move <- function(prev_string, new_string, original_neighbor = NULL) {
+  if (!is.null(original_neighbor)) {
+    # Use original_neighbor to locate the intended flip
+    diff_idx <- which(prev_string != original_neighbor)
+  } else {
+    # Fallback: detect based on new_string
+    diff_idx <- which(prev_string != new_string)
+  }
+
   if (length(diff_idx) == 0) {
     return(NULL)  # no change
   }
   if (length(diff_idx) > 1) {
-    warning("Multiple changes detected; only the first will be reported.")
+    warning("Multiple changes detected; using the first difference as primary.")
     diff_idx <- diff_idx[1]
   }
+
   element <- names(prev_string)[diff_idx]
   from <- prev_string[diff_idx]
-  to <- new_string[diff_idx]
+  to   <- new_string[diff_idx]
+
   return(list(element = element, from = from, to = to))
 }
+
 
 
 #' Check if a move is tabu
@@ -189,17 +221,40 @@ is_move_tabu <- function(move, tabu_list) {
   ))
 }
 
+
 #' Apply 1-bit perturbation to escape local optimum
 #'
-#' This function randomly flips one parameter in the current model string
-#' to generate a new valid model. Used when the search stagnates.
+#' This function randomly flips one parameter ("1-bit change") in the current
+#' model string to generate a perturbed candidate. The candidate is then passed
+#' through \code{validateModels()} to ensure pharmacological validity.
+#'
+#' The function returns both:
+#' \itemize{
+#'   \item \code{original_neighbor}: the raw 1-bit flip before validation
+#'   \item \code{validated_neighbor}: the corrected version after validation
+#' }
+#' This allows downstream functions (e.g. \code{detect_move()}) to identify
+#' which parameter was intentionally changed (primary move), while still using
+#' a valid model code for evaluation.
 #'
 #' @param prev_string A named numeric vector representing the current model.
 #' @param search.space The search space ("ivbase" or "oralbase").
-#' @param max.try Maximum number of attempts to find a valid perturbed model.
+#' @param max.try Maximum number of attempts to generate a valid perturbed model.
 #'
-#' @return A perturbed model string (named numeric vector).
+#' @return A \code{list} with two named numeric vectors:
+#' \item{original_neighbor}{raw 1-bit flip (may be invalid)}
+#' \item{validated_neighbor}{validated and usable model code}
+#'
+#' @examples
+#' prev <- c(no.cmpt = 2, eta.km = 0, eta.vc = 1,
+#'           eta.vp = 0, eta.vp2 = 0, eta.q = 1,
+#'           eta.q2 = 0, mm = 0, mcorr = 1, rv = 2)
+#' perturb <- perturb_1bit(prev, search.space = "ivbase")
+#' perturb$original_neighbor   # original 1-bit flip
+#' perturb$validated_neighbor  # validated model
+#'
 #' @export
+
 perturb_1bit <- function(prev_string, search.space, max.try = 1000) {
   for (i in 1:max.try) {
     disturbed <- prev_string
@@ -219,17 +274,28 @@ perturb_1bit <- function(prev_string, search.space, max.try = 1000) {
       disturbed[flip_idx] <- sample(candidates, 1)
     }
 
-    disturbed <- validateModels(string       = disturbed,
-                                search.space = search.space,
-                                code.source  = "TS")
-    names(disturbed) <- names(prev_string)
+    # Save original 1-bit flip (before validation)
+    disturbed_orig <- disturbed
 
-    if (!all(disturbed == prev_string)) {
-      return(disturbed)
+    # Validate neighbor
+    disturbed_val <- validateModels(string       = disturbed,
+                                    search.space = search.space,
+                                    code.source  = "TS")
+    names(disturbed_val) <- names(prev_string)
+
+    # If different from previous string, return both
+    if (!all(disturbed_val == prev_string)) {
+      return(list(
+        original_neighbor  = as.numeric(disturbed_orig),
+        validated_neighbor = as.numeric(disturbed_val)
+      ))
     }
   }
   warning("1-bit perturbation failed after ",
           max.try,
           " attempts, returning original string.")
-  return(prev_string)
+  return(list(
+    original_neighbor  = as.numeric(prev_string),
+    validated_neighbor = as.numeric(prev_string)
+  ))
 }

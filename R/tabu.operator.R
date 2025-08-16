@@ -33,50 +33,72 @@ tabuControl <- function(tabu.duration = 2,
 #' identify the best-performing model. Supports both IV and Oral search spaces.
 #'
 #' @param dat Dataset (typically PK/PD data).
-#' @param param_table Optional parameter table. If NULL, will be generated with auto_param_table().
-#' @param tabu.control A list of tabu search control parameters:
+#' @param param_table Optional parameter table. If \code{NULL}, generated via \code{auto_param_table()}.
+#' @param tabu.control A list of Tabu Search control parameters:
 #'   \itemize{
 #'     \item \code{tabu.duration} — Integer. Number of iterations a move remains tabu.
 #'     \item \code{max.round} — Integer. Maximum number of search iterations.
 #'     \item \code{start.point} — Optional initial model code vector.
-#'     \item \code{aspiration} — Logical. If TRUE, allows aspiration criterion.
+#'     \item \code{aspiration} — Logical. If \code{TRUE}, allows aspiration criterion.
+#'     \item \code{candidate.size} — Optional integer. Maximum number of neighbors
+#'           randomly sampled from the full neighborhood (candidate list strategy).
 #'   }
-#' @param search.space Character. Search space type ("ivbase" or "oralbase").
+#' @param search.space Character. Search space type: \code{"ivbase"} or \code{"oralbase"}.
 #' @param no.cores Integer. Number of CPU cores to use.
 #' @param foldername Character. Folder name for temporary outputs.
 #' @param filename Character. Base filename for outputs.
-#' @param penalty.control A list of penalty settings, typically from penaltyControl().
+#' @param penalty.control A list of penalty settings, typically from \code{penaltyControl()}.
 #' @param precomputed_results_file Optional cache file for model results.
-#' @param seed.no Random seed.
-#' @param ... Additional arguments passed to mod.run().
+#' @param seed.no Random seed for reproducibility.
+#' @param ... Additional arguments passed to \code{mod.run()}.
 #'
-#' @return A list containing:
-#'   \item{best_model_name}{Selected best model (human-readable).}
-#'   \item{best_model_code}{Vector representation of best model.}
-#'   \item{history}{Tabu search history: starting points, local bests, tabu elements, neighbors.}
+#' @return An object of class \code{tabuOperatorResult}, containing:
+#'   \item{\code{Final Selected Code}}{Vector representation of the best model.}
+#'   \item{\code{Final Selected Model Name}}{Selected best model (human-readable).}
+#'   \item{\code{Model Run History}}{Data frame of all model evaluations with fitness values.}
+#'   \item{\code{Search History}}{List with iteration-level history:
+#'         \code{starting.points.history}, \code{local.best.history},
+#'         \code{tabu.elements.history}, \code{neighbors.history}.}
 #'
 #' @details
 #' This function implements a customized Tabu Search framework for pharmacometric
-#' model structure optimization. The key design choices are:
+#' model structure optimization. Key design aspects:
 #'
 #' - **Solution representation**: Models are encoded as bit vectors
 #'   (e.g., number of compartments, inclusion of random effects, residual error structure).
+#'
 #' - **Initial solution**: Default is a 2-compartment base model, or user-specified
 #'   via \code{tabu.control$start.point}.
-#' - **Neighborhood definition**: All one-bit flips are considered (full neighborhood search),
-#'   with invalid models filtered (e.g., incompatible compartments).
-#' - **Move definition**: A move is defined by which element is modified and its value change
-#'   (e.g., \code{no.cmpt: 2 -> 3}, \code{eta.vc: 0 -> 1}).
+#'
+#' - **Neighborhood definition**: For each iteration, all one-bit flips are generated
+#'   (\emph{original neighbors}), then passed through \code{validateModels()} to ensure
+#'   only valid pharmacometric models are retained (\emph{validated neighbors}).
+#'
+#' - **Move definition**: A move is defined based on the \emph{original neighbor}
+#'   (primary 1-bit flip), even if the validated neighbor differs after correction.
+#'
 #' - **Tabu list**: Stores recent moves with remaining tabu tenure (\code{tabu.duration}).
+#'
 #' - **Aspiration criterion**: If enabled, a tabu move is allowed if it produces
 #'   a model better than the historical best.
+#'
+#' - **Perturbation**: If no improving neighbor is found, a random 1-bit perturbation
+#'   is applied. Both original and validated perturbed neighbors are tracked.
+#'
 #' - **Objective function**: Model fit quality (e.g., AIC/OFV), computed by \code{mod.run()},
 #'   with penalties applied via \code{penalty.control}.
+#'
 #' - **Termination**: Fixed number of iterations (\code{max.round}).
-#' - **History tracking**: Stores starting points, local bests, tabu elements,
-#'   and neighbors at each iteration for visualization and traceability.
+#'
+#' - **History tracking**: For each iteration, the algorithm stores:
+#'   starting points, validated neighbors, local best models, and tabu elements.
+#'
+#' @seealso \code{\link{generate_neighbors_df}}, \code{\link{detect_move}},
+#'          \code{\link{perturb_1bit}}, \code{\link{penaltyControl}},
+#'          \code{\link{CodetoMod}}
 #'
 #' @export
+
 tabu.operator <- function(dat,
                           param_table = NULL,
                           tabu.control = tabuControl(),
@@ -88,6 +110,7 @@ tabu.operator <- function(dat,
                           precomputed_results_file = NULL,
                           seed.no = 1234,
                           ...) {
+  current.date <- Sys.Date()
   set.seed(seed.no)
   # tabu control
   tabu.duration <- tabu.control$tabu.duration
@@ -120,12 +143,32 @@ tabu.operator <- function(dat,
 
   # --- Define bit names for search space ---
   if (search.space == "ivbase") {
-    bit.names <- c("no.cmpt", "eta.km", "eta.vc", "eta.vp",
-                   "eta.vp2", "eta.q", "eta.q2", "mm", "mcorr", "rv")
+    bit.names <- c(
+      "no.cmpt",
+      "eta.km",
+      "eta.vc",
+      "eta.vp",
+      "eta.vp2",
+      "eta.q",
+      "eta.q2",
+      "mm",
+      "mcorr",
+      "rv"
+    )
   } else if (search.space == "oralbase") {
-    bit.names <- c("no.cmpt", "eta.km", "eta.vc", "eta.vp",
-                   "eta.vp2", "eta.q", "eta.q2", "eta.ka",
-                   "mm", "mcorr", "rv")
+    bit.names <- c(
+      "no.cmpt",
+      "eta.km",
+      "eta.vc",
+      "eta.vp",
+      "eta.vp2",
+      "eta.q",
+      "eta.q2",
+      "eta.ka",
+      "mm",
+      "mcorr",
+      "rv"
+    )
   } else {
     stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
@@ -149,13 +192,13 @@ tabu.operator <- function(dat,
 
   # --- Iterative Tabu Search --
   pb <- progress::progress_bar$new(
-    format = " Tabu Search [:bar] :percent (iteration :current/:total) ",
+    format = " Tabu Search [:bar] :percent (iteration :current/:total)\n",
     total = max.round,
-    clear = FALSE, width = 60
+    clear = FALSE,
+    width = 60
   )
 
-  for (r in 1: max.round) {
-    pb$tick()
+  for (r in 1:max.round) {
     # Step 1: define current starting point
     if (r == 1) {
       current_string <- string_vec
@@ -164,41 +207,61 @@ tabu.operator <- function(dat,
     }
     starting.points.history[[r]] <- current_string
 
-    # Step 2: generate neighbors
-    neighbors_df <- generate_neighbors_df(current_string)
-    colnames(neighbors_df) <- bit.names
-    neighbors_df <- distinct(neighbors_df)[, bit.names]
+    # Step 2: generate neighbors (original + validated)
+    neighbors_list <-
+      generate_neighbors_df(current_string, search.space = search.space)
+    neighbors_orig <-
+      neighbors_list$original_neighbors   # pre-validation
+    neighbors_val  <-
+      neighbors_list$validated_neighbors  # post-validation (legal models)
+
+    # Deduplicate validated neighbors
+    neighbors_val <- distinct(neighbors_val)[, bit.names]
 
     # Step 3a: Filter tabu neighbors (without aspiration logic)
     neighbors_eval <- list()
     aspiration_candidates <- list()
+    move_records <- list()  # store primary moves
 
-    if (!is.null(tabu.elements.all) && nrow(tabu.elements.all) > 0) {
-      for (row in 1:nrow(neighbors_df)) {
-        move <- detect_move(current_string, neighbors_df[row,])
+    if (!is.null(tabu.elements.all) &&
+        nrow(tabu.elements.all) > 0) {
+      for (row in 1:nrow(neighbors_val)) {
+        # detect primary move using original neighbor
+        move <- detect_move(current_string,
+                            neighbors_val[row,],
+                            original_neighbor = neighbors_orig[row,])
 
         if (is_move_tabu(move, tabu.elements.all)) {
           # tabu move
           if (tabu.control$aspiration) {
-            # keep for now in separate list
             aspiration_candidates[[length(aspiration_candidates) + 1]] <-
-              neighbors_df[row,]
+              neighbors_val[row,]
           }
         } else {
           # non-tabu -> keep
           neighbors_eval[[length(neighbors_eval) + 1]] <-
-            neighbors_df[row,]
+            neighbors_val[row,]
+          move_records[[length(move_records) + 1]] <- move$element
         }
       }
     } else {
       # if no tabu elements, all neighbors are valid
       neighbors_eval <-
-        split(neighbors_df, seq_len(nrow(neighbors_df)))
+        split(neighbors_val, seq_len(nrow(neighbors_val)))
+      # detect moves for all neighbors
+      move_records <-
+        lapply(seq_len(nrow(neighbors_val)), function(row) {
+          move <- detect_move(current_string,
+                              neighbors_val[row,],
+                              original_neighbor = neighbors_orig[row,])
+          move$element
+        })
     }
 
     # Convert lists back to data frames
     if (length(neighbors_eval) > 0) {
       neighbors_eval <- do.call(rbind, neighbors_eval)
+      neighbors_eval$move.element <- unlist(move_records)
     } else {
       neighbors_eval <- data.frame()
     }
@@ -209,16 +272,14 @@ tabu.operator <- function(dat,
       aspiration_candidates <- data.frame()
     }
 
-    # save
-    neighbors.history[[r]] <- neighbors_df
+    # save (store validated neighbors in history)
+    neighbors.history[[r]] <- neighbors_val
 
     # --- Step 4: Evaluate neighbors (fitness calculation) ---
-    if (nrow(neighbors_df) > 0) {
-      neighbors_eval <- neighbors_df
-
-      neighbors_eval$fitness <- vapply(seq_len(nrow(neighbors_df)),
+    if (nrow(neighbors_eval) > 0) {
+      neighbors_eval$fitness <- vapply(seq_len(nrow(neighbors_eval)),
                                        function(k) {
-                                         string_vec <- as.numeric(neighbors_df[k,])
+                                         string_vec <- as.numeric(neighbors_eval[k, bit.names])
                                          result <- try(mod.run(
                                            r = r,
                                            dat = dat,
@@ -254,27 +315,43 @@ tabu.operator <- function(dat,
 
     # Step 5: update local best
     if (nrow(neighbors_eval) > 0) {
-      localbest <- neighbors_eval[which.min(neighbors_eval$fitness), , drop = FALSE]
+      localbest <-
+        neighbors_eval[which.min(neighbors_eval$fitness), , drop = FALSE]
     } else {
       localbest <- current_string  # fallback, in case no neighbors
     }
     local.best.history[[r]] <- localbest
 
-
     if (r == 1) {
-      prev_string <- string_vec      # starting points
+      prev_string <- string_vec      # starting point
     } else {
       prev_string <- local.best.history[[r - 1]][1, bit.names]
     }
     current_string <- localbest[1, bit.names]
 
+    # --- Step X: Update current solution with neighbor or perturbation ---
     if (all(prev_string == current_string)) {
-      message("Iteration ", r,
-              ": no improving neighbor found. Applying 2-bit perturbation to escape local optimum.")
-      current_string <- perturb_2bit(prev_string, search.space)
-    }
-    move <- detect_move(prev_string, current_string)
+      # Case 1: No improvement found in this iteration
+      # → Apply a random 1-bit perturbation to escape local optimum.
+      message(
+        "Iteration ",
+        r,
+        ": no improving neighbor found. Applying 1-bit perturbation to escape local optimum."
+      )
 
+      perturb <- perturb_1bit(prev_string, search.space)
+      current_string <- perturb$validated_neighbor
+      move <- detect_move(
+        prev_string,
+        new_string = perturb$validated_neighbor,
+        original_neighbor = perturb$original_neighbor
+      )
+
+    } else {
+      move <- detect_move(prev_string,
+                          new_string = current_string,
+                          original_neighbor = current_string)
+    }
     tabu.elements <- data.frame(
       tabu.num = r,
       element  = move$element,
@@ -295,6 +372,7 @@ tabu.operator <- function(dat,
     rownames(tabu.elements.all) <- NULL
     tabu.elements.history[[r]] <- tabu.elements.all
 
+    pb$tick()
   } # end loop
 
 

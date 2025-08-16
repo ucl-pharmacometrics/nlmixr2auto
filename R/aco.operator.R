@@ -378,8 +378,15 @@ aco.operator <- function(dat,
     stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
 
+  pb <- progress::progress_bar$new(
+    format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
+    total = max.iter,
+    clear = FALSE, width = 60
+  )
   ##########################Start###############################
-  aco.iter <- 1
+  #  Subsequent iterations ---
+  for (aco.iter in 1:max.iter) {
+  if (aco.iter ==1){
   node.list.0 <- initNodeList(search.space = search.space,
                               initial.phi = initial.phi)
   node.list.history <- node.list.0
@@ -458,9 +465,7 @@ aco.operator <- function(dat,
                                prob.floor = prob.floor)
 
   node.list.history <- rbind(node.list.history, node.list.s)
-
-  #  Subsequent iterations ---
-  for (aco.iter in 2:max.iter) {
+ } else{
     # Identify current best model (elitism)
     bestmodel <-
       fitness_history[fitness_history$fitness == min(fitness_history$fitness),]
@@ -546,8 +551,9 @@ aco.operator <- function(dat,
 
     # Extend node history
     node.list.history <- rbind(node.list.history, node.list.s)
-  }
-
+ }
+    pb$tick()
+}
   # ----------------------------
   # Final output (ACO)
   # ----------------------------
