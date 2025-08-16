@@ -2,100 +2,80 @@
 % Please edit documentation in R/tabu.operator.R
 \name{tabu.operator}
 \alias{tabu.operator}
-\title{Run Tabu search for automated pharmacokinetic model selection}
+\title{Tabu Search Operator for Pharmacometric Model Selection}
 \usage{
 tabu.operator(
   dat,
-  tabu.duration,
-  max.round,
-  start.point,
-  search.space,
-  no.cores,
-  thetalower,
-  crse,
-  cshrink,
-  cadd,
-  cprop,
-  ccorr,
-  penalty.type,
-  penalty.value,
-  foldername,
-  filename,
+  param_table = NULL,
+  tabu.control = tabuControl(),
+  search.space = "ivbase",
+  no.cores = rxode2::getRxThreads(),
+  foldername = "test",
+  filename = "test",
+  penalty.control = penaltyControl(),
+  precomputed_results_file = NULL,
+  seed.no = 1234,
   ...
 )
 }
 \arguments{
-\item{dat}{A data frame containing the pharmacokinetic data to be used for model fitting.}
+\item{dat}{Dataset (typically PK/PD data).}
 
-\item{tabu.duration}{Integer specifying the number of iterations a target remains tabu list.}
+\item{param_table}{Optional parameter table. If NULL, will be generated with auto_param_table().}
 
-\item{max.round}{Integer specifying the maximum number of rounds for the search.}
-
-\item{start.point}{Named vector specifying a model as starting points for the search.}
-
-\item{search.space}{An integer specifying the search space type (1 for standard).}
-
-\item{no.cores}{The number of CPU cores to use for parallel processing.}
-
-\item{thetalower}{A named vector specifying lower bounds for model parameters.}
-
-\item{crse}{Constraint value for the relative standard error (RSE).}
-
-\item{cshrink}{Constraint value for the shrinkage.}
-
-\item{cadd}{Constraint value for the additive error.}
-
-\item{cprop}{Constraint value for the proportional error.}
-
-\item{ccorr}{Constraint value for the correlation between parameters.}
-
-\item{penalty.type}{The type of penalty to apply during the fitness evaluation:
+\item{tabu.control}{A list of tabu search control parameters:
 \itemize{
-\item \code{penalty.type = 1}: Considers constraints on RSE.
-\item \code{penalty.type = 2}: Considers constraints on RSE and shrinkage.
-\item \code{penalty.type = 3}: Considers constraints on RSE, shrinkage, and sigma values (variance of residual error).
+\item \code{tabu.duration} — Integer. Number of iterations a move remains tabu.
+\item \code{max.round} — Integer. Maximum number of search iterations.
+\item \code{start.point} — Optional initial model code vector.
+\item \code{aspiration} — Logical. If TRUE, allows aspiration criterion.
 }}
 
-\item{penalty.value}{The value of the penalty to apply during the fitness evaluation.}
+\item{search.space}{Character. Search space type ("ivbase" or "oralbase").}
 
-\item{foldername}{The name of the folder for output storage. Defaults to "test".}
+\item{no.cores}{Integer. Number of CPU cores to use.}
 
-\item{filename}{The name of the output file. Defaults to "test".}
+\item{foldername}{Character. Folder name for temporary outputs.}
 
-\item{...}{Additional arguments passed to the model fitting function.}
+\item{filename}{Character. Base filename for outputs.}
+
+\item{penalty.control}{A list of penalty settings, typically from penaltyControl().}
+
+\item{precomputed_results_file}{Optional cache file for model results.}
+
+\item{seed.no}{Random seed.}
+
+\item{...}{Additional arguments passed to mod.run().}
 }
 \value{
-A list include the best solution and Tabu running history
+A list containing:
+\item{best_model_name}{Selected best model (human-readable).}
+\item{best_model_code}{Vector representation of best model.}
+\item{history}{Tabu search history: starting points, local bests, tabu elements, neighbors.}
 }
 \description{
-Perform Tabu search to select the best model for pharmacokinetic modelling
+Performs Tabu Search to explore the pharmacometric model space and
+identify the best-performing model. Supports both IV and Oral search spaces.
 }
-\examples{
-\dontrun{
-
-d1<-pheno_sd
-inits.out<-getppkinit(dat = d1,runnpd = 0)
-autosetinit(dat = d1,
-            inits= inits.out$Recommended_initial_estimates)
-tabu.operator(dat = d1,
-              tabu.duration=2,
-              max.round=4,
-              search.space = 1,
-              no.cores = 4,
-              thetalower=c(vp=1,
-                           vp2=1),
-              control = saemControl(
-                seed = 1234,
-                print = 5,
-                nBurn = 20,
-                nEm = 30,
-                logLik = T,
-                rxControl = rxControl(cores = 4,
-                                      maxsteps =70000)),
-               table=tableControl(cwres=T),
-               filename =  "pheno_sd",
-               foldername =   "pheno_sd" )
-
-
+\details{
+This function implements a customized Tabu Search framework for pharmacometric
+model structure optimization. The key design choices are:
+\itemize{
+\item \strong{Solution representation}: Models are encoded as bit vectors
+(e.g., number of compartments, inclusion of random effects, residual error structure).
+\item \strong{Initial solution}: Default is a 2-compartment base model, or user-specified
+via \code{tabu.control$start.point}.
+\item \strong{Neighborhood definition}: All one-bit flips are considered (full neighborhood search),
+with invalid models filtered (e.g., incompatible compartments).
+\item \strong{Move definition}: A move is defined by which element is modified and its value change
+(e.g., \code{no.cmpt: 2 -> 3}, \code{eta.vc: 0 -> 1}).
+\item \strong{Tabu list}: Stores recent moves with remaining tabu tenure (\code{tabu.duration}).
+\item \strong{Aspiration criterion}: If enabled, a tabu move is allowed if it produces
+a model better than the historical best.
+\item \strong{Objective function}: Model fit quality (e.g., AIC/OFV), computed by \code{mod.run()},
+with penalties applied via \code{penalty.control}.
+\item \strong{Termination}: Fixed number of iterations (\code{max.round}).
+\item \strong{History tracking}: Stores starting points, local bests, tabu elements,
+and neighbors at each iteration for visualization and traceability.
 }
 }

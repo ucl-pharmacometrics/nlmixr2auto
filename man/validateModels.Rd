@@ -7,24 +7,30 @@
 validateModels(string, search.space = "ivbase", code.source = "GA")
 }
 \arguments{
-\item{string}{Numeric vector representing either GA binary code or categorical code.}
+\item{string}{Numeric vector representing either a GA binary code
+or a categorical code (ACO/TS).}
 
-\item{search.space}{Character: \code{"ivcase"} or \code{"oralcase"}.
+\item{search.space}{Character: \code{"ivbase"} or \code{"oralbase"}.
 Determines the model structure space (intravenous vs oral).}
 
-\item{code.source}{Character: \code{"GA"} or \code{"ACO"}.
-Specifies whether the code is binary (GA) or already categorical (ACO).}
+\item{code.source}{Character: \code{"GA"}, \code{"ACO"}, or \code{"TS"}.
+Specifies the origin of the code:
+\itemize{
+\item \code{"GA"} = binary code,
+\item \code{"ACO"} or \code{"TS"} = categorical code.
+}}
 }
 \value{
 A numeric vector:
 \itemize{
 \item For GA input: corrected GA binary code.
-\item For ACO input: corrected categorical code.
+\item For ACO/TS input: corrected categorical code.
 }
 }
 \description{
-This function validates and corrects both GA (Genetic Algorithm) binary codes
-and ACO (Ant Colony Optimization) categorical codes for pharmacokinetic model structures.
+This function validates and corrects model codes for pharmacokinetic model structures.
+It is designed to handle inputs from Genetic Algorithm (GA), Ant Colony Optimization (ACO),
+and Tabu Search (TS) workflows, ensuring that only valid model structures are retained.
 \subsection{Processing Logic}{
 \itemize{
 \item \strong{GA}:
@@ -32,9 +38,10 @@ and ACO (Ant Colony Optimization) categorical codes for pharmacokinetic model st
 \item Input: GA binary code.
 \item Convert to categorical code via \code{\link{parseCode}}.
 \item Apply model validity corrections (compartment logic, Michaelis–Menten, oral absorption).
-\item Convert corrected categorical code back to GA binary code (no.cmpt1/2, rv1/2 encoding).
+\item Convert corrected categorical code back to GA binary code
+(no.cmpt1/2, rv1/2 encoding).
 }
-\item \strong{ACO}:
+\item \strong{ACO} and \strong{TS}:
 \enumerate{
 \item Input: categorical code.
 \item Apply model validity corrections directly.
