@@ -1,3 +1,192 @@
+createAnts <- function(search.space="ivbase",
+                       no.ants=6,
+                       initialize=F,
+                       node.list=NULL) {
+  # --- Defensive check: no.ants >= 6 ---
+  if (no.ants < 6) {
+    stop("Number of ants (no.ants) must be at least 6.")
+  }
+
+  # --- Determine if eta.ka is present (oralbase) ---
+  has_eta_ka <- any(grepl("^eta\\.ka", node.list$node.names))
+
+  # --- Helper: get index in node.list by name ---
+  idx <- function(names)
+    which(node.list$node.names %in% names)
+
+  # --- Prepare empty storage ---
+  no.cmpt <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.km  <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.vc  <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.vp  <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.vp2 <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.q   <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  eta.q2  <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  if (has_eta_ka) {
+    eta.ka <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  }
+  mm      <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  mcorr   <- data.frame(matrix(nrow = 1, ncol = no.ants))
+  rv      <- data.frame(matrix(nrow = 1, ncol = no.ants))
+
+  # --- Initialize population ---
+  if (initialize) {
+    # First 6 ants: fixed simple model
+    no.cmpt[1, 1:6]  <- c(1, 1, 2, 2, 3, 3)
+    eta.vc[1, 1:6]   <- 0
+    eta.vp[1, 1:6]   <- c(-1, -1, 0, 0, 0, 0)
+    eta.q[1, 1:6]    <- c(-1, -1, 0, 0, 0, 0)
+    eta.vp2[1, 1:6]  <- c(-1, -1, -1, -1, 0, 0)
+    eta.q2[1, 1:6]   <- c(-1, -1, -1, -1, 0, 0)
+    rv[1, 1:6]       <- c(1, 2, 1, 2, 1, 2)
+    mcorr[1, 1:6]    <- 0
+    mm[1, 1:6]       <- 0
+    eta.km[1, 1:6]   <- -1
+    if (has_eta_ka)
+      eta.ka[1, 1:6] <- -1
+
+    # Remaining ants: probability sampling
+    if (no.ants > 6) {
+      no.cmpt[1, 7:no.ants] <-
+        sample(1:3, no.ants - 6, prob = node.list[idx(c("1Cmpt", "2Cmpt", "3Cmpt")),]$p, replace = TRUE)
+      eta.vc[1, 7:no.ants]  <-
+        sample(0:1, no.ants - 6, prob = node.list[idx(c("eta.vc.no", "eta.vc.yes")),]$p, replace = TRUE)
+      mm[1, 7:no.ants]      <-
+        sample(0:1, no.ants - 6, prob = node.list[idx(c("mm.no", "mm.yes")),]$p, replace = TRUE)
+      mcorr[1, 7:no.ants]   <-
+        sample(0:1, no.ants - 6, prob = node.list[idx(c("mcorr.no", "mcorr.yes")),]$p, replace = TRUE)
+      rv[1, 7:no.ants]      <-
+        sample(1:3, no.ants - 6, prob = node.list[idx(c("add", "prop", "comb")),]$p, replace = TRUE)
+      if (has_eta_ka) {
+        eta.ka[1, 7:no.ants] <-
+          sample(0:1,
+                 no.ants - 6,
+                 prob = node.list[idx(c("eta.ka.no", "eta.ka.yes")),]$p,
+                 replace = TRUE)
+      }
+
+      for (j in 7:no.ants) {
+        if (no.cmpt[1, j] == 3) {
+          eta.vp2[1, j] <-
+            sample(0:1, 1, prob = node.list[idx(c("eta.vp2.no", "eta.vp2.yes")),]$p)
+          eta.q2[1, j]  <-
+            sample(0:1, 1, prob = node.list[idx(c("eta.q2.no", "eta.q2.yes")),]$p)
+        } else {
+          eta.vp2[1, j] <- -1
+          eta.q2[1, j]  <- -1
+        }
+
+        if (no.cmpt[1, j] > 1) {
+          eta.vp[1, j] <-
+            sample(0:1, 1, prob = node.list[idx(c("eta.vp.no", "eta.vp.yes")),]$p)
+          eta.q[1, j]  <-
+            sample(0:1, 1, prob = node.list[idx(c("eta.q.no", "eta.q.yes")),]$p)
+        } else {
+          eta.vp[1, j] <- -1
+          eta.q[1, j]  <- -1
+        }
+
+        if (mm[1, j] == 1) {
+          eta.km[1, j] <-
+            sample(0:1, 1, prob = node.list[idx(c("eta.km.no", "eta.km.yes")),]$p)
+        } else {
+          eta.km[1, j] <- -1
+        }
+      }
+    }
+  } else {
+    # Fully sampled initialization
+    no.cmpt[1, ] <-
+      sample(1:3, no.ants, prob = node.list[idx(c("1Cmpt", "2Cmpt", "3Cmpt")),]$p, replace = TRUE)
+    eta.vc[1, ]  <-
+      sample(0:1, no.ants, prob = node.list[idx(c("eta.vc.no", "eta.vc.yes")),]$p, replace = TRUE)
+    mm[1, ]      <-
+      sample(0:1, no.ants, prob = node.list[idx(c("mm.no", "mm.yes")),]$p, replace = TRUE)
+    mcorr[1, ]   <-
+      sample(0:1, no.ants, prob = node.list[idx(c("mcorr.no", "mcorr.yes")),]$p, replace = TRUE)
+    rv[1, ]      <-
+      sample(1:3, no.ants, prob = node.list[idx(c("add", "prop", "comb")),]$p, replace = TRUE)
+    if (has_eta_ka) {
+      eta.ka[1, ] <-
+        sample(0:1, no.ants, prob = node.list[idx(c("eta.ka.no", "eta.ka.yes")),]$p, replace = TRUE)
+    }
+
+    for (j in 1:no.ants) {
+      if (no.cmpt[1, j] == 3) {
+        eta.vp2[1, j] <-
+          sample(0:1, 1, prob = node.list[idx(c("eta.vp2.no", "eta.vp2.yes")),]$p)
+        eta.q2[1, j]  <-
+          sample(0:1, 1, prob = node.list[idx(c("eta.q2.no", "eta.q2.yes")),]$p)
+      } else {
+        eta.vp2[1, j] <- -1
+        eta.q2[1, j]  <- -1
+      }
+
+      if (no.cmpt[1, j] > 1) {
+        eta.vp[1, j] <-
+          sample(0:1, 1, prob = node.list[idx(c("eta.vp.no", "eta.vp.yes")),]$p)
+        eta.q[1, j]  <-
+          sample(0:1, 1, prob = node.list[idx(c("eta.q.no", "eta.q.yes")),]$p)
+      } else {
+        eta.vp[1, j] <- -1
+        eta.q[1, j]  <- -1
+      }
+
+      if (mm[1, j] == 1) {
+        eta.km[1, j] <-
+          sample(0:1, 1, prob = node.list[idx(c("eta.km.no", "eta.km.yes")),]$p)
+      } else {
+        eta.km[1, j] <- -1
+      }
+    }
+  }
+
+  # --- Combine into final matrix ---
+  if (has_eta_ka) {
+    ants.all <-
+      rbind(no.cmpt,
+            eta.km,
+            eta.vc,
+            eta.vp,
+            eta.vp2,
+            eta.q,
+            eta.q2,
+            eta.ka,
+            mm,
+            mcorr,
+            rv)
+    ants.all <- as.matrix(ants.all)
+    colnames(ants.all) <- paste0("ant", seq_len(ncol(ants.all)))
+    rownames(ants.all) <- c(
+      "no.cmpt", "eta.km", "eta.vc", "eta.vp", "eta.vp2",
+      "eta.q", "eta.q2", "eta.ka", "mm", "mcorr", "rv"
+    )
+  } else {
+    ants.all <-
+      rbind(no.cmpt,
+            eta.km,
+            eta.vc,
+            eta.vp,
+            eta.vp2,
+            eta.q,
+            eta.q2,
+            mm,
+            mcorr,
+            rv)
+    ants.all <- as.matrix(ants.all)
+    colnames(ants.all) <- paste0("ant", seq_len(ncol(ants.all)))
+    rownames(ants.all) <- c(
+      "no.cmpt", "eta.km", "eta.vc", "eta.vp", "eta.vp2",
+      "eta.q", "eta.q2", "mm", "mcorr", "rv"
+    )
+  }
+  return(ants.all)
+}
+
+
+
+
+
 #' Create ants for each travel
 #'
 #' Create a specified number of ants and initializes their parameters based on the given conditions and probabilities.
@@ -55,7 +244,7 @@ create.ant <- function(search.space,
   if (search.space == 1) {
     no.nodes = 22
     no.ants <- no.ants
-    
+
     cmpt.iv.r1      <- data.frame(matrix(nrow = 1, ncol = no.ants))
     eta.km.r1       <- data.frame(matrix(nrow = 1, ncol = no.ants))
     eta.vc.r1       <- data.frame(matrix(nrow = 1, ncol = no.ants))
@@ -66,8 +255,8 @@ create.ant <- function(search.space,
     mm.r1           <- data.frame(matrix(nrow = 1, ncol = no.ants))
     eta.mcorr.r1    <- data.frame(matrix(nrow = 1, ncol = no.ants))
     eta.rv.r1       <- data.frame(matrix(nrow = 1, ncol = no.ants))
-    
-    
+
+
     if (initialize == T) {
       # Start from simple model
       cmpt.iv.r1[1:6] <- c(1, 1, 2, 2, 3, 3)
@@ -80,7 +269,7 @@ create.ant <- function(search.space,
       eta.mcorr.r1[1:6] <- c(0, 0, 0, 0, 0, 0)
       mm.r1[1:6] <- c(0, 0, 0, 0, 0, 0)
       eta.km.r1[1:6] <- c(-1, -1, -1, -1, -1, -1)
-      
+
       if (no.ants > 6) {
         cmpt.iv.r1[7:no.ants] <- sample(
           x = seq(1, 3, 1),
@@ -88,37 +277,37 @@ create.ant <- function(search.space,
           prob = c(node.list[1:3,]$p),
           replace = T
         )
-        
+
         eta.vc.r1[7:no.ants] <- sample(
           x = c(0, 1),
           size = (no.ants - 6),
           prob = c(node.list[12:13,]$p),
           replace = T
         )
-        
+
         mm.r1[7:no.ants] <- sample(
           x = c(0, 1),
           size = (no.ants - 6),
           prob = c(node.list[14:15,]$p),
           replace = T
         )
-        
+
         eta.mcorr.r1[7:no.ants] <- sample(
           x = c(0, 1),
           size = (no.ants - 6),
           prob = c(node.list[18:19,]$p),
           replace = T
         )
-        
+
         eta.rv.r1[7:no.ants] <- sample(
           x = seq(1, 3, 1),
           size = (no.ants - 6),
           prob = c(node.list[20:22,]$p),
           replace = T
         )
-        
+
         # identify n/a situation, use -1
-        
+
         for (j in 7:no.ants) {
           if (cmpt.iv.r1[j] == 3) {
             eta.vp2.r1[j] <- sample(
@@ -132,15 +321,15 @@ create.ant <- function(search.space,
                 size = 1,
                 prob = c(node.list[6:7,]$p)
               )
-            
+
           }
           else{
             eta.vp2.r1[j] <- -1
             eta.q2.r1[j] <- -1
           }
         }
-        
-        
+
+
         for (j in 7:no.ants) {
           if (cmpt.iv.r1[j] > 1) {
             eta.vp.r1[j] <- sample(
@@ -160,10 +349,10 @@ create.ant <- function(search.space,
             eta.q.r1[j] <- -1
           }
         }
-        
-        
+
+
         for (j in 7:no.ants) {
-          
+
           if (mm.r1[j] ==1) {
            eta.km.r1[j] <- sample(
            x = c(0, 1),
@@ -174,15 +363,15 @@ create.ant <- function(search.space,
           }
           else{
             eta.km.r1[j] <- -1
-            
+
           }
-    
+
        }
-      
+
       } # close else
-      
+
     } # close initialize
-    
+
     else{
       cmpt.iv.r1[1:no.ants] <- sample(
         x = seq(1, 3, 1),
@@ -190,44 +379,44 @@ create.ant <- function(search.space,
         prob = c(node.list[1:3,]$p),
         replace = T
       )
-      
+
       eta.vc.r1[1:no.ants] <- sample(
         x = c(0, 1),
         size = no.ants,
         prob = c(node.list[12:13,]$p),
         replace = T
       )
-      
+
       mm.r1[1:no.ants] <- sample(
         x = c(0, 1),
         size = no.ants,
         prob = c(node.list[14:15,]$p),
         replace = T
       )
-      
+
       eta.km.r1[1:no.ants] <- sample(
         x = c(0, 1),
         size = no.ants,
         prob = c(node.list[16:17,]$p),
         replace = T
       )
-      
+
       eta.mcorr.r1[1:no.ants] <- sample(
         x = c(0, 1),
         size = no.ants,
         prob = c(node.list[18:19,]$p),
         replace = T
       )
-      
+
       eta.rv.r1[1:no.ants] <- sample(
         x = seq(1, 3, 1),
         size = no.ants,
         prob = c(node.list[20:22,]$p),
         replace = T
       )
-      
-      
-      
+
+
+
       for (j in 1:no.ants) {
         if (cmpt.iv.r1[j] == 3) {
           eta.vp2.r1[j] <- sample(
@@ -241,15 +430,15 @@ create.ant <- function(search.space,
               size = 1,
               prob = c(node.list[6:7,]$p)
             )
-          
+
         }
         else{
           eta.vp2.r1[j] <- -1
           eta.q2.r1[j] <- -1
         }
       }
-      
-      
+
+
       # 2cmpt, 3cmpt
       for (j in 1:no.ants) {
         if (cmpt.iv.r1[j] > 1) {
@@ -269,10 +458,10 @@ create.ant <- function(search.space,
           eta.vp.r1[j] <- -1
           eta.q.r1[j] <- -1
         }
-        
+
       }
-      
-      
+
+
       # 2cmpt, 3cmpt
       for (j in 1:no.ants) {
         if (mm.r1[j] == 1) {
@@ -281,18 +470,18 @@ create.ant <- function(search.space,
             size = 1,
             prob = c(node.list[16:17,]$p)
           )
-    
+
         }
         else{
           eta.km.r1[j] <- -1
-      
+
         }
       }
-          
+
     }
-    
+
   }# close if search.space<-1
-  
+
 
   ants.all <- rbind(
     cmpt.iv.r1,
@@ -306,7 +495,7 @@ create.ant <- function(search.space,
     eta.mcorr.r1,
     eta.rv.r1
   )
-  
+
   return(ants.all)
-  
+
 }

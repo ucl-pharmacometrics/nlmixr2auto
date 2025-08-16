@@ -2,88 +2,123 @@
 % Please edit documentation in R/aco.cores.R
 \name{phi.calculate}
 \alias{phi.calculate}
-\title{Calculate pheromone update for ants}
+\title{Update pheromone levels for each decision node}
 \usage{
 phi.calculate(
   r,
-  search.space,
-  input.ants.dat,
-  all.lib.dat,
-  node.list.0,
-  node.list.all,
-  alpha.value,
-  rho,
-  sig.diff,
-  lower.limit.phi,
-  upper.limit.phi
+  search.space = "ivbase",
+  fitness_history = NULL,
+  node.list.history = NULL,
+  alpha.value = 1,
+  rho = 0.2,
+  sig.diff = 1,
+  lower.limit.phi = 1,
+  upper.limit.phi = Inf
 )
 }
 \arguments{
-\item{r}{An integer representing the current iteration or travel.}
+\item{r}{Integer. The current optimization round.}
 
-\item{search.space}{An integer specifying the search space type (1 for standard).}
+\item{search.space}{Character. Either \code{"ivbase"} or \code{"oralbase"}, determines
+which decision variables and node groups are used.}
 
-\item{input.ants.dat}{A data frame containing the data of the input ants.}
+\item{fitness_history}{Data frame. History of all ants' fitness values and decision
+variable selections across rounds.}
 
-\item{all.lib.dat}{A data frame containing the library data with fitness values.}
+\item{node.list.history}{Data frame. History of node-level pheromone values
+across previous rounds.}
 
-\item{node.list.0}{A template data frame containing the all node pheromone information.}
+\item{alpha.value}{Numeric. Exponent used when converting ranks to pheromone
+contributions: \eqn{\Delta\phi \propto 1/\text{rank}^\alpha}.}
 
-\item{node.list.all}{A data frame containing the all node pheromone information.}
+\item{rho}{Numeric. Pheromone evaporation rate (fraction evaporated per iteration).}
 
-\item{alpha.value}{A numeric value for the alpha parameter in the pheromone calculation.}
+\item{sig.diff}{Numeric. Significance threshold for distinguishing fitness ranks.}
 
-\item{rho}{A numeric value for the evaporation rate of pheromone.}
+\item{lower.limit.phi}{Numeric. Lower bound on updated \eqn{\phi}.}
 
-\item{sig.diff}{A numeric value used in the ranking calculation.}
-
-\item{lower.limit.phi}{A numeric value specifying the lower limit for the pheromone level.}
-
-\item{upper.limit.phi}{A numeric value specifying the upper limit for the pheromone level.}
+\item{upper.limit.phi}{Numeric. Upper bound on updated \eqn{\phi}.}
 }
 \value{
-Data frame. The updated node list with new pheromone values.
+A data frame (node list) with updated \code{phi} and \code{delta_phi} for each node.
 }
 \description{
-Calculate the updated pheromone values for each node based on the results of the current iteration and the pheromone evaporation rate.
+Computes the pheromone increment (\eqn{\Delta \phi}) for each node
+in the ant colony optimization (ACO) search tree, and updates the global pheromone
+levels (\eqn{\phi}) based on the ants' paths in a given round.
+}
+\details{
+Steps performed:
+\enumerate{
+\item \strong{Initialize node list} for the given search space with \eqn{\phi = 0}.
+\item \strong{Subset ants of current round} from \code{fitness_history}.
+\item \strong{Compute rank-based \eqn{\Delta\phi} weights}: ants with higher fitness
+receive larger contributions, scaled by \code{alpha.value}.
+\item \strong{Extract decision columns} (variables controlling path choices) and append
+the computed \eqn{\phi} values as a new column in \code{phi.dat}.
+\item \strong{Map local decision indices to global node numbers} using \code{node.group} and
+\code{local.node.no} from \code{node.list}.
+\itemize{
+\item For example, in \code{"ivbase"}, \code{"eta.km"} maps to group 8; in \code{"oralbase"}, \code{"eta.ka"}
+is included as group 7.
+}
+\item \strong{For each node}:
+\itemize{
+\item Identify ants that chose this node (\code{chosen_mask}).
+\item Sum their \eqn{\phi} values to get \code{delta_phi}.
+\item Update global \eqn{\phi} with evaporation:
+\deqn{\phi_{\text{new}} = (1-\rho) \cdot \phi_{\text{prev, recent}} + \Delta\phi}
+\item Clip \eqn{\phi} to \verb{[lower.limit.phi, upper.limit.phi]}.
+}
+}
+
+This update rule maintains both exploration (through evaporation) and exploitation
+(reinforcing paths chosen by better-performing ants).
 }
 \examples{
-\dontrun{
-r <- 1
-search.space <- 1
-no.ants <- 10
-node.list.0 <- data.frame()  # Define node.list.0 as per your application needs
-input.ants.dat <- create.ant(search.space = search.space,
-                             no.ants = no.ants,
-                             initialize = TRUE,
-                             node.list = node.list.0)
+# Define search space
+search.space <- "ivbase"
+initial.phi <- 0
 
-all.lib.dat <- data.frame(fitness = runif(10)) # Example library data
-no.nodes <- 22
-initial.phi <- 1
-node.list.all <- data.frame(
-  travel = 0,
-  node.no = seq(1, no.nodes, 1),
-  local.node.no = c(seq(1, 3, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1),
-                    seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(1, 3, 1)),
-  node.names = c("1Cmpt", "2Cmpt", "3Cmpt", "eta.vp2.no", "eta.vp2.yes", "eta.q2.no", "eta.q2.yes",
-                 "eta.vp.no", "eta.vp.yes", "eta.q.no", "eta.q.yes", "eta.vc.no", "eta.vc.yes",
-                 "mm.no", "mm.yes", "eta.km.no", "eta.km.yes", "mcorr.no", "mcorr.yes",
-                 "add", "prop", "comb"),
-  node.group = c(rep(1, 3), sort(rep(seq(2, 9, 1), 2)), rep(10, 3)),
-  phi = rep(initial.phi, no.nodes),
-  delta_phi = rep(0, no.nodes),
-  p = c(rep(round(1 / 3, 3), 3), rep(0.5, 16), rep(round(1 / 3, 3), 3))
+# Example fitness_history from round 1
+fitness_history <- data.frame(
+  round   = rep(1, 8),
+  mod.no  = 1:8,
+  no.cmpt = c(1, 1, 2, 2, 3, 3, 2, 2),
+  eta.km  = c(0, 0, 0, 0, 0, 0, 0, 0),
+  eta.vc  = c(0, 0, 0, 0, 0, 0, 1, 1),
+  eta.vp  = c(0, 0, 0, 0, 0, 0, 0, 1),
+  eta.vp2 = c(0, 0, 0, 0, 0, 0, 0, 0),
+  eta.q   = c(0, 0, 0, 0, 0, 0, 0, 0),
+  eta.q2  = c(0, 0, 0, 0, 0, 0, 0, 0),
+  mm      = c(0, 0, 0, 0, 0, 0, 1, 0),
+  mcorr   = c(0, 0, 0, 0, 0, 0, 0, 0),
+  rv      = c(1, 2, 1, 2, 1, 2, 1, 1),
+  fitness = c(1243.874, 1200.762, 31249.876, 31202.200,
+              51259.286, 51204.839, 61032.572, 41031.825),
+  allrank = c(2, 1, 4, 3, 7, 6, 8, 5)
 )
-node.list.0=node.list.all
-alpha.value <- 1
-rho <- 0.2
-sig.diff <- 0.1
-lower.limit.phi <- 1
-upper.limit.phi <- 10
 
-node.list <- phi.calculate(r, search.space, input.ants.dat, all.lib.dat,
-node.list.all, alpha.value, rho, sig.diff, lower.limit.phi, upper.limit.phi)
+# Example node list history
+node.list.history <- initNodeList(
+  search.space = search.space,
+  initial.phi = initial.phi
+)
+
+# Call phi.calculate
+updated_nodes <- phi.calculate(
+  r = 1,
+  search.space = search.space,
+  fitness_history = fitness_history,
+  node.list.history = node.list.history,
+  alpha.value = 1,
+  rho = 0.2,
+  sig.diff = 1,
+  lower.limit.phi = 1,
+  upper.limit.phi = Inf
+)
+print(updated_nodes )
 }
-
+\seealso{
+\code{\link{initNodeList}}, \code{\link{rank_new}}
 }

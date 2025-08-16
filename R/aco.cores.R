@@ -1,268 +1,258 @@
-#' Calculate pheromone update for ants
+#' Update pheromone levels for each decision node
 #'
-#' Calculate the updated pheromone values for each node based on the results of the current iteration and the pheromone evaporation rate.
+#' Computes the pheromone increment (\eqn{\Delta \phi}) for each node
+#' in the ant colony optimization (ACO) search tree, and updates the global pheromone
+#' levels (\eqn{\phi}) based on the ants' paths in a given round.
 #'
-#' @param r An integer representing the current iteration or travel.
-#' @param search.space An integer specifying the search space type (1 for standard).
-#' @param input.ants.dat A data frame containing the data of the input ants.
-#' @param all.lib.dat A data frame containing the library data with fitness values.
-#' @param node.list.0 A template data frame containing the all node pheromone information.
-#' @param node.list.all A data frame containing the all node pheromone information.
-#' @param alpha.value A numeric value for the alpha parameter in the pheromone calculation.
-#' @param rho A numeric value for the evaporation rate of pheromone.
-#' @param sig.diff A numeric value used in the ranking calculation.
-#' @param lower.limit.phi A numeric value specifying the lower limit for the pheromone level.
-#' @param upper.limit.phi A numeric value specifying the upper limit for the pheromone level.
+#' @param r Integer. The current optimization round.
+#' @param search.space Character. Either `"ivbase"` or `"oralbase"`, determines
+#'   which decision variables and node groups are used.
+#' @param fitness_history Data frame. History of all ants' fitness values and decision
+#'   variable selections across rounds.
+#' @param node.list.history Data frame. History of node-level pheromone values
+#'   across previous rounds.
+#' @param alpha.value Numeric. Exponent used when converting ranks to pheromone
+#'   contributions: \eqn{\Delta\phi \propto 1/\text{rank}^\alpha}.
+#' @param rho Numeric. Pheromone evaporation rate (fraction evaporated per iteration).
+#' @param sig.diff Numeric. Significance threshold for distinguishing fitness ranks.
+#' @param lower.limit.phi Numeric. Lower bound on updated \eqn{\phi}.
+#' @param upper.limit.phi Numeric. Upper bound on updated \eqn{\phi}.
 #'
-#' @return Data frame. The updated node list with new pheromone values.
+#' @details
+#' Steps performed:
+#' 1. **Initialize node list** for the given search space with \eqn{\phi = 0}.
+#' 2. **Subset ants of current round** from `fitness_history`.
+#' 3. **Compute rank-based \eqn{\Delta\phi} weights**: ants with higher fitness
+#'    receive larger contributions, scaled by `alpha.value`.
+#' 4. **Extract decision columns** (variables controlling path choices) and append
+#'    the computed \eqn{\phi} values as a new column in `phi.dat`.
+#' 5. **Map local decision indices to global node numbers** using `node.group` and
+#'    `local.node.no` from `node.list`.
+#'    - For example, in `"ivbase"`, `"eta.km"` maps to group 8; in `"oralbase"`, `"eta.ka"`
+#'      is included as group 7.
+#' 6. **For each node**:
+#'    - Identify ants that chose this node (`chosen_mask`).
+#'    - Sum their \eqn{\phi} values to get `delta_phi`.
+#'    - Update global \eqn{\phi} with evaporation:
+#'      \deqn{\phi_{\text{new}} = (1-\rho) \cdot \phi_{\text{prev, recent}} + \Delta\phi}
+#'    - Clip \eqn{\phi} to `[lower.limit.phi, upper.limit.phi]`.
+#'
+#' This update rule maintains both exploration (through evaporation) and exploitation
+#' (reinforcing paths chosen by better-performing ants).
+#'
+#' @return A data frame (node list) with updated `phi` and `delta_phi` for each node.
+#'
+#' @seealso \code{\link{initNodeList}}, \code{\link{rank_new}}
+#'
 #' @examples
-#' \dontrun{
-#' r <- 1
-#' search.space <- 1
-#' no.ants <- 10
-#' node.list.0 <- data.frame()  # Define node.list.0 as per your application needs
-#' input.ants.dat <- create.ant(search.space = search.space,
-#'                              no.ants = no.ants,
-#'                              initialize = TRUE,
-#'                              node.list = node.list.0)
+#' # Define search space
+#' search.space <- "ivbase"
+#' initial.phi <- 0
 #'
-#' all.lib.dat <- data.frame(fitness = runif(10)) # Example library data
-#' no.nodes <- 22
-#' initial.phi <- 1
-#' node.list.all <- data.frame(
-#'   travel = 0,
-#'   node.no = seq(1, no.nodes, 1),
-#'   local.node.no = c(seq(1, 3, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1),
-#'                     seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(1, 3, 1)),
-#'   node.names = c("1Cmpt", "2Cmpt", "3Cmpt", "eta.vp2.no", "eta.vp2.yes", "eta.q2.no", "eta.q2.yes",
-#'                  "eta.vp.no", "eta.vp.yes", "eta.q.no", "eta.q.yes", "eta.vc.no", "eta.vc.yes",
-#'                  "mm.no", "mm.yes", "eta.km.no", "eta.km.yes", "mcorr.no", "mcorr.yes",
-#'                  "add", "prop", "comb"),
-#'   node.group = c(rep(1, 3), sort(rep(seq(2, 9, 1), 2)), rep(10, 3)),
-#'   phi = rep(initial.phi, no.nodes),
-#'   delta_phi = rep(0, no.nodes),
-#'   p = c(rep(round(1 / 3, 3), 3), rep(0.5, 16), rep(round(1 / 3, 3), 3))
+#' # Example fitness_history from round 1
+#' fitness_history <- data.frame(
+#'   round   = rep(1, 8),
+#'   mod.no  = 1:8,
+#'   no.cmpt = c(1, 1, 2, 2, 3, 3, 2, 2),
+#'   eta.km  = c(0, 0, 0, 0, 0, 0, 0, 0),
+#'   eta.vc  = c(0, 0, 0, 0, 0, 0, 1, 1),
+#'   eta.vp  = c(0, 0, 0, 0, 0, 0, 0, 1),
+#'   eta.vp2 = c(0, 0, 0, 0, 0, 0, 0, 0),
+#'   eta.q   = c(0, 0, 0, 0, 0, 0, 0, 0),
+#'   eta.q2  = c(0, 0, 0, 0, 0, 0, 0, 0),
+#'   mm      = c(0, 0, 0, 0, 0, 0, 1, 0),
+#'   mcorr   = c(0, 0, 0, 0, 0, 0, 0, 0),
+#'   rv      = c(1, 2, 1, 2, 1, 2, 1, 1),
+#'   fitness = c(1243.874, 1200.762, 31249.876, 31202.200,
+#'               51259.286, 51204.839, 61032.572, 41031.825),
+#'   allrank = c(2, 1, 4, 3, 7, 6, 8, 5)
 #' )
-#' node.list.0=node.list.all
-#' alpha.value <- 1
-#' rho <- 0.2
-#' sig.diff <- 0.1
-#' lower.limit.phi <- 1
-#' upper.limit.phi <- 10
 #'
-#' node.list <- phi.calculate(r, search.space, input.ants.dat, all.lib.dat,
-#' node.list.all, alpha.value, rho, sig.diff, lower.limit.phi, upper.limit.phi)
-#' }
+#' # Example node list history
+#' node.list.history <- initNodeList(
+#'   search.space = search.space,
+#'   initial.phi = initial.phi
+#' )
 #'
+#' # Call phi.calculate
+#' updated_nodes <- phi.calculate(
+#'   r = 1,
+#'   search.space = search.space,
+#'   fitness_history = fitness_history,
+#'   node.list.history = node.list.history,
+#'   alpha.value = 1,
+#'   rho = 0.2,
+#'   sig.diff = 1,
+#'   lower.limit.phi = 1,
+#'   upper.limit.phi = Inf
+#' )
+#' print(updated_nodes )
 phi.calculate <- function(r,
-                          search.space,
-                          input.ants.dat,
-                          all.lib.dat,
-                          node.list.0,
-                          node.list.all,
-                          alpha.value,
-                          rho,
-                          sig.diff,
-                          lower.limit.phi,
-                          upper.limit.phi) {
-  if (search.space == 1) {
-    length.string <- 10
-    
-    # create the new node.list for finished travel
-    node.list <- node.list.0
-    node.list$travel = r
-    phi.dat <<- input.ants.dat
-    
-    all.lib.dat$allrank <- rank_new(all.lib.dat$fitness,
-                                    sig.diff = sig.diff)
-    
-    write.csv(all.lib.dat, file = paste0("all.lib.dat.", r, ".csv"))
-    
-    # extract the pheromone information for the current travel
-    row.start <- nrow(all.lib.dat) - ncol(input.ants.dat) + 1
-    row.stop <- nrow(all.lib.dat)
-    
-    
-    phi <-
-      (1 / (all.lib.dat[row.start:row.stop,]$allrank)) ^ alpha.value
-    
-    # Replace the number less than 0
-    phi.dat[(length.string + 1),] <-
-      pmax(phi, 0) # based on the equation, it should be be less than 0
-    
-    # change the number for single node to the overall node number
-    phi.dat[2,] <- phi.dat[2,] + 4
-    phi.dat[3,] <- phi.dat[3,] + 6
-    phi.dat[4,] <- phi.dat[4,] + 8
-    phi.dat[5,] <- phi.dat[5,] + 10
-    phi.dat[6,] <- phi.dat[6,] + 12
-    phi.dat[7,] <- phi.dat[7,] + 14
-    phi.dat[8,] <- phi.dat[8,] + 16
-    phi.dat[9,] <- phi.dat[9,] + 18
-    phi.dat[10,] <- phi.dat[10,] + 19
-    
-    # write.csv(phi.dat,file = paste0("phi.dat",r,".csv") )
-    
-    # Calculate the total remaining pheromone from the previous iteration, then evaporate with the ratio of rho
-    for (n in 1:nrow(node.list)) {
-      if (n < 4) {
-        test.datM <- rbind(phi.dat[1,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        # pheromone generation and evaporation
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-      }
-      
-      else if (n < 6) {
-        test.datM <- rbind(phi.dat[2,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-      }
-      
-      else if (n < 8) {
-        test.datM <- rbind(phi.dat[3,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-        
-      }
-      else if (n < 10) {
-        test.datM <- rbind(phi.dat[4,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-        
-      }
-      else if (n < 12) {
-        test.datM <- rbind(phi.dat[5,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-        
-      }
-      else if (n < 14) {
-        test.datM <- rbind(phi.dat[6,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-        
-      }
-      
-      else if (n < 16) {
-        test.datM <- rbind(phi.dat[7,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-      }
-      
-      else if (n < 18) {
-        test.datM <- rbind(phi.dat[8,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-      }
-      
-      else if (n < 20) {
-        test.datM <- rbind(phi.dat[9,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-      }
-      
-      else{
-        test.datM <- rbind(phi.dat[10,], phi.dat[11,])
-        test.datM[3,] <- test.datM[1,] == n
-        node.list[n,]$delta_phi = sum(test.datM[2,] * test.datM[3,])
-        node.list[n,]$phi = (1 - rho) * sum(node.list.all[node.list.all$node.no ==
-                                                            n &
-                                                            node.list.all$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
-        
-      }
-      
-      node.list[n,]$phi <- pmax(node.list[n,]$phi, lower.limit.phi)
-      node.list[n,]$phi <- pmin(node.list[n,]$phi, upper.limit.phi)
-    }
-    
+                          search.space = "ivbase",
+                          fitness_history = NULL,
+                          node.list.history = NULL,
+                          alpha.value = 1,
+                          rho = 0.2,
+                          sig.diff = 1,
+                          lower.limit.phi = 1,
+                          upper.limit.phi = Inf) {
+  node.list <-
+    initNodeList(search.space = search.space, initial.phi = 0)
+  node.list$travel <- r
+
+  current_round_ants <- subset(fitness_history, round == r)
+
+  fitness_history$allrank <-
+    rank_new(fitness_history$fitness, sig.diff = sig.diff)
+
+  row.start <- nrow(fitness_history) - nrow(current_round_ants) + 1
+  row.stop  <- nrow(fitness_history)
+
+  phi_values <-
+    (1 / fitness_history[row.start:row.stop,]$allrank) ^ alpha.value
+  phi_values <- pmax(phi_values, 0)
+
+  decision_cols <-
+    grep("no.cmpt|eta|mm|mcorr|rv", names(current_round_ants))
+  phi.dat <- as.data.frame(current_round_ants[, decision_cols])
+  phi.dat$phi <- phi_values
+
+  if (search.space == "ivbase") {
+    col_to_group <- c(
+      "no.cmpt" = 1,
+      "eta.vp2" = 2,
+      "eta.q2"  = 3,
+      "eta.vp"  = 4,
+      "eta.q"   = 5,
+      "eta.vc"  = 6,
+      "mm"      = 7,
+      "eta.km"  = 8,
+      "mcorr"   = 9,
+      "rv"      = 10
+    )
+  } else if (search.space == "oralbase") {
+    col_to_group <- c(
+      "no.cmpt" = 1,
+      "eta.vp2" = 2,
+      "eta.q2"  = 3,
+      "eta.vp"  = 4,
+      "eta.q"   = 5,
+      "eta.vc"  = 6,
+      "eta.ka"  = 7,
+      "mm"      = 8,
+      "eta.km"  = 9,
+      "mcorr"   = 10,
+      "rv"      = 11
+    )
+  } else {
+    stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
+
+  for (col in setdiff(names(phi.dat), "phi")) {
+    group_id <- col_to_group[[col]]
+    mapping <- setNames(node.list$node.no[node.list$node.group == group_id],
+                        node.list$local.node.no[node.list$node.group == group_id])
+    phi.dat[[col]] <- mapping[as.character(phi.dat[[col]])]
+  }
+
+  for (n in 1:nrow(node.list)) {
+    group_id <- node.list$node.group[n]
+
+    col_name <- names(col_to_group)[col_to_group == group_id]
+    if (length(col_name) == 0)
+      next
+
+    chosen_mask <- phi.dat[[col_name]] == n
+
+    node.list[n,]$delta_phi <- sum(phi.dat$phi[chosen_mask])
+
+    node.list[n,]$phi <-
+      (1 - rho) * sum(node.list.history[node.list.history$node.no == n &
+                                          node.list.history$travel > (r - 2),]$phi) + node.list[n,]$delta_phi
+
+    node.list[n,]$phi <- pmax(node.list[n,]$phi, lower.limit.phi)
+    node.list[n,]$phi <- pmin(node.list[n,]$phi, upper.limit.phi)
+  }
+
   return(node.list)
 }
 
 
 
 
-#' Calculate selection probabilities for nodes
+#' Calculate selection probabilities for each node
 #'
-#' Calculate the selection probabilities for nodes in the ant colony optimization
+#' This function calculates the probability (`p`) of selecting each node in an
+#' Ant Colony Optimization (ACO) search, based on current pheromone levels (`phi`).
+#' It supports an optional probability floor (`prob.floor`) mechanism that ensures
+#' no node's probability drops below a minimum threshold, redistributing the
+#' remaining probability proportionally among other nodes in the same group.
 #'
-#' @param search.space An integer specifying the search space type (1 for standard).
-#' @param node.list.cal A data frame containing the list of nodes with their pheromone levels and other attributes.
-#' @return A data frame representing the updated node list with calculated selection probabilities.
-#' @examples
-#' \dontrun{
-#' # Example usage:
-#' search.space <- 1
-#' no.nodes <- 22
-#' initial.phi <- 1
-#' node.list.cal <- data.frame(
-#'   travel = 1,
-#'   node.no = seq(1, no.nodes, 1),
-#'   local.node.no = c(seq(1, 3, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1),
-#'                     seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(1, 3, 1)),
-#'   node.names = c("1Cmpt", "2Cmpt", "3Cmpt", "eta.vp2.no", "eta.vp2.yes", "eta.q2.no", "eta.q2.yes",
-#'                  "eta.vp.no", "eta.vp.yes", "eta.q.no", "eta.q.yes", "eta.vc.no", "eta.vc.yes",
-#'                  "mm.no", "mm.yes", "eta.km.no", "eta.km.yes", "mcorr.no", "mcorr.yes",
-#'                  "add", "prop", "comb"),
-#'   node.group = c(rep(1, 3), sort(rep(seq(2, 9, 1), 2)), rep(10, 3)),
-#'   phi = seq(1,22),
-#'   delta_phi = rep(0, no.nodes),
-#'   p = c(rep(round(1 / 3, 3), 3), rep(0.5, 16), rep(round(1 / 3, 3), 3))
-#' )
-#' updated.node.list.cal <- p.calculation(search.space, node.list.cal)
+#' @param search.space Character string or numeric code indicating the search space.
+#'   Accepts `"ivbase"`, `"oralbase"`, or `1` (equivalent to `"ivbase"`).
+#' @param node.list A data frame of nodes, including columns:
+#'   \describe{
+#'     \item{phi}{Current pheromone level}
+#'     \item{node.group}{Group ID for the decision step}
+#'     \item{p}{Probability of selection (to be calculated)}
+#'   }
+#' @param prob.floor Numeric scalar. Minimum probability each node is allowed to have
+#'   within its decision group. Set to `NULL` or `0` to disable smoothing.
+#'
+#' @details
+#' The probability for each node in a group is calculated as:
+#' \deqn{p_i = \frac{\phi_i}{\sum_{j \in G} \phi_j}}
+#'
+#' If \code{prob.floor} is set and any calculated probability falls below this value,
+#' the algorithm:
+#' \enumerate{
+#'   \item Sets all probabilities below \code{prob.floor} to \code{prob.floor}.
+#'   \item Redistributes the remaining probability mass proportionally among
+#'         the other nodes in the same group.
 #' }
 #'
+#' This acts as a \strong{probability smoothing mechanism}, preventing premature
+#' convergence by ensuring all nodes retain some chance of being explored.
+#'
+#' @return The updated \code{node.list} with recalculated \code{p} values.
+#'
+#' @examples
+#' \dontrun{
+#' node.list <- initNodeList(search.space = "ivbase", initial.phi = 1)
+#' updated.nodes <- p.calculation(
+#'                               node.list =  node.list,
+#'                               prob.floor = 0.2)
+#' }
+p.calculation <- function(node.list,
+                          prob.floor = NULL) {
+  for (group_id in unique(node.list$node.group)) {
+    group_idx <- which(node.list$node.group == group_id)
+    group_phi <- node.list$phi[group_idx]
 
-p.calculation <- function(search.space,
-                          node.list.cal) {
-  if (search.space == 1) {
-    for (n in 1:nrow(node.list.cal)) {
-      node.list.cal[n,]$p <-
-        node.list.cal[n,]$phi / sum(node.list.cal[node.list.cal$node.group == node.list.cal[n,]$node.group,]$phi)
-      # Ensure a 20% chance of selection.
-      # for the node group with two local node options
-      if (node.list.cal[n,]$node.group %in% c(2:9)) {
-        node.list.cal[n,]$p <- pmax(node.list.cal[n,]$p, 0.2)
-        node.list.cal[n,]$p <- pmin(node.list.cal[n,]$p, 0.8)
+    # Base probability calculation
+    group_p <- group_phi / sum(group_phi)
+
+    # Apply probability floor if requested
+    if (!is.null(prob.floor) && prob.floor > 0) {
+      below_floor <- group_p < prob.floor
+
+      if (any(below_floor)) {
+        # Fix those below the floor
+        group_p[below_floor] <- prob.floor
+
+        # After adjustment, check if sum > 1
+        total <- sum(group_p)
+        if (total > 1) {
+          # Too large → scale down the others
+          above_floor <- !below_floor
+          excess <- total - 1
+          group_p[above_floor] <- group_p[above_floor] -
+            excess * (group_p[above_floor] / sum(group_p[above_floor]))
+        }
       }
-      
-      # for the node group with three local node options
-      if (node.list.cal[n,]$node.group %in% c(1, 10)) {
-        node.list.cal[n,]$p <- pmax(node.list.cal[n,]$p, 0.25)
-        node.list.cal[n,]$p <- pmin(node.list.cal[n,]$p, 0.75)
-        
-      }
-      
     }
-    
-    return(node.list.cal)
-    
+    # Store back
+    node.list$p[group_idx] <- group_p
   }
+  return(node.list)
 }

@@ -286,7 +286,8 @@ ga.operator <- function(dat,
                                    param_table      = param_table,
                                    penalty.control  = penalty.control,
                                    precomputed_results_file = precomputed_results_file,
-                                   filename         = filename
+                                   filename         = filename,
+                                   ...
                                  ),
                                  silent = TRUE)
                                  if (is.numeric(result) && length(result) == 1)

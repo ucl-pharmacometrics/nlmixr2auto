@@ -2,42 +2,54 @@
 % Please edit documentation in R/aco.cores.R
 \name{p.calculation}
 \alias{p.calculation}
-\title{Calculate selection probabilities for nodes}
+\title{Calculate selection probabilities for each node}
 \usage{
-p.calculation(search.space, node.list.cal)
+p.calculation(node.list, prob.floor = NULL)
 }
 \arguments{
-\item{search.space}{An integer specifying the search space type (1 for standard).}
+\item{node.list}{A data frame of nodes, including columns:
+\describe{
+\item{phi}{Current pheromone level}
+\item{node.group}{Group ID for the decision step}
+\item{p}{Probability of selection (to be calculated)}
+}}
 
-\item{node.list.cal}{A data frame containing the list of nodes with their pheromone levels and other attributes.}
+\item{prob.floor}{Numeric scalar. Minimum probability each node is allowed to have
+within its decision group. Set to \code{NULL} or \code{0} to disable smoothing.}
+
+\item{search.space}{Character string or numeric code indicating the search space.
+Accepts \code{"ivbase"}, \code{"oralbase"}, or \code{1} (equivalent to \code{"ivbase"}).}
 }
 \value{
-A data frame representing the updated node list with calculated selection probabilities.
+The updated \code{node.list} with recalculated \code{p} values.
 }
 \description{
-Calculate the selection probabilities for nodes in the ant colony optimization
+This function calculates the probability (\code{p}) of selecting each node in an
+Ant Colony Optimization (ACO) search, based on current pheromone levels (\code{phi}).
+It supports an optional probability floor (\code{prob.floor}) mechanism that ensures
+no node's probability drops below a minimum threshold, redistributing the
+remaining probability proportionally among other nodes in the same group.
+}
+\details{
+The probability for each node in a group is calculated as:
+\deqn{p_i = \frac{\phi_i}{\sum_{j \in G} \phi_j}}
+
+If \code{prob.floor} is set and any calculated probability falls below this value,
+the algorithm:
+\enumerate{
+\item Sets all probabilities below \code{prob.floor} to \code{prob.floor}.
+\item Redistributes the remaining probability mass proportionally among
+the other nodes in the same group.
+}
+
+This acts as a \strong{probability smoothing mechanism}, preventing premature
+convergence by ensuring all nodes retain some chance of being explored.
 }
 \examples{
 \dontrun{
-# Example usage:
-search.space <- 1
-no.nodes <- 22
-initial.phi <- 1
-node.list.cal <- data.frame(
-  travel = 1,
-  node.no = seq(1, no.nodes, 1),
-  local.node.no = c(seq(1, 3, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1),
-                    seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(0, 1, 1), seq(1, 3, 1)),
-  node.names = c("1Cmpt", "2Cmpt", "3Cmpt", "eta.vp2.no", "eta.vp2.yes", "eta.q2.no", "eta.q2.yes",
-                 "eta.vp.no", "eta.vp.yes", "eta.q.no", "eta.q.yes", "eta.vc.no", "eta.vc.yes",
-                 "mm.no", "mm.yes", "eta.km.no", "eta.km.yes", "mcorr.no", "mcorr.yes",
-                 "add", "prop", "comb"),
-  node.group = c(rep(1, 3), sort(rep(seq(2, 9, 1), 2)), rep(10, 3)),
-  phi = seq(1,22),
-  delta_phi = rep(0, no.nodes),
-  p = c(rep(round(1 / 3, 3), 3), rep(0.5, 16), rep(round(1 / 3, 3), 3))
-)
-updated.node.list.cal <- p.calculation(search.space, node.list.cal)
+node.list <- initNodeList(search.space = "ivbase", initial.phi = 1)
+updated.nodes <- p.calculation(
+                              node.list =  node.list,
+                              prob.floor = 0.2)
 }
-
 }
