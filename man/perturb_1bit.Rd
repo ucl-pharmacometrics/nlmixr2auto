@@ -11,12 +11,34 @@ perturb_1bit(prev_string, search.space, max.try = 1000)
 
 \item{search.space}{The search space ("ivbase" or "oralbase").}
 
-\item{max.try}{Maximum number of attempts to find a valid perturbed model.}
+\item{max.try}{Maximum number of attempts to generate a valid perturbed model.}
 }
 \value{
-A perturbed model string (named numeric vector).
+A \code{list} with two named numeric vectors:
+\item{original_neighbor}{raw 1-bit flip (may be invalid)}
+\item{validated_neighbor}{validated and usable model code}
 }
 \description{
-This function randomly flips one parameter in the current model string
-to generate a new valid model. Used when the search stagnates.
+This function randomly flips one parameter ("1-bit change") in the current
+model string to generate a perturbed candidate. The candidate is then passed
+through \code{validateModels()} to ensure pharmacological validity.
+}
+\details{
+The function returns both:
+\itemize{
+\item \code{original_neighbor}: the raw 1-bit flip before validation
+\item \code{validated_neighbor}: the corrected version after validation
+}
+This allows downstream functions (e.g. \code{detect_move()}) to identify
+which parameter was intentionally changed (primary move), while still using
+a valid model code for evaluation.
+}
+\examples{
+prev <- c(no.cmpt = 2, eta.km = 0, eta.vc = 1,
+          eta.vp = 0, eta.vp2 = 0, eta.q = 1,
+          eta.q2 = 0, mm = 0, mcorr = 1, rv = 2)
+perturb <- perturb_1bit(prev, search.space = "ivbase")
+perturb$original_neighbor   # original 1-bit flip
+perturb$validated_neighbor  # validated model
+
 }

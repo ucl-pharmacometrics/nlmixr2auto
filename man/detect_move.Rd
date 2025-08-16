@@ -2,32 +2,33 @@
 % Please edit documentation in R/tabu.cores.R
 \name{detect_move}
 \alias{detect_move}
-\title{Detect the move between two solutions}
+\title{Detect the primary move between two model codes}
 \usage{
-detect_move(prev_string, new_string)
+detect_move(prev_string, new_string, original_neighbor = NULL)
 }
 \arguments{
-\item{prev_string}{Numeric vector representing the current solution
-(e.g., the local best).}
+\item{prev_string}{A named numeric vector: the starting model code.}
 
-\item{new_string}{Numeric vector representing a candidate neighbor solution.}
+\item{new_string}{A named numeric vector: the validated model code.}
+
+\item{original_neighbor}{Optional named numeric vector: the original
+neighbor before validation. If provided, this is used to identify
+the primary change.}
 }
 \value{
-A named list with elements:
-\itemize{
-\item \code{element} — The variable name that was changed.
-\item \code{from} — The original value in the current solution.
-\item \code{to} — The new value in the neighbor solution.
-}
+A list with \code{element}, \code{from}, and \code{to}
+describing the primary change.
 }
 \description{
-Given a current solution vector and a neighbor solution vector,
-this function identifies the specific move (bit change) required to
-transform the current solution into the neighbor solution.
+Compares a previous model code with a new one and identifies
+the primary intended change. If an \code{original_neighbor}
+is provided, this is used to determine the intended change,
+ignoring any secondary modifications introduced by validation.
 }
 \examples{
-prev <- c(no.cmpt = 2, eta.vc = 0, rv = 2)
-new  <- c(no.cmpt = 3, eta.vc = 0, rv = 2)
-detect_move(prev, new)
+prev <- c(no.cmpt = 2, eta.vc = 1)
+orig <- c(no.cmpt = 3, eta.vc = 1)  # original neighbor
+new  <- c(no.cmpt = 3, eta.vc = 0)  # validated neighbor (extra fix)
+detect_move(prev, new, original_neighbor = orig)
 
 }

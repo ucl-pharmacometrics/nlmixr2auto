@@ -26,8 +26,14 @@ If specified, a random subset of this size is sampled.}
 \item{seed}{Optional random seed for reproducibility when sampling neighbors.}
 }
 \value{
-A \code{data.frame} of valid neighbor model codes, with
-the same column names as \code{current_string}.
+A \code{list} with two components:
+\describe{
+\item{\code{original}}{A \code{data.frame} of neighbors as generated
+by single-variable flips, before validation.}
+\item{\code{validated}}{A \code{data.frame} of neighbors after
+applying \code{validateModels()}, representing valid pharmacometric
+models.}
+}
 }
 \description{
 Generates a set of neighbor models from a given current model code.
@@ -37,6 +43,12 @@ through \code{validateModels()} to ensure the resulting code
 corresponds to a valid pharmacometric model.
 }
 \details{
+For each neighbor, both the \emph{original} (pre-validation) and the
+\emph{validated} (post-validation) codes are retained. This allows
+downstream functions (e.g. \code{detect_move()}) to distinguish
+between the intended primary modification and any secondary
+adjustments introduced by validation.
+
 Optionally, the function can restrict the number of neighbors
 by random sampling (candidate list strategy).
 }
@@ -45,6 +57,7 @@ current_string <- c(no.cmpt = 2, eta.km = 0, eta.vc = 1,
                     eta.vp = 0, eta.vp2 = 0, eta.q = 1,
                     eta.q2 = 0, mm = 0, mcorr = 1, rv = 2)
 neighbors <- generate_neighbors_df(current_string, search.space = "ivbase")
-head(neighbors)
+head(neighbors$original)   # raw neighbors (pre-validation)
+head(neighbors$validated)  # validated neighbors (post-validation)
 
 }

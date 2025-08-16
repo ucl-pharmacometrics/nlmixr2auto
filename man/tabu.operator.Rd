@@ -21,17 +21,19 @@ tabu.operator(
 \arguments{
 \item{dat}{Dataset (typically PK/PD data).}
 
-\item{param_table}{Optional parameter table. If NULL, will be generated with auto_param_table().}
+\item{param_table}{Optional parameter table. If \code{NULL}, generated via \code{auto_param_table()}.}
 
-\item{tabu.control}{A list of tabu search control parameters:
+\item{tabu.control}{A list of Tabu Search control parameters:
 \itemize{
 \item \code{tabu.duration} — Integer. Number of iterations a move remains tabu.
 \item \code{max.round} — Integer. Maximum number of search iterations.
 \item \code{start.point} — Optional initial model code vector.
-\item \code{aspiration} — Logical. If TRUE, allows aspiration criterion.
+\item \code{aspiration} — Logical. If \code{TRUE}, allows aspiration criterion.
+\item \code{candidate.size} — Optional integer. Maximum number of neighbors
+randomly sampled from the full neighborhood (candidate list strategy).
 }}
 
-\item{search.space}{Character. Search space type ("ivbase" or "oralbase").}
+\item{search.space}{Character. Search space type: \code{"ivbase"} or \code{"oralbase"}.}
 
 \item{no.cores}{Integer. Number of CPU cores to use.}
 
@@ -39,19 +41,22 @@ tabu.operator(
 
 \item{filename}{Character. Base filename for outputs.}
 
-\item{penalty.control}{A list of penalty settings, typically from penaltyControl().}
+\item{penalty.control}{A list of penalty settings, typically from \code{penaltyControl()}.}
 
 \item{precomputed_results_file}{Optional cache file for model results.}
 
-\item{seed.no}{Random seed.}
+\item{seed.no}{Random seed for reproducibility.}
 
-\item{...}{Additional arguments passed to mod.run().}
+\item{...}{Additional arguments passed to \code{mod.run()}.}
 }
 \value{
-A list containing:
-\item{best_model_name}{Selected best model (human-readable).}
-\item{best_model_code}{Vector representation of best model.}
-\item{history}{Tabu search history: starting points, local bests, tabu elements, neighbors.}
+An object of class \code{tabuOperatorResult}, containing:
+\item{\code{Final Selected Code}}{Vector representation of the best model.}
+\item{\code{Final Selected Model Name}}{Selected best model (human-readable).}
+\item{\code{Model Run History}}{Data frame of all model evaluations with fitness values.}
+\item{\code{Search History}}{List with iteration-level history:
+\code{starting.points.history}, \code{local.best.history},
+\code{tabu.elements.history}, \code{neighbors.history}.}
 }
 \description{
 Performs Tabu Search to explore the pharmacometric model space and
@@ -59,23 +64,31 @@ identify the best-performing model. Supports both IV and Oral search spaces.
 }
 \details{
 This function implements a customized Tabu Search framework for pharmacometric
-model structure optimization. The key design choices are:
+model structure optimization. Key design aspects:
 \itemize{
 \item \strong{Solution representation}: Models are encoded as bit vectors
 (e.g., number of compartments, inclusion of random effects, residual error structure).
 \item \strong{Initial solution}: Default is a 2-compartment base model, or user-specified
 via \code{tabu.control$start.point}.
-\item \strong{Neighborhood definition}: All one-bit flips are considered (full neighborhood search),
-with invalid models filtered (e.g., incompatible compartments).
-\item \strong{Move definition}: A move is defined by which element is modified and its value change
-(e.g., \code{no.cmpt: 2 -> 3}, \code{eta.vc: 0 -> 1}).
+\item \strong{Neighborhood definition}: For each iteration, all one-bit flips are generated
+(\emph{original neighbors}), then passed through \code{validateModels()} to ensure
+only valid pharmacometric models are retained (\emph{validated neighbors}).
+\item \strong{Move definition}: A move is defined based on the \emph{original neighbor}
+(primary 1-bit flip), even if the validated neighbor differs after correction.
 \item \strong{Tabu list}: Stores recent moves with remaining tabu tenure (\code{tabu.duration}).
 \item \strong{Aspiration criterion}: If enabled, a tabu move is allowed if it produces
 a model better than the historical best.
+\item \strong{Perturbation}: If no improving neighbor is found, a random 1-bit perturbation
+is applied. Both original and validated perturbed neighbors are tracked.
 \item \strong{Objective function}: Model fit quality (e.g., AIC/OFV), computed by \code{mod.run()},
 with penalties applied via \code{penalty.control}.
 \item \strong{Termination}: Fixed number of iterations (\code{max.round}).
-\item \strong{History tracking}: Stores starting points, local bests, tabu elements,
-and neighbors at each iteration for visualization and traceability.
+\item \strong{History tracking}: For each iteration, the algorithm stores:
+starting points, validated neighbors, local best models, and tabu elements.
 }
+}
+\seealso{
+\code{\link{generate_neighbors_df}}, \code{\link{detect_move}},
+\code{\link{perturb_1bit}}, \code{\link{penaltyControl}},
+\code{\link{CodetoMod}}
 }

@@ -251,6 +251,22 @@ ga.operator <- function(dat,
 
   history <- vector("list", max.iter)  # Store results for each iteration
 
+  # --- Iterative Tabu Search --
+  progressr::handlers(
+    progressr::handler_progress(
+      format = paste0(
+        crayon::cyan("GA Search "),
+        crayon::yellow("[:bar]"),
+        crayon::green(" :percent "),
+        crayon::blue(" (iteration :current/:total)")
+      ),
+      width = 80
+    )
+  )
+
+  with_progress({
+    p <- progressr::progressor(steps = max.iter)
+
   for (ga.iter in 1:max.iter) {
     # 1. Initialize or update population
     if (ga.iter == 1) {
@@ -383,7 +399,7 @@ ga.operator <- function(dat,
       children.mutation = children.all
     )
   }
-
+  })
   # ----------------------------
   # Final output
   # ----------------------------

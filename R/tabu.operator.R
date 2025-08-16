@@ -191,13 +191,20 @@ tabu.operator <- function(dat,
   globalbest <- NULL
 
   # --- Iterative Tabu Search --
-  pb <- progress::progress_bar$new(
-    format = " Tabu Search [:bar] :percent (iteration :current/:total)\n",
-    total = max.round,
-    clear = FALSE,
-    width = 60
+  progressr::handlers(
+    progressr::handler_progress(
+      format = paste0(
+        crayon::cyan("Tabu Search "),
+        crayon::yellow("[:bar]"),
+        crayon::green(" :percent "),
+        crayon::blue(" (iteration :current/:total)")
+      ),
+      width = 80
+    )
   )
 
+  with_progress({
+    p <- progressr::progressor(steps = max.round)
   for (r in 1:max.round) {
     # Step 1: define current starting point
     if (r == 1) {
@@ -372,9 +379,8 @@ tabu.operator <- function(dat,
     rownames(tabu.elements.all) <- NULL
     tabu.elements.history[[r]] <- tabu.elements.all
 
-    pb$tick()
   } # end loop
-
+  })
 
   # ----------------------------
   # Final output (Tabu Search)

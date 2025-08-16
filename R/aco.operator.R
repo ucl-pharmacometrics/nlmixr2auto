@@ -378,182 +378,194 @@ aco.operator <- function(dat,
     stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
 
-  pb <- progress::progress_bar$new(
-    format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
-    total = max.iter,
-    clear = FALSE, width = 60
-  )
-  ##########################Start###############################
-  #  Subsequent iterations ---
-  for (aco.iter in 1:max.iter) {
-  if (aco.iter ==1){
-  node.list.0 <- initNodeList(search.space = search.space,
-                              initial.phi = initial.phi)
-  node.list.history <- node.list.0
-  cycle.all.list <- list()
-
-  # Create initial ant population
-  initial.ants <- createAnts(
-    search.space = "ivbase",
-    no.ants = no.ants,
-    initialize = TRUE,
-    node.list = node.list.0
-  )
-
-  initial.ants <- t(vapply(seq_len(ncol(initial.ants)),  #
-                           function(i) {
-                             validateModels(
-                               string = pmax(unname(initial.ants[, i]), 0),
-                               search.space = "ivbase",
-                               code.source = "ACO"
-                             )
-                           },
-                           numeric(nrow(initial.ants))))
-
-  colnames(initial.ants) <- bit.names
-  cycle.all.list[[1]] <- initial.ants
-
-  # Model running and fitness evaluation
-  data.ants <- as.data.frame(initial.ants)
-
-  data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
-                              function(k) {
-                                string_vec <- as.vector(initial.ants[k,])
-                                result <- try(mod.run(
-                                  r                = aco.iter,
-                                  dat              = dat,
-                                  search.space     = search.space,
-                                  string           = string_vec,
-                                  param_table      = param_table,
-                                  penalty.control  = penalty.control,
-                                  precomputed_results_file = precomputed_results_file,
-                                  filename         = filename,...
-                                ),
-                                silent = TRUE)
-                                if (is.numeric(result) &&
-                                    length(result) == 1)
-                                  result
-                                else
-                                  NA_real_
-                              },
-                              numeric(1))
-
-  data.ants$round <- aco.iter
-  data.ants$mod.no <- seq_len(nrow(data.ants))
-  data.ants <-
-    data.ants[, c("round", "mod.no", setdiff(names(data.ants), c("round", "mod.no")))]
-
-  fitness_history <- data.frame()
-  data.ants$round <-
-    aco.iter  # Track which generation each record belongs to
-  fitness_history <- rbind(fitness_history, data.ants)
-
-  #  Update pheromone levels and probabilities ---
-  node.list.1 <- phi.calculate(
-    r = aco.iter,
-    search.space = search.space,
-    fitness_history = fitness_history,
-    node.list.history = node.list.history,
-    alpha.value = alpha.value,
-    rho = rho,
-    sig.diff = sig.diff,
-    lower.limit.phi = lower.limit.phi,
-    upper.limit.phi = upper.limit.phi
-  )
-
-  node.list.s <- p.calculation(node.list = node.list.1,
-                               prob.floor = prob.floor)
-
-  node.list.history <- rbind(node.list.history, node.list.s)
- } else{
-    # Identify current best model (elitism)
-    bestmodel <-
-      fitness_history[fitness_history$fitness == min(fitness_history$fitness),]
-    bestmodelcode <- bestmodel[1, bit.names]
-
-    # Generate next generation of ants
-    cycle.all <- createAnts(
-      search.space = search.space,
-      no.ants = no.ants,
-      initialize = FALSE,
-      node.list = node.list.s
+  # --- Iterative Tabu Search --
+  progressr::handlers(
+    progressr::handler_progress(
+      format = paste0(
+        crayon::cyan("ACO Search "),
+        crayon::yellow("[:bar]"),
+        crayon::green(" :percent "),
+        crayon::blue(" (iteration :current/:total)")
+      ),
+      width = 80
     )
+  )
 
-    # Apply elitism: preserve top-performing ants
-    no.elitism <- max(round(no.ants * elitism.percentage, 0), 1)
-    for (loop.no.elitism in 1:no.elitism) {
-      cycle.all[, (no.ants - loop.no.elitism + 1)] <-
-        as.numeric(bestmodelcode)
+  with_progress({
+    p <- progressr::progressor(steps = max.iter)
+    ##########################Start###############################
+    #  Subsequent iterations ---
+    for (aco.iter in 1:max.iter) {
+      if (aco.iter == 1) {
+        node.list.0 <- initNodeList(search.space = search.space,
+                                    initial.phi = initial.phi)
+        node.list.history <- node.list.0
+        cycle.all.list <- list()
+
+        # Create initial ant population
+        initial.ants <- createAnts(
+          search.space = "ivbase",
+          no.ants = no.ants,
+          initialize = TRUE,
+          node.list = node.list.0
+        )
+
+        initial.ants <- t(vapply(seq_len(ncol(initial.ants)),  #
+                                 function(i) {
+                                   validateModels(
+                                     string = pmax(unname(initial.ants[, i]), 0),
+                                     search.space = "ivbase",
+                                     code.source = "ACO"
+                                   )
+                                 },
+                                 numeric(nrow(initial.ants))))
+
+        colnames(initial.ants) <- bit.names
+        cycle.all.list[[1]] <- initial.ants
+
+        # Model running and fitness evaluation
+        data.ants <- as.data.frame(initial.ants)
+
+        data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
+                                    function(k) {
+                                      string_vec <- as.vector(initial.ants[k, ])
+                                      result <- try(mod.run(
+                                        r                = aco.iter,
+                                        dat              = dat,
+                                        search.space     = search.space,
+                                        string           = string_vec,
+                                        param_table      = param_table,
+                                        penalty.control  = penalty.control,
+                                        precomputed_results_file = precomputed_results_file,
+                                        filename         = filename,
+                                        ...
+                                      ),
+                                      silent = TRUE)
+                                      if (is.numeric(result) &&
+                                          length(result) == 1)
+                                        result
+                                      else
+                                        NA_real_
+                                    },
+                                    numeric(1))
+
+        data.ants$round <- aco.iter
+        data.ants$mod.no <- seq_len(nrow(data.ants))
+        data.ants <-
+          data.ants[, c("round", "mod.no", setdiff(names(data.ants), c("round", "mod.no")))]
+
+        fitness_history <- data.frame()
+        data.ants$round <-
+          aco.iter  # Track which generation each record belongs to
+        fitness_history <- rbind(fitness_history, data.ants)
+
+        #  Update pheromone levels and probabilities ---
+        node.list.1 <- phi.calculate(
+          r = aco.iter,
+          search.space = search.space,
+          fitness_history = fitness_history,
+          node.list.history = node.list.history,
+          alpha.value = alpha.value,
+          rho = rho,
+          sig.diff = sig.diff,
+          lower.limit.phi = lower.limit.phi,
+          upper.limit.phi = upper.limit.phi
+        )
+
+        node.list.s <- p.calculation(node.list = node.list.1,
+                                     prob.floor = prob.floor)
+
+        node.list.history <- rbind(node.list.history, node.list.s)
+      } else{
+        # Identify current best model (elitism)
+        bestmodel <-
+          fitness_history[fitness_history$fitness == min(fitness_history$fitness), ]
+        bestmodelcode <- bestmodel[1, bit.names]
+
+        # Generate next generation of ants
+        cycle.all <- createAnts(
+          search.space = search.space,
+          no.ants = no.ants,
+          initialize = FALSE,
+          node.list = node.list.s
+        )
+
+        # Apply elitism: preserve top-performing ants
+        no.elitism <- max(round(no.ants * elitism.percentage, 0), 1)
+        for (loop.no.elitism in 1:no.elitism) {
+          cycle.all[, (no.ants - loop.no.elitism + 1)] <-
+            as.numeric(bestmodelcode)
+        }
+        cycle.all.list[[aco.iter]] <- cycle.all
+
+        # Evaluate all ants in current iteration
+        data.ants <- as.data.frame(t(vapply(seq_len(ncol(cycle.all)),
+                                            function(i) {
+                                              validateModels(
+                                                string = pmax(unname(cycle.all[, i]), 0),
+                                                search.space = search.space,
+                                                code.source = "ACO"
+                                              )
+                                            },
+                                            numeric(nrow(cycle.all)))))
+        colnames(data.ants) <- bit.names
+
+        data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
+                                    function(k) {
+                                      string_vec <- as.vector(as.numeric(data.ants[k, ]))
+                                      result <- try(mod.run(
+                                        r = aco.iter,
+                                        dat = dat,
+                                        search.space = search.space,
+                                        string = string_vec,
+                                        param_table = param_table,
+                                        penalty.control = penalty.control,
+                                        precomputed_results_file = precomputed_results_file,
+                                        filename = filename,
+                                        ...
+                                      ),
+                                      silent = TRUE)
+                                      if (is.numeric(result) &&
+                                          length(result) == 1)
+                                        result
+                                      else
+                                        NA_real_
+                                    },
+                                    numeric(1))
+
+        # Add round and model IDs
+        data.ants$round <- aco.iter
+        data.ants$mod.no <- seq_len(nrow(data.ants))
+        data.ants <-
+          data.ants[, c("round", "mod.no", setdiff(names(data.ants), c("round", "mod.no")))]
+
+        # Append to fitness history
+        fitness_history <-
+          rbind(fitness_history[, setdiff(names(fitness_history), "allrank")],
+                data.ants)
+
+        # Update pheromone trails
+        node.list.s <- phi.calculate(
+          r = aco.iter,
+          search.space = search.space,
+          fitness_history = fitness_history,
+          node.list.history = node.list.history,
+          alpha.value = alpha.value,
+          rho = rho,
+          sig.diff = sig.diff,
+          lower.limit.phi = lower.limit.phi,
+          upper.limit.phi = upper.limit.phi
+        )
+
+        # Update probabilities
+        node.list.s <- p.calculation(node.list = node.list.s,
+                                     prob.floor = prob.floor)
+
+        # Extend node history
+        node.list.history <- rbind(node.list.history, node.list.s)
+      }
     }
-    cycle.all.list[[aco.iter]] <- cycle.all
-
-    # Evaluate all ants in current iteration
-    data.ants <- as.data.frame(t(vapply(seq_len(ncol(cycle.all)),
-                                        function(i) {
-                                          validateModels(
-                                            string = pmax(unname(cycle.all[, i]), 0),
-                                            search.space = search.space,
-                                            code.source = "ACO"
-                                          )
-                                        },
-                                        numeric(nrow(cycle.all)))))
-    colnames(data.ants) <- bit.names
-
-    data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
-                                function(k) {
-                                  string_vec <- as.vector(as.numeric(data.ants[k,]))
-                                  result <- try(mod.run(
-                                    r = aco.iter,
-                                    dat = dat,
-                                    search.space = search.space,
-                                    string = string_vec,
-                                    param_table = param_table,
-                                    penalty.control = penalty.control,
-                                    precomputed_results_file = precomputed_results_file,
-                                    filename = filename,
-                                    ...
-                                  ),
-                                  silent = TRUE)
-                                  if (is.numeric(result) &&
-                                      length(result) == 1)
-                                    result
-                                  else
-                                    NA_real_
-                                },
-                                numeric(1))
-
-    # Add round and model IDs
-    data.ants$round <- aco.iter
-    data.ants$mod.no <- seq_len(nrow(data.ants))
-    data.ants <-
-      data.ants[, c("round", "mod.no", setdiff(names(data.ants), c("round", "mod.no")))]
-
-    # Append to fitness history
-    fitness_history <- rbind(fitness_history[, setdiff(names(fitness_history), "allrank")],
-                             data.ants)
-
-    # Update pheromone trails
-    node.list.s <- phi.calculate(
-      r = aco.iter,
-      search.space = search.space,
-      fitness_history = fitness_history,
-      node.list.history = node.list.history,
-      alpha.value = alpha.value,
-      rho = rho,
-      sig.diff = sig.diff,
-      lower.limit.phi = lower.limit.phi,
-      upper.limit.phi = upper.limit.phi
-    )
-
-    # Update probabilities
-    node.list.s <- p.calculation(node.list = node.list.s,
-                                 prob.floor = prob.floor)
-
-    # Extend node history
-    node.list.history <- rbind(node.list.history, node.list.s)
- }
-    pb$tick()
-}
+  })
   # ----------------------------
   # Final output (ACO)
   # ----------------------------
