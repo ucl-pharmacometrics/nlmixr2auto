@@ -420,8 +420,7 @@ aco.operator <- function(dat,
                                   param_table      = param_table,
                                   penalty.control  = penalty.control,
                                   precomputed_results_file = precomputed_results_file,
-                                  filename         = filename,
-                                  ...
+                                  filename         = filename,...
                                 ),
                                 silent = TRUE)
                                 if (is.numeric(result) &&
@@ -497,7 +496,7 @@ aco.operator <- function(dat,
 
     data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                 function(k) {
-                                  string_vec <- as.vector(data.ants[k,])
+                                  string_vec <- as.vector(as.numeric(data.ants[k,]))
                                   result <- try(mod.run(
                                     r = aco.iter,
                                     dat = dat,
