@@ -411,7 +411,7 @@ aco.operator <- function(dat,
 
   data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                               function(k) {
-                                string_vec <- initial.ants[k,]
+                                string_vec <- as.vector(initial.ants[k,])
                                 result <- try(mod.run(
                                   r                = aco.iter,
                                   dat              = dat,
@@ -497,7 +497,7 @@ aco.operator <- function(dat,
 
     data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                 function(k) {
-                                  string_vec <- unname(as.numeric(data.ants[k,]))
+                                  string_vec <- as.vector(data.ants[k,])
                                   result <- try(mod.run(
                                     r = aco.iter,
                                     dat = dat,

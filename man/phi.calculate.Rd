@@ -118,6 +118,7 @@ updated_nodes <- phi.calculate(
   upper.limit.phi = Inf
 )
 print(updated_nodes )
+
 }
 \seealso{
 \code{\link{initNodeList}}, \code{\link{rank_new}}

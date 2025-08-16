@@ -87,6 +87,8 @@
 #'   upper.limit.phi = Inf
 #' )
 #' print(updated_nodes )
+#'
+#' @export
 phi.calculate <- function(r,
                           search.space = "ivbase",
                           fitness_history = NULL,
@@ -223,6 +225,8 @@ phi.calculate <- function(r,
 #'                               node.list =  node.list,
 #'                               prob.floor = 0.2)
 #' }
+#' @export
+#'
 p.calculation <- function(node.list,
                           prob.floor = NULL) {
   for (group_id in unique(node.list$node.group)) {
