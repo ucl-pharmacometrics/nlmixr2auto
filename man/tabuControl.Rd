@@ -6,7 +6,7 @@
 \usage{
 tabuControl(
   tabu.duration = 2,
-  max.round = 30,
+  max.round = 15,
   start.point = NULL,
   aspiration = TRUE,
   candidate.size = NULL
