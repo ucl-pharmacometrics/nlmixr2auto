@@ -265,6 +265,13 @@ validateModels <-
         rv2 = rv2
       )
 
+      # If oral, insert eta.ka
+      if (!is.null(eta.ka)) {
+        pos <- which(names(string.df) == "eta.q2")
+        string.df <- cbind(string.df[, 1:pos, drop = FALSE],
+                           eta.ka = eta.ka,
+                           string.df[, (pos + 1):ncol(string.df), drop = FALSE])
+      }
     }
 
     if (code.source %in% c("ACO", "TS")) {

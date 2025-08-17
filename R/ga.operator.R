@@ -251,19 +251,6 @@ ga.operator <- function(dat,
 
   history <- vector("list", max.iter)  # Store results for each iteration
 
-  # --- Iterative Tabu Search --
-  progressr::handlers(
-    progressr::handler_progress(
-      format = paste0(
-        crayon::cyan("GA Search "),
-        crayon::yellow("[:bar]"),
-        crayon::green(" :percent "),
-        crayon::blue(" (iteration :current/:total)")
-      ),
-      width = 80
-    )
-  )
-
   pb <-
     progress::progress_bar$new(
       format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
@@ -303,7 +290,7 @@ ga.operator <- function(dat,
                                    r                = ga.iter,
                                    dat              = dat,
                                    search.space     = search.space,
-                                   string           = parseCode(population[k, 1:nbits]),
+                                   string           = parseCode(string = population[k, 1:nbits], search.space = search.space),
                                    param_table      = param_table,
                                    penalty.control  = penalty.control,
                                    precomputed_results_file = precomputed_results_file,
@@ -328,7 +315,7 @@ ga.operator <- function(dat,
     sel.best.code <- population[sel.best, , drop = FALSE]
 
     # 5. Local exhaustive search
-    # ls.population <- NULL
+    ls.population <- NULL
     if (ga.iter %% nlocal.search == 0) {
       ls.population <- runlocal(
         ga.iter                   = ga.iter,
