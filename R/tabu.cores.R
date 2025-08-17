@@ -172,7 +172,7 @@ detect_move <- function(prev_string, new_string, original_neighbor = NULL) {
     return(NULL)  # no change
   }
   if (length(diff_idx) > 1) {
-    warning("Multiple changes detected; using the first difference as primary.")
+    stop("Multiple changes detected; using the first difference as primary.")
     diff_idx <- diff_idx[1]
   }
 
@@ -222,19 +222,19 @@ is_move_tabu <- function(move, tabu_list) {
 }
 
 
-#' Apply 1-bit perturbation to escape local optimum
+#' Apply 2-bit perturbation to escape local optimum
 #'
-#' This function randomly flips one parameter ("1-bit change") in the current
+#' This function randomly flips two parameters ("2-bit change") in the current
 #' model string to generate a perturbed candidate. The candidate is then passed
 #' through \code{validateModels()} to ensure pharmacological validity.
 #'
 #' The function returns both:
 #' \itemize{
-#'   \item \code{original_neighbor}: the raw 1-bit flip before validation
+#'   \item \code{original_neighbor}: the raw 2-bit flip before validation
 #'   \item \code{validated_neighbor}: the corrected version after validation
 #' }
 #' This allows downstream functions (e.g. \code{detect_move()}) to identify
-#' which parameter was intentionally changed (primary move), while still using
+#' which parameters were intentionally changed (primary moves), while still using
 #' a valid model code for evaluation.
 #'
 #' @param prev_string A named numeric vector representing the current model.
@@ -242,60 +242,66 @@ is_move_tabu <- function(move, tabu_list) {
 #' @param max.try Maximum number of attempts to generate a valid perturbed model.
 #'
 #' @return A \code{list} with two named numeric vectors:
-#' \item{original_neighbor}{raw 1-bit flip (may be invalid)}
+#' \item{original_neighbor}{raw 2-bit flip (may be invalid)}
 #' \item{validated_neighbor}{validated and usable model code}
 #'
 #' @examples
 #' prev <- c(no.cmpt = 2, eta.km = 0, eta.vc = 1,
 #'           eta.vp = 0, eta.vp2 = 0, eta.q = 1,
 #'           eta.q2 = 0, mm = 0, mcorr = 1, rv = 2)
-#' perturb <- perturb_1bit(prev, search.space = "ivbase")
-#' perturb$original_neighbor   # original 1-bit flip
+#' perturb <- perturb_2bit(prev, search.space = "ivbase")
+#' perturb$original_neighbor   # original 2-bit flip
 #' perturb$validated_neighbor  # validated model
 #'
 #' @export
 
-perturb_1bit <- function(prev_string, search.space, max.try = 1000) {
-  for (i in 1:max.try) {
-    disturbed <- prev_string
-    flip_idx <- sample(seq_along(prev_string), 1)
 
-    param <- names(prev_string)[flip_idx]
-    if (param %in% c("no.cmpt", "rv")) {
-      all_options <- 1:3
-    } else {
-      all_options <- 0:1
+
+perturb_2bit <-
+  function(prev_string, search.space, max.try = 1000) {
+    for (i in 1:max.try) {
+      disturbed <- prev_string
+      flip_idx <- sample(seq_along(prev_string), 2)  # flip 2 bits
+
+      for (idx in flip_idx) {
+        param <- names(prev_string)[idx]
+        if (param %in% c("no.cmpt", "rv")) {
+          all_options <- 1:3
+        } else {
+          all_options <- 0:1
+        }
+
+        current_val <- as.numeric(disturbed[idx])
+        candidates <- setdiff(all_options, current_val)
+
+        if (length(candidates) > 0) {
+          disturbed[idx] <- sample(candidates, 1)
+        }
+      }
+
+      # Save original 2-bit flip (before validation)
+      disturbed_orig <- disturbed
+
+      # Validate neighbor
+      disturbed_val <- validateModels(string       = disturbed,
+                                      search.space = search.space,
+                                      code.source  = "TS")
+      names(disturbed_val) <- names(prev_string)
+
+      # Check that at least 2 positions changed after validation
+      changed_positions <- sum(disturbed_val != prev_string)
+      if (changed_positions >= 2) {
+        return(list(
+          original_neighbor  = disturbed_orig,
+          validated_neighbor = disturbed_val
+        ))
+      }
     }
-
-    current_val <- as.numeric(disturbed[flip_idx])
-    candidates <- setdiff(all_options, current_val)
-
-    if (length(candidates) > 0) {
-      disturbed[flip_idx] <- sample(candidates, 1)
-    }
-
-    # Save original 1-bit flip (before validation)
-    disturbed_orig <- disturbed
-
-    # Validate neighbor
-    disturbed_val <- validateModels(string       = disturbed,
-                                    search.space = search.space,
-                                    code.source  = "TS")
-    names(disturbed_val) <- names(prev_string)
-
-    # If different from previous string, return both
-    if (!all(disturbed_val == prev_string)) {
-      return(list(
-        original_neighbor  = as.numeric(disturbed_orig),
-        validated_neighbor = as.numeric(disturbed_val)
-      ))
-    }
+    warning("2-bit perturbation failed after ",
+            max.try,
+            " attempts, returning original string.")
+    return(list(
+      original_neighbor  = prev_string,
+      validated_neighbor = prev_string
+    ))
   }
-  warning("1-bit perturbation failed after ",
-          max.try,
-          " attempts, returning original string.")
-  return(list(
-    original_neighbor  = as.numeric(prev_string),
-    validated_neighbor = as.numeric(prev_string)
-  ))
-}

@@ -201,15 +201,15 @@ tabu.operator <- function(dat,
     for (r in 1:max.round) {
       # Step 1: define current starting point
       if (r == 1) {
-        current_string <- string_vec
+        start_string <- string_vec
       } else {
-        current_string <- localbest[1, bit.names]
+        start_string <- current_string
       }
-      starting.points.history[[r]] <- current_string
+      starting.points.history[[r]] <- start_string
 
       # Step 2: generate neighbors (original + validated)
       neighbors_list <-
-        generate_neighbors_df(current_string, search.space = search.space)
+        generate_neighbors_df(start_string, search.space = search.space)
       neighbors_orig <-
         neighbors_list$original_neighbors   # pre-validation
       neighbors_val  <-
@@ -227,7 +227,7 @@ tabu.operator <- function(dat,
           nrow(tabu.elements.all) > 0) {
         for (row in 1:nrow(neighbors_val)) {
           # detect primary move using original neighbor
-          move <- detect_move(current_string,
+          move <- detect_move(start_string,
                               neighbors_val[row, ],
                               original_neighbor = neighbors_orig[row, ])
 
@@ -251,7 +251,7 @@ tabu.operator <- function(dat,
         # detect moves for all neighbors
         move_records <-
           lapply(seq_len(nrow(neighbors_val)), function(row) {
-            move <- detect_move(current_string,
+            move <- detect_move(start_string,
                                 neighbors_val[row, ],
                                 original_neighbor = neighbors_orig[row, ])
             move$element
@@ -288,8 +288,7 @@ tabu.operator <- function(dat,
                                              param_table = param_table,
                                              penalty.control = penalty.control,
                                              precomputed_results_file = precomputed_results_file,
-                                             filename = filename,
-                                             ...
+                                             filename = filename
                                            ),
                                            silent = TRUE)
                                            if (is.numeric(result) &&
@@ -319,53 +318,72 @@ tabu.operator <- function(dat,
         localbest <-
           neighbors_eval[which.min(neighbors_eval$fitness), , drop = FALSE]
       } else {
-        localbest <- current_string  # fallback, in case no neighbors
+        localbest <- start_string  # fallback, in case no neighbors
       }
       local.best.history[[r]] <- localbest
 
       if (r == 1) {
         prev_string <- string_vec      # starting point
       } else {
-        prev_string <- local.best.history[[r - 1]][1, bit.names]
+        prev_string <- start_string
       }
       current_string <- localbest[1, bit.names]
 
       # --- Step X: Update current solution with neighbor or perturbation ---
       if (all(prev_string == current_string)) {
-        # Case 1: No improvement found in this iteration
-        # → Apply a random 1-bit perturbation to escape local optimum.
+        # Case 1: No improving neighbor found → escape via perturbation
         message(
           "Iteration ",
           r,
           ": no improving neighbor found. Applying 1-bit perturbation to escape local optimum."
         )
 
-        perturb <- perturb_1bit(prev_string, search.space)
+        perturb <- perturb_2bit(prev_string, search.space)
         current_string <- perturb$validated_neighbor
-        move <- detect_move(
-          prev_string,
-          new_string = perturb$validated_neighbor,
-          original_neighbor = perturb$original_neighbor
+        # Record as a perturbation move (not added to tabu list logic)
+        tabu.elements <- data.frame(
+          tabu.num = r,
+          element  = "perturbation",   # mark specially
+          from     = NA,
+          to       = NA,
+          tabu.iteration.left = 0,     # no tabu tenure
+          stringsAsFactors = FALSE
         )
 
       } else {
-        move <- detect_move(prev_string,
-                            new_string = current_string,
-                            original_neighbor = current_string)
+        # Case 2: Normal neighbor move update tabu as usual
+        idx <- match(paste0(as.numeric(current_string), collapse = "_"),
+                     apply(neighbors_val[, bit.names], 1, function(x)
+                       paste0(as.numeric(x), collapse = "_")))
+
+        if (!is.na(idx)) {
+          # Found the matching original neighbor → record the true move
+          move <- detect_move(start_string,
+                              new_string        = current_string,
+                              original_neighbor = neighbors_orig[idx,])
+        } else {
+          # Fallback: in rare cases where match fails,
+          move <- detect_move(start_string,
+                              new_string        = current_string,
+                              original_neighbor = current_string
+          )
+        }
+
+        tabu.elements <- data.frame(
+          tabu.num = r,
+          element  = move$element,
+          from     = unname(move$from),
+          to       = unname(move$to),
+          tabu.iteration.left = tabu.control$tabu.duration,
+          stringsAsFactors = FALSE
+        )
       }
-      tabu.elements <- data.frame(
-        tabu.num = r,
-        element  = move$element,
-        from     = unname(move$from),
-        to       = unname(move$to),
-        tabu.iteration.left = tabu.control$tabu.duration,
-        stringsAsFactors = FALSE
-      )
 
       if (!is.null(tabu.elements.all)) {
         tabu.elements.all$tabu.iteration.left <-
           tabu.elements.all$tabu.iteration.left - 1
       }
+
       tabu.elements.all <- rbind(tabu.elements.all, tabu.elements)
       tabu.elements.all <-
         tabu.elements.all[tabu.elements.all$tabu.iteration.left > 0, ]
