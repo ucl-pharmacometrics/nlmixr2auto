@@ -378,19 +378,6 @@ aco.operator <- function(dat,
     stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
   }
 
-  # --- Iterative Tabu Search --
-  progressr::handlers(
-    progressr::handler_progress(
-      format = paste0(
-        crayon::cyan("ACO Search "),
-        crayon::yellow("[:bar]"),
-        crayon::green(" :percent "),
-        crayon::blue(" (iteration :current/:total)")
-      ),
-      width = 80
-    )
-  )
-
     ##########################Start###############################
     #  Subsequent iterations ---
   pb <-
@@ -410,7 +397,7 @@ aco.operator <- function(dat,
 
         # Create initial ant population
         initial.ants <- createAnts(
-          search.space = "ivbase",
+          search.space = search.space,
           no.ants = no.ants,
           initialize = TRUE,
           node.list = node.list.0
@@ -420,7 +407,7 @@ aco.operator <- function(dat,
                                  function(i) {
                                    validateModels(
                                      string = pmax(unname(initial.ants[, i]), 0),
-                                     search.space = "ivbase",
+                                     search.space = search.space,
                                      code.source = "ACO"
                                    )
                                  },
@@ -482,7 +469,8 @@ aco.operator <- function(dat,
                                      prob.floor = prob.floor)
 
         node.list.history <- rbind(node.list.history, node.list.s)
-      } else{
+      }
+      else{
         # Identify current best model (elitism)
         bestmodel <-
           fitness_history[fitness_history$fitness == min(fitness_history$fitness),]
