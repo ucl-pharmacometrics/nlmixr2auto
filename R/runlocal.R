@@ -95,22 +95,9 @@ runlocal <- function(dat,
       "'bit.names' cannot be NULL"
     ))
   }
-
-  if (search.space == "oralbase") {
-    idx_eta_q2 <- which(bit.names == "eta.q2")
-    if (length(idx_eta_q2) == 1) {
-      bit.names <- append(bit.names, "eta.ka", after = idx_eta_q2)
-    } else {
-      warning("'eta.q2' not found in bit.names, 'eta.ka' not inserted.")
-    }
-  }
-
   nbits <- length(bit.names)
   if (is.null(sel.best.code)) {
     stop("'sel.best.code' cannot be NULL. Please provide a binary vector.")
-  }
-  if (is.null(nbits)) {
-    stop("'nbits' must be specified.")
   }
   if (length(sel.best.code) !=  nbits) {
     stop(sprintf(
@@ -119,7 +106,6 @@ runlocal <- function(dat,
       nbits
     ))
   }
-
   if (is.null(names(sel.best.code)) ||
       any(names(sel.best.code) == "")) {
     names(sel.best.code) <- bit.names

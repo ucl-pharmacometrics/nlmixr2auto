@@ -402,7 +402,7 @@ ga.operator <- function(dat,
 
   out <- new.env(parent = emptyenv())
   class(out) <- "gaOperatorResult"
-  out[["Final Selected Code"]] <- sel.best.code
+  out[["Final Selected Code"]] <- as.data.frame(sel.best.code)
   out[["Final Selected Model Name"]] <- best_model_name
   out[["Model Run History"]] <- as.data.frame(Store.all, stringsAsFactors = FALSE)
   out[["Selection History"]] <- history
