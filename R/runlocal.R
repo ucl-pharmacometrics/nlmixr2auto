@@ -105,14 +105,14 @@ runlocal <- function(dat,
     }
   }
 
-  nbins <- length(bit.names)
+  nbits <- length(bit.names)
   if (is.null(sel.best.code)) {
     stop("'sel.best.code' cannot be NULL. Please provide a binary vector.")
   }
   if (is.null(nbits)) {
     stop("'nbits' must be specified.")
   }
-  if (length(sel.best.code) !=  nbins) {
+  if (length(sel.best.code) !=  nbits) {
     stop(sprintf(
       "'sel.best.code' length (%d) does not match 'nbits' (%d).",
       length(sel.best.code),
