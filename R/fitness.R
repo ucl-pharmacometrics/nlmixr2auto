@@ -286,7 +286,7 @@ fitness <- function(search.space = "ivbase",
                     fit = NULL,
                     dat = NULL,
                     penalty.control = penaltyControl(),
-                    objf = "AIC") {
+                    objf = "BIC") {
 
   # --- Extract penalty controls ---
   penalty.terms     <- penalty.control$penalty.terms
