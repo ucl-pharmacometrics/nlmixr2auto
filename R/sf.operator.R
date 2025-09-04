@@ -1079,6 +1079,18 @@ sf.operator <- function(dat,
     )
   }
 
+  if (is.null(result.steps.corr)){
+    result.steps.rv <- step_rv(
+      dat = dat,
+      state = result.steps.iiv,
+      search.space = search.space,
+      param_table = param_table,
+      penalty.control = penalty.control,
+      filename = filename,
+      ...
+    )
+  }
+
   if (!is.null( result.steps.corr)){
   result.steps.rv <-   step_rv(
     dat = dat,
@@ -1086,6 +1098,7 @@ sf.operator <- function(dat,
     search.space = search.space,
     param_table = param_table,
     penalty.control = penalty.control,
+    filename = filename,
     ...
   )
  }
