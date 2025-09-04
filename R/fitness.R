@@ -637,49 +637,49 @@ fitness <- function(search.space = "ivbase",
   # --- Count constraint violations ---
   fit$count.constraint.theta <-
     if (length(cols.theta) > 0) {
-      rowSums(fit[, cols.theta, drop = FALSE])
+      rowSums(fit[, cols.theta, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.rse <-
     if (length(cols.rse) > 0) {
-      rowSums(fit[, cols.rse, drop = FALSE])
+      rowSums(fit[, cols.rse, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.omega <-
     if (length(cols.omega) > 0) {
-      rowSums(fit[, cols.omega, drop = FALSE])
+      rowSums(fit[, cols.omega, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.shrinkage <-
     if (length(cols.shrink) > 0) {
-      rowSums(fit[, cols.shrink, drop = FALSE])
+      rowSums(fit[, cols.shrink, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.correlation <-
     if (length(cols.corr) > 0) {
-      rowSums(fit[, cols.corr, drop = FALSE])
+      rowSums(fit[, cols.corr, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.sigma <-
     if (length(cols.sigma) > 0) {
-      rowSums(fit[, cols.sigma, drop = FALSE])
+      rowSums(fit[, cols.sigma, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
 
   fit$count.constraint.total <-
     if (length(flag.cols) > 0) {
-      rowSums(fit[, flag.cols, drop = FALSE])
+      rowSums(fit[, flag.cols, drop = FALSE] > 0, na.rm = TRUE)
     } else {
       rep(0, nrow(fit))
     }
