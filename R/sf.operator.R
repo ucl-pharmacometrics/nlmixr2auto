@@ -1090,17 +1090,6 @@ sf.operator <- function(dat,
   )
  }
 
-  if (is.null( result.steps.corr)){
-    result.steps.rv <-   step_rv(
-      dat = dat,
-      state = result.steps.iiv,
-      search.space = search.space,
-      param_table = param_table,
-      penalty.control = penalty.control,
-      ...
-    )
-  }
-
   out <- new.env(parent = emptyenv())
   class(out) <- "sfOperatorResult"
   latest_round <- subset(Store.all, round.num == max(Store.all$round.num, na.rm = TRUE))
