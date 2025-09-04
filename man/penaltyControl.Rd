@@ -6,36 +6,43 @@
 \usage{
 penaltyControl(
   penalty.value = 10000,
-  step.penalties = c(10, 10000),
+  step.penalties = list(rse = c(10, 10000), shrinkage = c(10, 10000), bsv = c(10, 10000),
+    sigma = list(add = c(10, 10000), prop = c(10, 10000)), correlation = c(10, 10000)),
   bounds = param.bounds(),
   thresholds = list(),
   penalty.terms = c("total")
 )
 }
 \arguments{
-\item{penalty.value}{Numeric. Default penalty applied for binary violations and bound constraints.}
+\item{penalty.value}{Numeric. Default penalty applied for binary violations
+and bound constraints.}
 
-\item{step.penalties}{Numeric vector of length 2. Penalties for mild and severe violations
-in step-based methods (e.g., c(mild = 10, severe = 10000)).}
+\item{step.penalties}{Numeric vector of length 2. Penalties for mild and
+severe violations in step-based methods
+(e.g., \code{c(mild = 10, severe = 10000)}).}
 
-\item{bounds}{A list of parameter bounds defined by \code{param.bounds()} (includes theta, omega, sigma, correlation).}
+\item{bounds}{A list of parameter bounds defined by \code{\link[=param.bounds]{param.bounds()}}
+(includes theta, omega, sigma, correlation).}
 
 \item{thresholds}{A named list of threshold control for RSE and shrinkage.
 Each element should contain a \code{method} ("binary" or "step"), and:
-- For "binary": \code{threshold} (single value)
-- For "step": \code{step.levels} (e.g., c(30, 50))}
+\itemize{
+\item For "binary": \code{threshold} (single value)
+\item For "step": \code{step.levels} (e.g., \code{c(30, 50)})
+}}
 
 \item{penalty.terms}{Character vector of constraint types to penalize.
 Valid terms: "rse", "shrinkage", "theta", "omega", "sigma",
 "correlation", "covariance", "total".}
 }
 \value{
-A list containing penalty configuration for use in the \code{fitness()} function.
+A list containing penalty configuration for use in the \code{\link[=fitness]{fitness()}}
+function.
 }
 \description{
 This function sets up penalty rules used in evaluating model quality based on
 bounds (e.g., parameter lower/upper limits) and threshold-based metrics such as
-RSE and shrinkage. Supports both binary and stepwise penalty schemes.
+RSE and shrinkage. Supports both binary and step penalty schemes.
 }
 \examples{
 # Use all defaults
@@ -51,5 +58,7 @@ penaltyControl(thresholds = list(
   rse = list(method = "binary", threshold = 40)
 ))
 
-
+}
+\seealso{
+\code{\link[=param.bounds]{param.bounds()}}
 }

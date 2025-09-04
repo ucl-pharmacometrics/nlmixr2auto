@@ -2,28 +2,79 @@
 % Please edit documentation in R/fitness.R
 \name{param.bounds}
 \alias{param.bounds}
-\title{Construct default parameter bounds for model fitness evaluation}
+\title{Define Parameter Bounds for PK/PD Models}
 \usage{
 param.bounds(
   theta = list(lower = NULL, upper = NULL),
   omega = list(lower = NULL, upper = NULL),
-  sigma = list(add = list(lower = NULL, upper = Inf), prop = list(lower = 0.05, upper =
+  sigma = list(add = list(lower = 0.001, upper = Inf), prop = list(lower = 0.001, upper =
     Inf)),
-  correlation = list(lower = 0.1, upper = Inf)
+  correlation = list(lower = 0.1, upper = 0.8)
 )
 }
 \arguments{
-\item{theta}{List of lower and upper bounds for fixed-effect parameters (theta)}
+\item{theta}{A list with optional elements:
+\describe{
+\item{lower}{Named list of lower bounds for fixed effects. Defaults to
+\code{-Inf} for all parameters.}
+\item{upper}{Named list of upper bounds for fixed effects. Defaults to
+\code{Inf} for all parameters.}
+}}
 
-\item{omega}{List of lower bounds for BSV parameters (omega)}
+\item{omega}{A list with optional elements:
+\describe{
+\item{lower}{Named list of lower bounds for variance terms. Defaults to
+\code{10} for all parameters.}
+\item{upper}{Named list of upper bounds for variance terms. Defaults to
+\code{Inf} for all parameters.}
+}}
 
-\item{sigma}{List with named lower bounds for residual error (additive and proportional)}
+\item{sigma}{A list with two elements (each itself a list of bounds):
+\describe{
+\item{add}{Lower and upper bounds for additive error component.
+Defaults to \code{0.001} and \code{Inf}.}
+\item{prop}{Lower and upper bounds for proportional error component.
+Defaults to \code{0.001} and \code{Inf}.}
+}}
 
-\item{correlation}{List of lower and upper bounds for interindividual correlation}
+\item{correlation}{A list with elements \code{lower} and \code{upper}
+giving the bounds for correlation terms. Defaults to 0.1 and 0.8.}
 }
 \value{
-A structured list containing parameter bounds
+A named list with four components:
+\describe{
+\item{theta}{List of lower and upper bounds for fixed effects.}
+\item{omega}{List of lower and upper bounds for variance terms.}
+\item{sigma}{List with additive (\code{add}) and proportional (\code{prop})
+error bounds.}
+\item{correlation}{List with lower and upper correlation bounds.}
+}
 }
 \description{
-Construct default parameter bounds for model fitness evaluation
+Utility function to generate lower and upper bounds for
+pharmacokinetic model parameters, including fixed effects (\code{theta}),
+random effects variances (\code{omega}), residual error (\code{sigma}),
+and correlation constraints.
+}
+\details{
+This function provides a convenient way to specify parameter constraints
+for model estimation or simulation in population PK/PD modeling frameworks.
+Default values are intended as generic placeholders and should be adapted
+to the specific model and dataset.
+}
+\examples{
+# Use all default bounds
+bounds <- param.bounds()
+
+# Customize only omega lower bounds
+bounds <- param.bounds(omega = list(lower = list(cl = 5, vc = 2)))
+
+# Adjust sigma proportional error bounds
+bounds <- param.bounds(
+  sigma = list(
+    add = list(lower = 0.001, upper = 1),
+    prop = list(lower = 0.01, upper = 0.05)
+  )
+)
+
 }

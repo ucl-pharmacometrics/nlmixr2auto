@@ -253,7 +253,7 @@ ga.operator <- function(dat,
 
   pb <-
     progress::progress_bar$new(
-      format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
+      format = " GA Search [:bar] :percent (iteration :current/:total)\n",
       total = max.iter,
       clear = FALSE,
       width = 60

@@ -9,62 +9,80 @@ fitness(
   fit = NULL,
   dat = NULL,
   penalty.control = penaltyControl(),
-  objf = "AIC"
+  objf = "BIC"
 )
 }
 \arguments{
-\item{search.space}{Character. Defines the structural model type (e.g., \code{"ivbase"}, \code{"oralbase"}).}
+\item{search.space}{Character. Defines the structural model type
+(e.g., \code{"ivbase"}, \code{"oralbase"}).}
 
-\item{fit}{Data frame. Model summary from tools such as \code{get.mod.lst()}, with parameter estimates and diagnostics.}
+\item{fit}{Data frame. Model summary from tools such as
+\code{get.mod.lst()}, with parameter estimates and diagnostics.}
 
-\item{dat}{Data frame. Observed data containing columns \code{EVID}, \code{DV}, and \code{ID}; used for estimating default additive error if missing.}
+\item{dat}{Data frame. Observed data containing columns \code{EVID}, \code{DV},
+and \code{ID}; used for estimating default additive error if missing.}
 
-\item{penalty.control}{List. Created using \code{penaltyControl()}, includes:
+\item{penalty.control}{List created using \code{\link[=penaltyControl]{penaltyControl()}}, including:
 \describe{
-\item{\code{penalty.value}}{Numeric. Default penalty multiplier used in binary violations.}
-\item{\code{step.penalties}}{Numeric vector of length 2. Penalties applied to step violations (mild, severe).}
-\item{\code{bounds}}{List. Parameter lower/upper bounds, created via \code{param.bounds()}.}
-\item{\code{thresholds}}{Named list. Diagnostic constraints (e.g., RSE, shrinkage), each with \code{method} ("binary" or "step"), and corresponding threshold or step levels.}
-\item{\code{penalty.terms}}{Character vector. Constraint categories to penalize. Valid terms include \code{"theta"}, \code{"rse"}, \code{"omega"}, \code{"shrinkage"}, \code{"sigma"}, \code{"correlation"}, \code{"covariance"}, and \code{"total"}.}
+\item{\code{penalty.value}}{Numeric. Default penalty multiplier used in
+binary violations.}
+\item{\code{step.penalties}}{Numeric vector or list. Penalties applied to
+step violations (mild, severe).}
+\item{\code{bounds}}{List of parameter lower/upper bounds, typically from
+\code{\link[=param.bounds]{param.bounds()}}.}
+\item{\code{thresholds}}{Named list of diagnostic constraints (e.g., RSE,
+shrinkage). Each contains a \code{method} ("binary" or "step") and the
+corresponding threshold or step levels.}
+\item{\code{penalty.terms}}{Character vector of constraint categories to
+penalize. Valid terms include \code{"theta"}, \code{"rse"},
+\code{"omega"}, \code{"shrinkage"}, \code{"sigma"}, \code{"correlation"},
+\code{"covariance"}, and \code{"total"}.}
 }}
 
-\item{objf}{Character. Column name in \code{fit} used as the base objective function (e.g., \code{"AIC"}, \code{"BIC"}, \code{"OBJFV"}).}
+\item{objf}{Character. Column name in \code{fit} used as the base objective
+function (e.g., \code{"AIC"}, \code{"BIC"}, \code{"OBJFV"}).}
 }
 \value{
 A data frame extending \code{fit} with the following:
 \itemize{
-\item \code{flag.*} columns: indicators of constraint violations (0 = no violation, 1 = mild, 2 = severe).
-\item \code{count.constraint.*} columns: number of violations per constraint type.
-\item \code{fitness}: penalized objective function value, computed from the specified \code{objf} plus applicable penalties.
+\item \code{flag.*} columns: indicators of constraint violations
+(0 = no violation, 1 = mild, 2 = severe).
+\item \code{count.constraint.*} columns: number of violations per
+constraint type.
+\item \code{fitness}: penalized objective function value, computed from the
+specified \code{objf} plus applicable penalties.
 }
 }
 \description{
-This function evaluates the quality of a fitted model based on parameter bounds and
-diagnostic thresholds (e.g., relative standard error \link{RSE}, shrinkage, residual error,
-and inter-individual correlation). Violations are flagged and penalized, either via
-binary (yes/no) or stepwise (graded) penalties.
+This function evaluates the quality of a fitted model based on parameter
+bounds and diagnostic thresholds (e.g., relative standard error \link{RSE},
+shrinkage, residual error, and inter-individual correlation). Violations
+are flagged and penalized, either via binary (yes/no) or stepwise (graded)
+penalties.
 }
 \examples{
 \dontrun{
-# Define the model
+# Fit a model (using nlmixr2)
 pheno <- function() {
   ini({
-    lcl <- log(0.008) # typical value of clearance
-    lvc  <- log(0.6)   # typical value of volume
-    eta.cl + eta.vc ~ c(1,
-                       0.01, 1)
+    tcl <- log(0.008) # typical value of clearance
+    tv <-  log(0.6)   # typical value of volume
+    ## var(eta.cl)
+    eta.cl + eta.v ~ c(1,
+                       0.01, 1) ## cov(eta.cl, eta.v), var(eta.v)
+    # interindividual variability on clearance and volume
     add.err <- 0.1    # residual variability
   })
   model({
-    cl <- exp(lcl + eta.cl) # individual value of clearance
-    vc  <- exp(lvc + eta.vc)   # individual value of volume
-    ke <- cl / vc            # elimination rate constant
+    cl <- exp(tcl + eta.cl) # individual value of clearance
+    v <- exp(tv + eta.v)    # individual value of volume
+    ke <- cl / v            # elimination rate constant
     d/dt(A1) = - ke * A1    # model differential equation
-    cp = A1 / vc             # concentration in plasma
+    cp = A1 / v             # concentration in plasma
     cp ~ add(add.err)       # define error model
   })
 }
-fit <- nlmixr(pheno, pheno_sd, "saem", control = list(print = 0),
+fit <- nlmixr2(pheno, pheno_sd, "saem", control = list(print = 0),
               table = list(cwres = TRUE, npde = TRUE))
 Store. <- get.mod.lst(fit.s = fit, 1)
 # --- Example 1: Default settings (step penalties) ---
@@ -73,7 +91,6 @@ result.default <- fitness(
   dat = pheno_sd
 )
 print(result.default)
-# --- Example 2: Use binary penalties for RSE and shrinkage ---
 result.binary <- fitness(
   fit = Store.,
   dat = pheno_sd,
@@ -87,4 +104,7 @@ result.binary <- fitness(
 print(result.binary)
 }
 
+}
+\seealso{
+\code{\link[=penaltyControl]{penaltyControl()}}, \code{\link[=param.bounds]{param.bounds()}}
 }
