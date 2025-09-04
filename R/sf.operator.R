@@ -1067,6 +1067,18 @@ sf.operator <- function(dat,
     )
   ))
 
+  if (isTRUE(dynamic_fitness)) {
+    penalty.control$penalty.terms = c(
+      "rse",
+      "theta",
+      "covariance",
+      "shrinkage",
+      "omega",
+      "correlation",
+      "sigma"
+    )
+  }
+
   if (!is.null( result.steps.corr)){
   result.steps.rv <-   step_rv(
     dat = dat,
