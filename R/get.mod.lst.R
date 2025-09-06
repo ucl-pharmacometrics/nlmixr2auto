@@ -52,6 +52,7 @@ get.mod.lst <- function(fit.s,
   model.time.setup <- NA
   model.time.covariance <- NA
   model.time.algorithm <- NA
+  model.time.optimize <- NA
   model.time.table <- NA
   model.time.compress <- NA
   model.time.other <- NA
@@ -72,7 +73,7 @@ get.mod.lst <- function(fit.s,
   thetamtt <- NA
   thetan <- NA
   thetabio <- NA
-  
+
   rseka <- NA
   rsecl <- NA
   rsevc <- NA
@@ -89,7 +90,7 @@ get.mod.lst <- function(fit.s,
   rsemtt <- NA
   rsen <- NA
   rsebio <- NA
-  
+
   bsvka <- NA
   bsvcl <- NA
   bsvvc <- NA
@@ -106,7 +107,7 @@ get.mod.lst <- function(fit.s,
   bsvmtt <- NA
   bsvn <- NA
   bsvbio <- NA
-  
+
   shrinkka <- NA
   shrinkcl <- NA
   shrinkvc <- NA
@@ -123,7 +124,7 @@ get.mod.lst <- function(fit.s,
   shrinkmtt <- NA
   shrinkn <- NA
   shrinkbio <- NA
-  
+
   CIlowerka <- NA
   CIlowercl <- NA
   CIlowervc <- NA
@@ -140,7 +141,7 @@ get.mod.lst <- function(fit.s,
   CIlowermtt <- NA
   CIlowern <- NA
   CIlowerbio <- NA
-  
+
   CIupperka <- NA
   CIuppercl <- NA
   CIuppervc <- NA
@@ -157,8 +158,8 @@ get.mod.lst <- function(fit.s,
   CIuppermtt <- NA
   CIuppern <- NA
   CIupperbio <- NA
-  
-  
+
+
   omegaka <- NA
   omegacl <- NA
   omegavc <- NA
@@ -175,7 +176,7 @@ get.mod.lst <- function(fit.s,
   omegamtt <- NA
   omegan <- NA
   omegabio <- NA
-  
+
   omega.vc.cl <- NA
   omega.vp.cl <- NA
   omega.q.cl <- NA
@@ -240,7 +241,7 @@ get.mod.lst <- function(fit.s,
     }
 
 
-    # read message 
+    # read message
     if (is.null(fit.s$covMethod) == F) {
       model.covMethod <- fit.s$covMethod
     }
@@ -248,7 +249,7 @@ get.mod.lst <- function(fit.s,
     if (is.null(fit.s$message) == F) {
       model.message <- fit.s$message
     }
-    
+
     if (is.null(fit.s$time$setup) == F) {
       model.time.setup <- fit.s$time$setup
     }
@@ -262,9 +263,9 @@ get.mod.lst <- function(fit.s,
     }
 
     if (is.null(fit.s$time$optimize) == F) {
-      model.time.algorithm <- fit.s$time$optimize
+      model.time.optimize <- fit.s$time$optimize
     }
-    
+
     if (is.null(fit.s$time$table) == F) {
       model.time.table <- fit.s$time$table
     }
@@ -488,8 +489,8 @@ get.mod.lst <- function(fit.s,
         CIupperka <- parlst[parlst$param.names == "lka", ]$`CI Upper`
       }
     }
-    
-    
+
+
     if (nrow(parlst[parlst$param.names == "lD2", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "lD2", ]$`Back-transformed`) ==
           F) {
@@ -502,7 +503,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lD2", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "lD2", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lD2", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "lD2", ]$`Shrink(SD)%`
@@ -510,12 +511,12 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lD2", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "lD2", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lD2", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "lD2", ]$`CI Upper`
       }
     }
-    
+
     if (nrow(parlst[parlst$param.names == "lF1", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "lF1", ]$`Back-transformed`) ==
           F) {
@@ -528,7 +529,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lF1", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "lF1", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lF1", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "lF1", ]$`Shrink(SD)%`
@@ -536,12 +537,12 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lF1", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "lF1", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lF1", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "lF1", ]$`CI Upper`
       }
     }
-    
+
     if (nrow(parlst[parlst$param.names == "lF2", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "lF2", ]$`Back-transformed`) ==
           F) {
@@ -554,7 +555,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lF2", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "lF2", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lF2", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "lF2", ]$`Shrink(SD)%`
@@ -562,12 +563,12 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lF2", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "lF2", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lF2", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "lF2", ]$`CI Upper`
       }
     }
-    
+
     if (nrow(parlst[parlst$param.names == "ltlag", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "ltlag", ]$`Back-transformed`) ==
           F) {
@@ -580,7 +581,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "ltlag", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "ltlag", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "ltlag", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "ltlag", ]$`Shrink(SD)%`
@@ -588,13 +589,13 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "ltlag", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "ltlag", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "ltlag", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "ltlag", ]$`CI Upper`
       }
     }
-    
-    
+
+
     if (nrow(parlst[parlst$param.names == "lmtt", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "lmtt", ]$`Back-transformed`) ==
           F) {
@@ -607,7 +608,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lmtt", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "lmtt", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lmtt", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "lmtt", ]$`Shrink(SD)%`
@@ -615,13 +616,13 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lmtt", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "lmtt", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lmtt", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "lmtt", ]$`CI Upper`
       }
     }
-    
-    
+
+
     if (nrow(parlst[parlst$param.names == "ln", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "ln", ]$`Back-transformed`) ==
           F) {
@@ -634,7 +635,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "ln", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "ln", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "ln", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "ln", ]$`Shrink(SD)%`
@@ -642,12 +643,12 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "ln", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "ln", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "ln", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "ln", ]$`CI Upper`
       }
     }
-    
+
     if (nrow(parlst[parlst$param.names == "lbio", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "lbio", ]$`Back-transformed`) ==
           F) {
@@ -660,7 +661,7 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lbio", ]$`BSV(CV%)`) == F) {
         bsvtlag <- parlst[parlst$param.names == "lbio", ]$`BSV(CV%)`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lbio", ]$`Shrink(SD)%`) ==
           F) {
         shrinktlag <- parlst[parlst$param.names == "lbio", ]$`Shrink(SD)%`
@@ -668,12 +669,12 @@ get.mod.lst <- function(fit.s,
       if (is.null(parlst[parlst$param.names == "lbio", ]$`CI Lower`) == F) {
         CIlowertlag <- parlst[parlst$param.names == "lbio", ]$`CI Lower`
       }
-      
+
       if (is.null(parlst[parlst$param.names == "lbio", ]$`CI Upper`) == F) {
         CIuppertlag <- parlst[parlst$param.names == "lbio", ]$`CI Upper`
       }
     }
-    
+
 
     if (nrow(parlst[parlst$param.names == "sigma_add", ]) > 0) {
       if (is.null(parlst[parlst$param.names == "sigma_add", ]$`Back-transformed`) ==
@@ -736,28 +737,28 @@ get.mod.lst <- function(fit.s,
     if (nrow(omegalst[omegalst$omega.names == "eta.F1", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.F1", ]$eta.tlag
     }
-    
+
     if (nrow(omegalst[omegalst$omega.names == "eta.F2", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.F2", ]$eta.tlag
     }
-    
+
     if (nrow(omegalst[omegalst$omega.names == "eta.tlag", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.tlag", ]$eta.tlag
     }
-    
+
     if (nrow(omegalst[omegalst$omega.names == "eta.mtt", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.mtt", ]$eta.tlag
     }
-    
+
     if (nrow(omegalst[omegalst$omega.names == "eta.n", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.n", ]$eta.tlag
     }
-    
+
     if (nrow(omegalst[omegalst$omega.names == "eta.bio", ]) > 0) {
       omegatlag <- omegalst[omegalst$omega.names == "eta.bio", ]$eta.tlag
     }
-    
-    
+
+
     if (nrow(omegalst[omegalst$omega.names %in% c("eta.cl", "eta.vc"), ]) ==
         2) {
       omega.vc.cl <-
@@ -912,6 +913,7 @@ get.mod.lst <- function(fit.s,
     model.time.setup = model.time.setup,
     model.time.covariance = model.time.covariance,
     model.time.algorithm = model.time.algorithm,
+    model.time.optimize = model.time.optimize,
     model.time.table = model.time.table,
     model.time.compress = model.time.compress,
     model.time.other = model.time.other,
