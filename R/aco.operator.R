@@ -575,10 +575,20 @@ aco.operator <- function(dat,
   best_model_name <- CodetoMod(sel.best.code = bestmodelcode,
                                search.space  = search.space)
 
+  best_idx <- which(apply(Store.all[, names(bestmodelcode)], 1, function(x) {
+    all(x == bestmodelcode)
+  }))[1]
+
+  best_row <- Store.all[best_idx, c("model.num", "round.num")]
+
   out <- new.env(parent = emptyenv())
   class(out) <- "acoOperatorResult"
   out[["Final Selected Code"]] <- bestmodelcode
   out[["Final Selected Model Name"]] <- best_model_name
+  out[["Best Model First Occurrence"]] <- paste0(
+    "Best model first appears at model ", best_row$model.num,
+    ", round ", best_row$round.num, "."
+  )
   out[["Model Run History"]] <-
     as.data.frame(Store.all, stringsAsFactors = FALSE)
   out[["Node Run History"]] <- node.list.history
