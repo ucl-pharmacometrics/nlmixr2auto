@@ -93,6 +93,7 @@ phi.calculate <- function(r,
                           search.space = "ivbase",
                           fitness_history = NULL,
                           node.list.history = NULL,
+                          param.Q  = 1,
                           alpha.value = 1,
                           rho = 0.2,
                           sig.diff = 1,
@@ -111,7 +112,7 @@ phi.calculate <- function(r,
   row.stop  <- nrow(fitness_history)
 
   phi_values <-
-    (1 / fitness_history[row.start:row.stop,]$allrank) ^ alpha.value
+    (param.Q / fitness_history[row.start:row.stop,]$allrank) ^ alpha.value
   phi_values <- pmax(phi_values, 0)
 
   decision_cols <-

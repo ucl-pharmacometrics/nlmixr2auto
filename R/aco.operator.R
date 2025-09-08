@@ -172,6 +172,7 @@ initNodeList <- function(search.space,
 #'
 #' @param no.ants Integer. Number of ants per iteration.
 #' @param max.iter Integer. Maximum number of iterations.
+#' @param param.Q Numeric. Pheromone intensity parameter controlling the amount of pheromone
 #' @param rho Numeric in [0,1]. Pheromone evaporation rate per iteration.
 #' @param initial.phi Numeric. Initial pheromone level for all nodes.
 #' @param lower.limit.phi Numeric. Lower bound for pheromone level.
@@ -195,6 +196,7 @@ initNodeList <- function(search.space,
 
 acoControl <- function(no.ants = 10,
                        max.iter = 10,
+                       param.Q = 1,
                        rho = 0.2,
                        initial.phi = 1,
                        lower.limit.phi = 1,
@@ -206,6 +208,7 @@ acoControl <- function(no.ants = 10,
   list(
     no.ants = no.ants,
     max.iter = max.iter,
+    param.Q = param.Q,
     rho = rho,
     initial.phi = initial.phi,
     lower.limit.phi = lower.limit.phi,
@@ -458,6 +461,7 @@ aco.operator <- function(dat,
           search.space = search.space,
           fitness_history = fitness_history,
           node.list.history = node.list.history,
+          param.Q = param.Q,
           alpha.value = alpha.value,
           rho = rho,
           sig.diff = sig.diff,
@@ -545,6 +549,7 @@ aco.operator <- function(dat,
           search.space = search.space,
           fitness_history = fitness_history,
           node.list.history = node.list.history,
+          param.Q = param.Q,
           alpha.value = alpha.value,
           rho = rho,
           sig.diff = sig.diff,
