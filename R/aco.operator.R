@@ -313,6 +313,7 @@ aco.operator <- function(dat,
   # --- Extract ACO control parameters ---
   no.ants <- aco.control$no.ants
   max.iter <- aco.control$max.iter
+  param.Q <-aco.control$param.Q
   rho <- aco.control$rho
   initial.phi <- aco.control$initial.phi
   lower.limit.phi <- aco.control$lower.limit.phi
