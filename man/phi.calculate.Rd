@@ -9,6 +9,7 @@ phi.calculate(
   search.space = "ivbase",
   fitness_history = NULL,
   node.list.history = NULL,
+  param.Q = 1,
   alpha.value = 1,
   rho = 0.2,
   sig.diff = 1,

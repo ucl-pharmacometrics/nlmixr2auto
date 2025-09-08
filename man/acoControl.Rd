@@ -7,6 +7,7 @@
 acoControl(
   no.ants = 10,
   max.iter = 10,
+  param.Q = 1,
   rho = 0.2,
   initial.phi = 1,
   lower.limit.phi = 1,
@@ -21,6 +22,8 @@ acoControl(
 \item{no.ants}{Integer. Number of ants per iteration.}
 
 \item{max.iter}{Integer. Maximum number of iterations.}
+
+\item{param.Q}{Numeric. Pheromone intensity parameter controlling the amount of pheromone}
 
 \item{rho}{Numeric in \link{0,1}. Pheromone evaporation rate per iteration.}
 
