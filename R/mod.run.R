@@ -88,7 +88,8 @@
 
 
 
-mod.run <- function(string = NULL,
+mod.run <- function(r=1,
+                    string = NULL,
                     dat = NULL,
                     search.space = "ivbase",
                     penalty.control = penaltyControl(),
