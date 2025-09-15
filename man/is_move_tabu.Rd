@@ -4,7 +4,7 @@
 \alias{is_move_tabu}
 \title{Check if a move is tabu}
 \usage{
-is_move_tabu(move, tabu_list)
+is_move_tabu(move, tabu_list, tabu.policy = c("attribute", "move"))
 }
 \arguments{
 \item{move}{A list as returned by \code{\link{detect_move}},
@@ -13,6 +13,9 @@ containing \code{element}, \code{from}, and \code{to}.}
 \item{tabu_list}{Data frame of tabu elements, with columns:
 \code{elements} (variable name), \code{elements.value} (forbidden value),
 and \code{tabu.iteration.left} (remaining tabu tenure).}
+
+\item{tabu.policy}{Character scalar. Tabu restriction type:
+\code{"attribute"} (default) or \code{"move"}.}
 }
 \value{
 Logical scalar: \code{TRUE} if the move is tabu, \code{FALSE} otherwise.

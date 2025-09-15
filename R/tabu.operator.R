@@ -8,8 +8,13 @@
 #' @param aspiration Logical. Whether to apply the aspiration criterion.
 #'   If TRUE, tabu moves are allowed if they yield a solution strictly better
 #'   than the global best found so far.
-#' @param candidate.size Optional integer. If not NULL, restricts neighborhood search
+#' @param candidate.size Optional integer. If not NULL, restricts neighborhood sear
 #'   to a random subset of this size (candidate list strategy).
+#' @param tabu.policy Character. Type of tabu restriction:
+#'   \itemize{
+#'     \item \code{"attribute"} — forbid revisiting a variable value (default).
+#'     \item \code{"move"} — forbid only specific from–to transitions.
+#'   }
 #'
 #' @return A list of Tabu Search hyperparameters.
 #' @export
@@ -17,13 +22,15 @@ tabuControl <- function(tabu.duration = 2,
                         max.round = 15,
                         start.point = NULL,
                         aspiration = TRUE,
-                        candidate.size = NULL) {
+                        candidate.size = NULL,
+                        tabu.policy="attribute") {
   list(
     tabu.duration = tabu.duration,
     max.round = max.round,
     start.point = start.point,
     aspiration = aspiration,
-    candidate.size = candidate.size
+    candidate.size = candidate.size,
+    tabu.policy=tabu.policy
   )
 }
 
@@ -118,6 +125,7 @@ tabu.operator <- function(dat,
   start.point <- tabu.control$start.point
   aspiration <- tabu.control$aspiration
   candidate.size <- tabu.control$candidate.size
+  tabu.policy <- tabu.control$tabu.policy
 
   # Create temporary output directory
   outputdir <- paste0("TS_",
@@ -231,7 +239,7 @@ tabu.operator <- function(dat,
                               neighbors_val[row, ],
                               original_neighbor = neighbors_orig[row, ])
 
-          if (is_move_tabu(move, tabu.elements.all)) {
+          if (is_move_tabu(move = move, tabu_list = tabu.elements.all,tabu.policy = tabu.policy)) {
             # tabu move
             if (tabu.control$aspiration) {
               aspiration_candidates[[length(aspiration_candidates) + 1]] <-
@@ -330,25 +338,51 @@ tabu.operator <- function(dat,
       current_string <- localbest[1, bit.names]
 
       # --- Step X: Update current solution with neighbor or perturbation ---
-      if (all(prev_string == current_string)) {
-        # Case 1: No improving neighbor found → escape via perturbation
-        message(
-          "Iteration ",
-          r,
-          ": no improving neighbor found. Applying 1-bit perturbation to escape local optimum."
-        )
+      has_been_start <- any(vapply(starting.points.history, function(hist) {
+        all(hist == current_string)
+      }, logical(1)))
 
+      if (has_been_start) {
+        message(
+          "Iteration ", r,
+          ": candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling."
+        )
         perturb <- perturb_2bit(prev_string, search.space)
         current_string <- perturb$validated_neighbor
-        # Record as a perturbation move (not added to tabu list logic)
-        tabu.elements <- data.frame(
-          tabu.num = r,
-          element  = "perturbation",   # mark specially
-          from     = NA,
-          to       = NA,
-          tabu.iteration.left = 0,     # no tabu tenure
-          stringsAsFactors = FALSE
-        )
+
+        if (tabu.policy == "move") {
+          # Move-based tabu:
+          # Store both forward and reverse moves (e.g., 2 to 3 and 3 to 2)
+          tabu.elements <- rbind(
+            data.frame(
+              tabu.num = r,
+              element  = move$element,
+              from     = unname(move$from),
+              to       = unname(move$to),
+              tabu.iteration.left = tabu.control$tabu.duration,
+              stringsAsFactors = FALSE
+            ),
+            data.frame(
+              tabu.num = r,
+              element  = move$element,
+              from     = unname(move$to),   # reverse move
+              to       = unname(move$from), # reverse move
+              tabu.iteration.left = tabu.control$tabu.duration,
+              stringsAsFactors = FALSE
+            )
+          )
+        } else if (tabu.policy == "attribute") {
+          # Attribute-based tabu:
+          # Store only the target value (e.g., "element = no.cmpt, to = 3")
+          # This forbids any move that sets the element to this value.
+          tabu.elements <- data.frame(
+            tabu.num = r,
+            element  = move$element,
+            to       = unname(move$to),  # only store target value
+            tabu.iteration.left = tabu.control$tabu.duration,
+            stringsAsFactors = FALSE
+          )
+        }
 
       } else {
         # Case 2: Normal neighbor move update tabu as usual
@@ -369,14 +403,39 @@ tabu.operator <- function(dat,
           )
         }
 
-        tabu.elements <- data.frame(
-          tabu.num = r,
-          element  = move$element,
-          from     = unname(move$from),
-          to       = unname(move$to),
-          tabu.iteration.left = tabu.control$tabu.duration,
-          stringsAsFactors = FALSE
-        )
+        if (tabu.policy == "move") {
+          # Move-based tabu:
+          # Store both forward and reverse moves (e.g., 2 to 3 and 3 to 2)
+          tabu.elements <- rbind(
+            data.frame(
+              tabu.num = r,
+              element  = move$element,
+              from     = unname(move$from),
+              to       = unname(move$to),
+              tabu.iteration.left = tabu.control$tabu.duration,
+              stringsAsFactors = FALSE
+            ),
+            data.frame(
+              tabu.num = r,
+              element  = move$element,
+              from     = unname(move$to),   # reverse move
+              to       = unname(move$from), # reverse move
+              tabu.iteration.left = tabu.control$tabu.duration,
+              stringsAsFactors = FALSE
+            )
+          )
+        } else if (tabu.policy == "attribute") {
+          # Attribute-based tabu:
+          # Store only the target value (e.g., "element = no.cmpt, to = 3")
+          # This forbids any move that sets the element to this value.
+          tabu.elements <- data.frame(
+            tabu.num = r,
+            element  = move$element,
+            to       = unname(move$to),  # only store target value
+            tabu.iteration.left = tabu.control$tabu.duration,
+            stringsAsFactors = FALSE
+          )
+        }
       }
 
       if (!is.null(tabu.elements.all)) {

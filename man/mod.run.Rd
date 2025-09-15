@@ -5,6 +5,7 @@
 \title{Run and evaluate a population PK model}
 \usage{
 mod.run(
+  r = 1,
   string = NULL,
   dat = NULL,
   search.space = "ivbase",

@@ -197,6 +197,8 @@ detect_move <- function(prev_string, new_string, original_neighbor = NULL) {
 #' @param tabu_list Data frame of tabu elements, with columns:
 #'   \code{elements} (variable name), \code{elements.value} (forbidden value),
 #'   and \code{tabu.iteration.left} (remaining tabu tenure).
+#' @param tabu.policy Character scalar. Tabu restriction type:
+#'   \code{"attribute"} (default) or \code{"move"}.
 #'
 #' @return Logical scalar: \code{TRUE} if the move is tabu, \code{FALSE} otherwise.
 #'
@@ -210,17 +212,30 @@ detect_move <- function(prev_string, new_string, original_neighbor = NULL) {
 #' is_move_tabu(move, tabu_list)
 #'
 #' @export
-is_move_tabu <- function(move, tabu_list) {
+is_move_tabu <- function(move, tabu_list, tabu.policy = c("attribute", "move")) {
+  tabu.policy <- match.arg(tabu.policy)
+
   if (is.null(move) || is.null(tabu_list) || nrow(tabu_list) == 0) {
     return(FALSE)
   }
-  return(any(
-    tabu_list$elements == move$element &
-      tabu_list$elements.value == move$to &
-      tabu_list$tabu.iteration.left > 0
-  ))
-}
 
+  if (tabu.policy == "move") {
+    # Move-based tabu: forbid only the exact from→to transition
+    return(any(
+      tabu_list$element == move$element &
+        tabu_list$from   == move$from &
+        tabu_list$to     == move$to &
+        tabu_list$tabu.iteration.left > 0
+    ))
+  } else if (tabu.policy == "attribute") {
+    # Attribute-based tabu: forbid any move that sets the element to a tabu value
+    return(any(
+      tabu_list$element == move$element &
+        tabu_list$to     == move$to &
+        tabu_list$tabu.iteration.left > 0
+    ))
+  }
+}
 
 #' Apply 2-bit perturbation to escape local optimum
 #'
@@ -254,9 +269,6 @@ is_move_tabu <- function(move, tabu_list) {
 #' perturb$validated_neighbor  # validated model
 #'
 #' @export
-
-
-
 perturb_2bit <-
   function(prev_string, search.space, max.try = 1000) {
     for (i in 1:max.try) {

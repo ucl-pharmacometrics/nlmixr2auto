@@ -9,7 +9,8 @@ tabuControl(
   max.round = 15,
   start.point = NULL,
   aspiration = TRUE,
-  candidate.size = NULL
+  candidate.size = NULL,
+  tabu.policy = "attribute"
 )
 }
 \arguments{
@@ -23,8 +24,14 @@ tabuControl(
 If TRUE, tabu moves are allowed if they yield a solution strictly better
 than the global best found so far.}
 
-\item{candidate.size}{Optional integer. If not NULL, restricts neighborhood search
+\item{candidate.size}{Optional integer. If not NULL, restricts neighborhood sear
 to a random subset of this size (candidate list strategy).}
+
+\item{tabu.policy}{Character. Type of tabu restriction:
+\itemize{
+\item \code{"attribute"} — forbid revisiting a variable value (default).
+\item \code{"move"} — forbid only specific from–to transitions.
+}}
 }
 \value{
 A list of Tabu Search hyperparameters.
