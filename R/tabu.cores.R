@@ -177,9 +177,10 @@ detect_move <- function(prev_string, new_string, original_neighbor = NULL) {
   }
 
   element <- names(prev_string)[diff_idx]
-  from <- prev_string[diff_idx]
-  to   <- new_string[diff_idx]
-
+  # from <- prev_string[diff_idx]
+  # to   <- new_string[diff_idx]
+  from <- unname(prev_string[diff_idx])[1]
+  to   <- unname(new_string[diff_idx])[1]
   return(list(element = element, from = from, to = to))
 }
 
