@@ -350,40 +350,14 @@ tabu.operator <- function(dat,
         perturb <- perturb_2bit(prev_string, search.space)
         current_string <- perturb$validated_neighbor
 
-        if (tabu.policy == "move") {
-          # Move-based tabu:
-          # Store both forward and reverse moves (e.g., 2 to 3 and 3 to 2)
-          tabu.elements <- rbind(
-            data.frame(
-              tabu.num = r,
-              element  = move$element,
-              from     = unname(move$from),
-              to       = unname(move$to),
-              tabu.iteration.left = tabu.control$tabu.duration,
-              stringsAsFactors = FALSE
-            ),
-            data.frame(
-              tabu.num = r,
-              element  = move$element,
-              from     = unname(move$to),   # reverse move
-              to       = unname(move$from), # reverse move
-              tabu.iteration.left = tabu.control$tabu.duration,
-              stringsAsFactors = FALSE
-            )
-          )
-        } else if (tabu.policy == "attribute") {
-          # Attribute-based tabu:
-          # Store only the target value (e.g., "element = no.cmpt, to = 3")
-          # This forbids any move that sets the element to this value.
-          tabu.elements <- data.frame(
-            tabu.num = r,
-            element  = move$element,
-            to       = unname(move$to),  # only store target value
-            tabu.iteration.left = tabu.control$tabu.duration,
-            stringsAsFactors = FALSE
-          )
-        }
-
+        tabu.elements <- data.frame(
+          tabu.num = r,
+          element  = "perturbation", # not in the tabulist
+          from     = NA,
+          to       = NA,
+          tabu.iteration.left = 0,
+          stringsAsFactors = FALSE
+        )
       } else {
         # Case 2: Normal neighbor move update tabu as usual
         idx <- match(paste0(as.numeric(current_string), collapse = "_"),
