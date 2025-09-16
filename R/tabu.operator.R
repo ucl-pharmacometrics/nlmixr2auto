@@ -405,7 +405,8 @@ tabu.operator <- function(dat,
           tabu.elements <- data.frame(
             tabu.num = r,
             element  = move$element,
-            to       = unname(move$to),  # only store target value
+            from     = unname(move$from),
+            to       = unname(move$to),
             tabu.iteration.left = tabu.control$tabu.duration,
             stringsAsFactors = FALSE
           )
