@@ -18,8 +18,8 @@
 #'
 #' @return A list of Tabu Search hyperparameters.
 #' @export
-tabuControl <- function(tabu.duration = 2,
-                        max.round = 15,
+tabuControl <- function(tabu.duration = 3,
+                        max.round = 20,
                         start.point = NULL,
                         aspiration = TRUE,
                         candidate.size = NULL,
