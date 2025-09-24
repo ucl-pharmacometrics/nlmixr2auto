@@ -131,7 +131,9 @@ mod.run <- function(r=1,
             tryFormats = c(
               "%Y-%m-%d %H:%M:%S",
               "%Y-%m-%d %H:%M",
-              "%Y/%m/%d %H:%M:%S"
+              "%Y/%m/%d %H:%M:%S",
+              "%d/%m/%Y %H:%M",
+              "%Y-%m-%d"
             )
           )
         })
