@@ -81,16 +81,16 @@ param.bounds <- function(theta = list(lower = NULL, upper = NULL),
   )
 
   default.theta.upper <- list(
-    ka = Inf,
-    vc = Inf,
-    cl = Inf,
-    vp = Inf,
-    vp2 = Inf,
-    q = Inf,
-    q2 = Inf,
-    tlag = Inf,
-    vmax = Inf,
-    km = Inf
+    ka = 10^9,
+    vc = 10^9,
+    cl = 10^9,
+    vp = 10^9,
+    vp2 = 10^9,
+    q = 10^9,
+    q2 = 10^9,
+    tlag = 10^9,
+    vmax = 10^9,
+    km = 10^9
   )
 
   theta.lower <-
