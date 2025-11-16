@@ -4,9 +4,9 @@ Automated Population Pharmacokinetic Modelling. This package offers serveral opt
 ## Installation of nlmixr2autoinit
 ```r
 install.packages("nlmixr2autoinit", dependencies = TRUE)
+```
 
 ## Installation of nlmixr2auto
-
 ``` r
 library(devtools)
 install_github("ucl-pharmacometrics/nlmixr2auto")
