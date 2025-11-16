@@ -1,12 +1,14 @@
 # nlmixr2auto
 Automated Population Pharmacokinetic Modelling. This package offers serveral optimisation algorithms designed for automated population pharmacokinetic modeling, serving as a valuable tool for pharmacokinetic model selection.
 
-## R package installation
+## Installation of nlmixr2autoinit
+```r
+install.packages("nlmixr2autoinit", dependencies = TRUE)
 
-Installation nlmixr2autoinit and nlmixr2auto:
+## Installation of nlmixr2auto
+
 ``` r
 library(devtools)
-install_github("ucl-pharmacometrics/nlmixr2autoinit")
 install_github("ucl-pharmacometrics/nlmixr2auto")
 ```
 
