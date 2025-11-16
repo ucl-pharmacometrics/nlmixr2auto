@@ -12,6 +12,7 @@ library(devtools)
 install_github("ucl-pharmacometrics/nlmixr2auto")
 ```
 
+## Examples
 Stepwsie example
 ``` r
 
