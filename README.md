@@ -26,7 +26,6 @@ outs <- sf.operator(
   foldername =   "pheno_sd",
   saem.control = saemControl(
     seed = 1234,
-    print = 5,
     nBurn = 200,
     nEm = 300,
     rxControl = rxControl(cores = 4),
