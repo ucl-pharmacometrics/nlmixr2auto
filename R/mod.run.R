@@ -281,12 +281,19 @@ mod.run <- function(r=1,
       tableControl(cwres = TRUE)
     }
 
+    max_wall_time <- if (!is.null(dot_args$max_wall_time)) {
+      dot_args$max_wall_time
+    } else {
+      86400
+    }
+
     result <- run_model_in_subprocess(
       modi = modi,
       dat = dat,
       f = f,
       saem.control = saem.control,
-      table.control = table.control
+      table.control = table.control,
+      max_wall_time = max_wall_time
     )
     fit.s  <- result$fit.s
     Store. <- get.mod.lst(fit.s, modi = modi)
