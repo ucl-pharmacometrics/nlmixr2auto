@@ -5,8 +5,8 @@
 \title{Control Parameters for Tabu Search}
 \usage{
 tabuControl(
-  tabu.duration = 2,
-  max.round = 15,
+  tabu.duration = 3,
+  max.round = 20,
   start.point = NULL,
   aspiration = TRUE,
   candidate.size = NULL,

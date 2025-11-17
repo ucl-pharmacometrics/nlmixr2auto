@@ -5,15 +5,15 @@
 \title{Control Parameters for Ant Colony Optimization}
 \usage{
 acoControl(
-  no.ants = 10,
-  max.iter = 10,
+  no.ants = 15,
+  max.iter = 20,
   param.Q = 1,
-  rho = 0.2,
-  initial.phi = 1,
+  rho = 0.5,
+  initial.phi = 2,
   lower.limit.phi = 1,
   upper.limit.phi = Inf,
   alpha.value = 1,
-  elitism.percentage = 1/3,
+  elitism.percentage = 0,
   prob.floor = 0.2,
   sig.diff = 1
 )

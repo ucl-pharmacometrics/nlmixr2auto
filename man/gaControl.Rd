@@ -5,12 +5,12 @@
 \title{Control Parameters for Genetic Algorithm}
 \usage{
 gaControl(
-  npopsize = 10,
-  max.iter = 15,
-  prob.crossover = 0.8,
-  prob.mutation = 0.2,
+  npopsize = 20,
+  max.iter = 20,
+  prob.crossover = 0.7,
+  prob.mutation = 0.1,
   sig.diff = 1,
-  nlocal.search = 5
+  nlocal.search = 3
 )
 }
 \arguments{
