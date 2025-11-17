@@ -15,24 +15,25 @@ install_github("ucl-pharmacometrics/nlmixr2auto")
 ## Examples
 Stepwsie example
 ``` r
-
 library(nlmixr2autoinit)
 library(nlmixr2auto)
 
 outs <- sf.operator(
-  dat = pheno_sd,
-  search.space = "ivbase",
-  filename =  "pheno_sd",
-  foldername =   "pheno_sd",
-  saem.control = saemControl(
-    seed = 1234,
-    nBurn = 200,
-    nEm = 300,
-    rxControl = rxControl(cores = 4),
-    logLik = TRUE
+  dat = pheno_sd,                    # Dataset used for model fitting
+  search.space = "ivbase",           # Structural search space for IV PK models
+  filename = "pheno_sd",             # Prefix for output files
+  foldername = "pheno_sd",           # Folder where results will be stored
+  saem.control = saemControl(        # SAEM estimation control settings
+    seed = 1234,                     # Random seed
+    nBurn = 200,                     # SAEM burn-in iterations 
+    nEm   = 300,                     # SAEM EM-phase iterations 
+    rxControl = rxControl(cores = 4),# CPU cores for ODE solving
+    logLik    = TRUE                 # Compute log-likelihood
   ),
-  table.control  = tableControl(cwres = TRUE),
-  max_wall_time = 2 * 60 * 60
+  table.control = tableControl(
+    cwres = TRUE                     # Compute conditional weighted residuals (CWRES)
+  ),
+  max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
 )
 
 print(outs)
