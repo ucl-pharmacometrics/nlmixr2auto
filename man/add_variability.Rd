@@ -9,22 +9,30 @@ add_variability(param_name, eta_flag, param_table, param.type = 1)
 \arguments{
 \item{param_name}{Character. The name of the parameter.}
 
-\item{eta_flag}{Integer. If 1, inter-individual variability is added; otherwise, it is not.}
+\item{eta_flag}{Integer. If 1, inter-individual variability is added;
+otherwise, it is not.}
 
-\item{param_table}{Data frame. A table containing parameter details with columns \code{Name}, \code{init}, and optionally bounds like \code{lb} and \code{ub}.}
+\item{param_table}{Data frame. A table containing parameter details with
+columns \code{Name}, \code{init}, and optionally bounds like \code{lb} and \code{ub}.}
 
-\item{param.type}{Integer. Transformation type: 1=Exponential, 2=Logistic. Defaults to 1.}
+\item{param.type}{Integer. Transformation type: 1=Exponential, 2=Logistic.
+Defaults to 1.}
 }
 \value{
 A list containing:
 \item{mod}{Character. The model string for the parameter.}
-\item{eta_init}{Character. The initialization string for the variability parameter (if applicable).}
+\item{eta_init}{Character. The initialization string for the variability
+parameter (if applicable).}
 }
 \description{
-Defines a model string for a parameter, optionally adding inter-individual variability.
+Defines a model string for a parameter, optionally adding inter-individual
+variability.
 }
 \examples{
-param_table <-initialize_param_table()
+param_table <- initialize_param_table()
 add_variability("cl", 1, param_table)
- @export
+
+}
+\author{
+Zhonghui Huang
 }

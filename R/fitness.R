@@ -1,59 +1,60 @@
-#' Define Parameter Bounds for PK/PD Models
+#' Define Parameter Bounds for PK Models
 #'
-#' @description
 #' Utility function to generate lower and upper bounds for
-#' pharmacokinetic model parameters, including fixed effects (`theta`),
-#' random effects variances (`omega`), residual error (`sigma`),
+#' pharmacokinetic model parameters, including fixed effects (theta),
+#' random effects variances (omega), residual error (sigma),
 #' and correlation constraints.
 #'
 #' @param theta A list with optional elements:
 #'   \describe{
 #'     \item{lower}{Named list of lower bounds for fixed effects. Defaults to
-#'     \code{-Inf} for all parameters.}
+#'     -Inf for all parameters.}
 #'     \item{upper}{Named list of upper bounds for fixed effects. Defaults to
-#'     \code{Inf} for all parameters.}
+#'     10^9 for all parameters.}
 #'   }
 #' @param omega A list with optional elements:
 #'   \describe{
 #'     \item{lower}{Named list of lower bounds for variance terms. Defaults to
-#'     \code{10} for all parameters.}
+#'     10 for all parameters.}
 #'     \item{upper}{Named list of upper bounds for variance terms. Defaults to
-#'     \code{Inf} for all parameters.}
+#'     Inf for all parameters.}
 #'   }
 #' @param sigma A list with two elements (each itself a list of bounds):
 #'   \describe{
 #'     \item{add}{Lower and upper bounds for additive error component.
-#'     Defaults to \code{0.001} and \code{Inf}.}
+#'     Defaults to 0.001 and Inf.}
 #'     \item{prop}{Lower and upper bounds for proportional error component.
-#'     Defaults to \code{0.001} and \code{Inf}.}
+#'     Defaults to 0.001 and Inf.}
 #'   }
-#' @param correlation A list with elements \code{lower} and \code{upper}
+#' @param correlation A list with elements lower and upper
 #' giving the bounds for correlation terms. Defaults to 0.1 and 0.8.
 #'
 #' @returns A named list with four components:
 #' \describe{
-#'   \item{theta}{List of lower and upper bounds for fixed effects.}
+#'   \item{theta}{List of parameter-specific lower and upper bounds
+#'   for fixed effects.}
 #'   \item{omega}{List of lower and upper bounds for variance terms.}
-#'   \item{sigma}{List with additive (\code{add}) and proportional (\code{prop})
+#'   \item{sigma}{List with additive (add) and proportional (prop)
 #'   error bounds.}
 #'   \item{correlation}{List with lower and upper correlation bounds.}
 #' }
 #'
 #' @details
-#' This function provides a convenient way to specify parameter constraints
-#' for model estimation or simulation in population PK/PD modeling frameworks.
-#' Default values are intended as generic placeholders and should be adapted
-#' to the specific model and dataset.
+#' Default theta bounds use -Inf for lower limits and 10^9 for upper limits
+#' to avoid allowing unrealistically large fixed effect estimates while
+#' still providing flexibility during model estimation.
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
 #' # Use all default bounds
-#' bounds <- param.bounds()
+#'  param.bounds()
 #'
 #' # Customize only omega lower bounds
-#' bounds <- param.bounds(omega = list(lower = list(cl = 5, vc = 2)))
+#' param.bounds(omega = list(lower = list(cl = 5, vc = 2)))
 #'
 #' # Adjust sigma proportional error bounds
-#' bounds <- param.bounds(
+#' param.bounds(
 #'   sigma = list(
 #'     add = list(lower = 0.001, upper = 1),
 #'     prop = list(lower = 0.01, upper = 0.05)
@@ -94,12 +95,12 @@ param.bounds <- function(theta = list(lower = NULL, upper = NULL),
   )
 
   theta.lower <-
-    modifyList(default.theta.lower, if (is.null(theta$lower))
+    utils::modifyList(default.theta.lower, if (is.null(theta$lower))
       list()
       else
         theta$lower)
   theta.upper <-
-    modifyList(default.theta.upper, if (is.null(theta$upper))
+    utils::modifyList(default.theta.upper, if (is.null(theta$upper))
       list()
       else
         theta$upper)
@@ -132,12 +133,12 @@ param.bounds <- function(theta = list(lower = NULL, upper = NULL),
   )
 
   omega.lower <-
-    modifyList(default.omega.lower, if (is.null(omega$lower))
+    utils::modifyList(default.omega.lower, if (is.null(omega$lower))
       list()
       else
         omega$lower)
   omega.upper <-
-    modifyList(default.omega.upper, if (is.null(omega$upper))
+    utils::modifyList(default.omega.upper, if (is.null(omega$upper))
       list()
       else
         omega$upper)
@@ -152,48 +153,59 @@ param.bounds <- function(theta = list(lower = NULL, upper = NULL),
 }
 
 
-#' Define penalty control settings for model fitness evaluation
+#' Configure penalty settings for model evaluation
 #'
-#' @description
-#' This function sets up penalty rules used in evaluating model quality based on
-#' bounds (e.g., parameter lower/upper limits) and threshold-based metrics such as
-#' RSE and shrinkage. Supports both binary and step penalty schemes.
+#' Defines rules governing penalty assignment during model adequacy evaluation.
 #'
-#' @param penalty.value Numeric. Default penalty applied for binary violations
+#' @param penalty.value Numeric. Constant penalty assigned to binary violations
 #'   and bound constraints.
-#' @param step.penalties Numeric vector of length 2. Penalties for mild and
-#'   severe violations in step-based methods
-#'   (e.g., \code{c(mild = 10, severe = 10000)}).
-#' @param bounds A list of parameter bounds defined by [param.bounds()]
-#'   (includes theta, omega, sigma, correlation).
-#' @param thresholds A named list of threshold control for RSE and shrinkage.
-#'   Each element should contain a \code{method} ("binary" or "step"), and:
-#'   \itemize{
-#'     \item For "binary": \code{threshold} (single value)
-#'     \item For "step": \code{step.levels} (e.g., \code{c(30, 50)})
-#'   }
-#' @param penalty.terms Character vector of constraint types to penalize.
-#'   Valid terms: "rse", "shrinkage", "theta", "omega", "sigma",
-#'   "correlation", "covariance", "total".
 #'
-#' @returns A list containing penalty configuration for use in the [fitness()]
-#'   function.
+#' @param step.penalties A named list defining penalty magnitudes used in
+#'   step-wise procedures. Each element must contain a numeric vector of length
+#'   two representing penalty levels for moderate and critical deviations.
+#'
+#' @param bounds A list specifying lower and upper parameter limits, as returned
+#'   by param.bounds(). The structure can include limits for theta, omega, sigma,
+#'   and correlation terms.
+#'
+#' @param thresholds A named list describing evaluation rules for RSE and
+#'   shrinkage. Each component must include a field named method, with value
+#'   binary or step, together with the corresponding limit definition:
+#'   - If method = binary: a single cutoff value stored in threshold
+#'   - If method = step: two deviation boundaries stored in step.levels
+#'
+#' @param penalty.terms Character vector specifying which components are
+#'   considered when penalties are reported. Recognized entries include:
+#'   rse, shrinkage, theta, omega, sigma, correlation, covariance, and total.
+#'   If total is included, penalties are aggregated across all components and
+#'   any other entries are ignored.
+#'
+#' @details
+#' Penalization may be triggered by exceeding predefined parameter bounds
+#' (fixed-effect and variance-covariance elements) or by surpassing thresholds
+#' for relative standard error (RSE) or shrinkage criteria. Binary and step-wise
+#' penalty procedures are supported.
+#'
+#' @returns A list containing the full penalty configuration for use in fitness().
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
-#' # Use all defaults
+#' # Default configuration
 #' penaltyControl()
 #'
-#' # Override only theta bounds
+#' # Custom bounds for selected fixed-effect parameters
 #' penaltyControl(bounds = param.bounds(
 #'   theta = list(lower = list(cl = 0.01, vc = 0.01))
 #' ))
 #'
-#' # Use binary method for RSE with a custom threshold
+#' # Binary penalty method for RSE
 #' penaltyControl(thresholds = list(
 #'   rse = list(method = "binary", threshold = 40)
 #' ))
 #'
-#' @seealso [param.bounds()]
+#' @seealso \code{\link{param.bounds}()}, \code{\link{fitness}()}.
+#'
 #' @export
 
 penaltyControl <- function(penalty.value = 10000,
@@ -201,16 +213,13 @@ penaltyControl <- function(penalty.value = 10000,
                              rse         = c(10, 10000),
                              shrinkage   = c(10, 10000),
                              bsv         = c(10, 10000),
-                             sigma       = list(
-                               add  = c(10, 10000),
-                               prop = c(10, 10000)
-                             ),
+                             sigma       = list(add  = c(10, 10000),
+                                                prop = c(10, 10000)),
                              correlation = c(10, 10000)
                            ),
                            bounds = param.bounds(),
                            thresholds = list(),
                            penalty.terms = c("total")) {
-
   # Valid penalty terms
   penalty.terms <- tolower(penalty.terms)
   valid.elements <-
@@ -228,7 +237,7 @@ penaltyControl <- function(penalty.value = 10000,
     stop(paste("Invalid penalty.terms:", paste(invalid, collapse = ", ")))
   }
   if ("total" %in% penalty.terms && length(penalty.terms) > 1) {
-    warning("'total' overrides other penalty elements — using only 'total'")
+    warning("'total' overrides other penalty elements - using only 'total'")
     penalty.terms <- "total"
   }
 
@@ -244,33 +253,25 @@ penaltyControl <- function(penalty.value = 10000,
       threshold = 30,
       step.levels = c(30, 50)
     ),
-    bsv = list(
-      method = "step",
-      step.levels = c(10, 10)
-    ),
+    bsv = list(method = "step",
+               step.levels = c(10, 10)),
     sigma = list(
-      add = list(
-        method = "step",
-        # step.levels = c(0.1, 0.01)
-        step.levels = c(0.001, 0)
-      ),
-      prop = list(
-        method = "step",
-        # step.levels = c(0.05, 0.01)
-        step.levels = c(0.001, 0)
-      )
+      add = list(method = "step",
+                 # step.levels = c(0.1, 0.01)
+                 step.levels = c(0.001, 0)),
+      prop = list(method = "step",
+                  # step.levels = c(0.05, 0.01)
+                  step.levels = c(0.001, 0))
     ),
     correlation = list(
       method = "step",
-      step.levels = list(
-        lower = c(0.1, 0.05),
-        upper = c(0.8, 0.95)
-      )
+      step.levels = list(lower = c(0.1, 0.05),
+                         upper = c(0.8, 0.95))
     )
   )
 
   # Merge user thresholds with defaults
-  thresholds <- modifyList(default.thresholds, thresholds)
+  thresholds <- utils::modifyList(default.thresholds, thresholds)
 
   # Return full control structure
   return(
@@ -284,99 +285,74 @@ penaltyControl <- function(penalty.value = 10000,
   )
 }
 
-
-
 #' Evaluate fitness of a population pharmacokinetic model
 #'
-#' @description
-#' This function evaluates the quality of a fitted model based on parameter
-#' bounds and diagnostic thresholds (e.g., relative standard error [RSE],
-#' shrinkage, residual error, and inter-individual correlation). Violations
-#' are flagged and penalized, either via binary (yes/no) or stepwise (graded)
-#' penalties.
+#' Evaluates the quality of a fitted model based on parameter
+#' bounds and diagnostic thresholds.
 #'
-#' @param search.space Character. Defines the structural model type
-#'   (e.g., \code{"ivbase"}, \code{"oralbase"}).
+#' @param search.space Character, one of "ivbase" or "oralbase". Default is "ivbase".
 #' @param fit Data frame. Model summary from tools such as
-#'   \code{get.mod.lst()}, with parameter estimates and diagnostics.
-#' @param dat Data frame. Observed data containing columns \code{EVID}, \code{DV},
-#'   and \code{ID}; used for estimating default additive error if missing.
-#' @param penalty.control List created using [penaltyControl()], including:
+#'   `get.mod.lst()`, with parameter estimates and diagnostics.
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param penalty.control List created using \code{penaltyControl()}, including:
 #'   \describe{
-#'     \item{\code{penalty.value}}{Numeric. Default penalty multiplier used in
+#'     \item{penalty.value}{Numeric. Default penalty multiplier used in
 #'       binary violations.}
-#'     \item{\code{step.penalties}}{Numeric vector or list. Penalties applied to
+#'     \item{step.penalties}{Numeric vector or list. Penalties applied to
 #'       step violations (mild, severe).}
-#'     \item{\code{bounds}}{List of parameter lower/upper bounds, typically from
-#'       [param.bounds()].}
-#'     \item{\code{thresholds}}{Named list of diagnostic constraints (e.g., RSE,
-#'       shrinkage). Each contains a \code{method} ("binary" or "step") and the
+#'     \item{bounds}{List of parameter lower/upper bounds, typically from
+#'       `param.bounds()`.}
+#'     \item{thresholds}{Named list of diagnostic constraints (e.g., RSE,
+#'       shrinkage). Each contains a method ("binary" or "step") and the
 #'       corresponding threshold or step levels.}
-#'     \item{\code{penalty.terms}}{Character vector of constraint categories to
-#'       penalize. Valid terms include \code{"theta"}, \code{"rse"},
-#'       \code{"omega"}, \code{"shrinkage"}, \code{"sigma"}, \code{"correlation"},
-#'       \code{"covariance"}, and \code{"total"}.}
+#'     \item{penalty.terms}{Character vector of constraint categories to
+#'       penalize. Valid terms include "theta", "rse", "omega",
+#'       "shrinkage", "sigma", "correlation", "covariance", and "total".}
 #'   }
-#' @param objf Character. Column name in \code{fit} used as the base objective
-#'   function (e.g., \code{"AIC"}, \code{"BIC"}, \code{"OBJFV"}).
+#' @param objf Character. Column name in fit used as the base objective
+#'   function (e.g., "AIC", "BIC", "OBJFV").
 #'
-#' @returns A data frame extending \code{fit} with the following:
+#' @returns A data frame extending fit with the following:
 #' \itemize{
-#'   \item \code{flag.*} columns: indicators of constraint violations
+#'   \item flag.* columns: indicators of constraint violations
 #'     (0 = no violation, 1 = mild, 2 = severe).
-#'   \item \code{count.constraint.*} columns: number of violations per
+#'   \item count.constraint.* columns: number of violations per
 #'     constraint type.
-#'   \item \code{fitness}: penalized objective function value, computed from the
-#'     specified \code{objf} plus applicable penalties.
+#'   \item fitness: penalized objective function value, computed from the
+#'     specified objf plus applicable penalties.
 #' }
 #'
+#' @author Zhonghui Huang
+#'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Fit a model (using nlmixr2)
 #' pheno <- function() {
 #'   ini({
-#'     tcl <- log(0.008) # typical value of clearance
-#'     tv <-  log(0.6)   # typical value of volume
-#'     ## var(eta.cl)
+#'     tcl <- log(0.008)
+#'     tv <-  log(0.6)
 #'     eta.cl + eta.v ~ c(1,
-#'                        0.01, 1) ## cov(eta.cl, eta.v), var(eta.v)
-#'     # interindividual variability on clearance and volume
-#'     add.err <- 0.1    # residual variability
+#'                        0.01, 1)
+#'     add.err <- 0.1
 #'   })
 #'   model({
-#'     cl <- exp(tcl + eta.cl) # individual value of clearance
-#'     v <- exp(tv + eta.v)    # individual value of volume
-#'     ke <- cl / v            # elimination rate constant
-#'     d/dt(A1) = - ke * A1    # model differential equation
-#'     cp = A1 / v             # concentration in plasma
-#'     cp ~ add(add.err)       # define error model
+#'     cl <- exp(tcl + eta.cl)
+#'     v <- exp(tv + eta.v)
+#'     ke <- cl / v
+#'     d/dt(A1) = - ke * A1
+#'     cp = A1 / v
+#'     cp ~ add(add.err)
 #'   })
 #' }
-#' fit <- nlmixr2(pheno, pheno_sd, "saem", control = list(print = 0),
+#' fit <- nlmixr2est::nlmixr2(pheno, pheno_sd, "saem", control = list(print = 0),
 #'               table = list(cwres = TRUE, npde = TRUE))
 #' Store. <- get.mod.lst(fit.s = fit, 1)
-#' # --- Example 1: Default settings (step penalties) ---
-#' result.default <- fitness(
-#'   fit = Store.,
-#'   dat = pheno_sd
-#' )
-#' print(result.default)
-
-# --- Example 2: Use binary penalties for RSE and shrinkage ---
-#' result.binary <- fitness(
-#'   fit = Store.,
-#'   dat = pheno_sd,
-#'   penalty.control = penaltyControl(
-#'     thresholds = list(
-#'       rse = list(method = "binary"),
-#'       shrinkage = list(method = "binary")
-#'     )
-#'   )
-#' )
-#' print(result.binary)
+#'  fitness(fit = Store.,dat = pheno_sd)
 #' }
 #'
-#' @seealso [penaltyControl()], [param.bounds()]
+#' @seealso \code{\link{penaltyControl}()}, \code{\link{param.bounds}()}.
 #' @export
 
 fitness <- function(search.space = "ivbase",
@@ -425,14 +401,14 @@ fitness <- function(search.space = "ivbase",
   colnames(dat) <- toupper(colnames(dat))
   if (!"EVID" %in% colnames(dat))
     stop("dat must contain 'EVID' column.")
-  dat.obs <- dat[dat$EVID == 0,]
-  pop.cmin <- aggregate(DV ~ ID, data = dat.obs, FUN = min)
-  dat.cmin <- median(pop.cmin$DV)
+  dat.obs <- dat[dat$EVID == 0, ]
+  pop.cmin <- stats::aggregate(DV ~ ID, data = dat.obs, FUN = min)
+  dat.cmin <- stats::median(pop.cmin$DV)
   sigma.bounds$add$lower <-
     signif(dat.cmin * sigma.bounds$add$lower, 1)
 
-  pop.cmax <- aggregate(DV ~ ID, data = dat.obs, FUN = max)
-  dat.cmax <- median(pop.cmax$DV)
+  pop.cmax <- stats::aggregate(DV ~ ID, data = dat.obs, FUN = max)
+  dat.cmax <- stats::median(pop.cmax$DV)
 
   # --- Variable assignments by model type ---
   if (search.space %in% c("ivbase", "oralbase")) {
@@ -457,8 +433,7 @@ fitness <- function(search.space = "ivbase",
         "rsevmax",
         "rsekm")
     bsv.cols <-
-      c(
-        "bsvvc",
+      c("bsvvc",
         "bsvcl",
         "bsvvp",
         "bsvvp2",
@@ -466,8 +441,7 @@ fitness <- function(search.space = "ivbase",
         "bsvq2",
         "bsvtlag",
         "bsvvmax",
-        "bsvkm"
-      )
+        "bsvkm")
     shrink.cols <-
       c(
         "shrinkcl",
@@ -486,9 +460,91 @@ fitness <- function(search.space = "ivbase",
       bsv.cols     <- c("bsvka", bsv.cols)
       shrink.cols  <- c("shrinkka", shrink.cols)
     }
+    corr.cols  <- grep("^cor\\.", colnames(fit), value = TRUE)
+    error.cols <- c("add", "prop")
+  } else if (search.space == "custom") {
+    # Set all possible parameter columns for custom search space
+    param.cols <- c(
+      "thetaka",
+      "thetacl",
+      "thetavc",
+      "thetavp",
+      "thetavp2",
+      "thetaq",
+      "thetaq2",
+      "thetavmax",
+      "thetakm",
+      "thetatlag",
+      "thetan",
+      "thetamtt",
+      "thetabio",
+      "thetaD2",
+      "thetaF1",
+      "thetaFr"
+    )
+
+    rse.cols <- c(
+      "rseka",
+      "rsecl",
+      "rsevc",
+      "rsevp",
+      "rsevp2",
+      "rseq",
+      "rseq2",
+      "rsevmax",
+      "rsekm",
+      "rsetlag",
+      "rsen",
+      "rsemtt",
+      "rsebio",
+      "rseD2",
+      "rseF1",
+      "rseFr"
+    )
+
+    bsv.cols <- c(
+      "bsvka",
+      "bsvcl",
+      "bsvvc",
+      "bsvvp",
+      "bsvvp2",
+      "bsvq",
+      "bsvq2",
+      "bsvvmax",
+      "bsvkm",
+      "bsvtlag",
+      "bsvn",
+      "bsvmtt",
+      "bsvbio",
+      "bsvD2",
+      "bsvF1",
+      "bsvFr"
+    )
+
+    shrink.cols <- c(
+      "shrinkka",
+      "shrinkcl",
+      "shrinkvc",
+      "shrinkvp",
+      "shrinkvp2",
+      "shrinkq",
+      "shrinkq2",
+      "shrinkvmax",
+      "shrinkkm",
+      "shrinktlag",
+      "shrinkn",
+      "shrinkmtt",
+      "shrinkbio",
+      "shrinkD2",
+      "shrinkF1",
+      "shrinkFr"
+    )
 
     corr.cols  <- grep("^cor\\.", colnames(fit), value = TRUE)
     error.cols <- c("add", "prop")
+
+  } else {
+    stop(sprintf("Unknown search.space: '%s'", search.space), call. = FALSE)
   }
 
   # --- Apply parameter bound flags (theta) ---
@@ -514,7 +570,8 @@ fitness <- function(search.space = "ivbase",
                         fit[[col]] > rse.threshold] <- 1
     } else if (rse.method == "step" && !is.null(rse.steps)) {
       fit[[flag.col]][!is.na(fit[[col]]) &
-                        fit[[col]] > rse.steps[1] & fit[[col]] <= rse.steps[2]] <- 1
+                        fit[[col]] > rse.steps[1] &
+                        fit[[col]] <= rse.steps[2]] <- 1
       fit[[flag.col]][!is.na(fit[[col]]) &
                         fit[[col]] > rse.steps[2]] <- 2
     }
@@ -528,13 +585,15 @@ fitness <- function(search.space = "ivbase",
 
     if (bsv.method == "binary") {
       fit[[flag.col]][!is.na(value) &
-                        value < bsv.lower[[sub("bsv", "", col)]]] <- 1
+                        value < bsv.lower[[sub("bsv", "", col)]]] <-
+        1
     } else if (bsv.method == "step" && !is.null(bsv.steps)) {
       # Severe: value < step1
       fit[[flag.col]][!is.na(value) & value < bsv.steps[2]] <- 2
       # Mild: step1 ≤ value < step2
       fit[[flag.col]][!is.na(value) &
-                        value >= bsv.steps[2] & value < bsv.steps[1]] <- 1
+                        value >= bsv.steps[2] &
+                        value < bsv.steps[1]] <- 1
     }
   }
 
@@ -549,7 +608,8 @@ fitness <- function(search.space = "ivbase",
     if (col == "add") {
       if (sigma.add.method == "step" && !is.null(sigma.add.steps)) {
         fit[[flag.col]][!is.na(value) &
-                          value <= sigma.add.steps[1] & value > sigma.add.steps[2]] <- 1
+                          value <= sigma.add.steps[1] &
+                          value > sigma.add.steps[2]] <- 1
         fit[[flag.col]][!is.na(value) &
                           value < sigma.add.steps[2]] <- 2
       } else if (sigma.add.method == "binary") {
@@ -561,7 +621,8 @@ fitness <- function(search.space = "ivbase",
     if (col == "prop") {
       if (sigma.prop.method == "step" && !is.null(sigma.prop.steps)) {
         fit[[flag.col]][!is.na(value) &
-                          value <= sigma.prop.steps[1] & value > sigma.prop.steps[2]] <- 1
+                          value <= sigma.prop.steps[1] &
+                          value > sigma.prop.steps[2]] <- 1
         fit[[flag.col]][!is.na(value) &
                           value < sigma.prop.steps[2]] <- 2
       } else if (sigma.prop.method == "binary") {
@@ -610,7 +671,8 @@ fitness <- function(search.space = "ivbase",
                         value.abs > cor.steps$upper[1] &
                         value.abs < cor.steps$upper[2]] <- 1
       fit[[flag.col]][!is.na(value.abs) &
-                        value.abs >= cor.steps$upper[2] & value.abs < 1] <- 2
+                        value.abs >= cor.steps$upper[2] &
+                        value.abs < 1] <- 2
       # ---- Perfect correlation ----
       fit[[flag.col]][!is.na(value.abs) & value.abs == 1] <- 2
       # ---- Zero correlation ----

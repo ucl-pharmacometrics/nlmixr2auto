@@ -2,59 +2,70 @@
 % Please edit documentation in R/aco.operator.R
 \name{acoControl}
 \alias{acoControl}
-\title{Control Parameters for Ant Colony Optimization}
+\title{Create control parameters for the ACO algorithm}
 \usage{
 acoControl(
-  no.ants = 15,
-  max.iter = 20,
-  param.Q = 1,
+  nants = 15,
+  niter = 20,
+  Q = 1,
   rho = 0.5,
-  initial.phi = 2,
-  lower.limit.phi = 1,
-  upper.limit.phi = Inf,
-  alpha.value = 1,
-  elitism.percentage = 0,
-  prob.floor = 0.2,
-  sig.diff = 1
+  phi0 = 2,
+  phi_min = 1,
+  phi_max = Inf,
+  alpha = 1,
+  elite = 0,
+  prob_min = 0.2,
+  diff_tol = 1
 )
 }
 \arguments{
-\item{no.ants}{Integer. Number of ants per iteration.}
+\item{nants}{Integer. Number of ants (candidate solutions) generated
+at each iteration. Defaults to 15.}
 
-\item{max.iter}{Integer. Maximum number of iterations.}
+\item{niter}{Integer. Maximum number of ACO iterations. Defaults to 20.}
 
-\item{param.Q}{Numeric. Pheromone intensity parameter controlling the amount of pheromone}
+\item{Q}{A positive numeric value. Pheromone scaling constant controlling the
+amount of pheromone deposited by high-quality solutions during each
+iteration. Defaults to 1.}
 
-\item{rho}{Numeric in \link{0,1}. Pheromone evaporation rate per iteration.}
+\item{rho}{Numeric in (0, 1). Pheromone evaporation rate. Higher values
+increase evaporation, encouraging exploration. Defaults to 0.5.}
 
-\item{initial.phi}{Numeric. Initial pheromone level for all nodes.}
+\item{phi0}{A non-negative numeric value. Initial pheromone value assigned
+to all nodes at the start of the search. Defaults to 2.}
 
-\item{lower.limit.phi}{Numeric. Lower bound for pheromone level.}
+\item{phi_min}{A non-negative numeric value. Lower bound for pheromone values, preventing
+premature convergence. Defaults to 1.}
 
-\item{upper.limit.phi}{Numeric. Upper bound for pheromone level.}
+\item{phi_max}{A non-negative numeric value. Upper bound for pheromone values, limiting
+excessive reinforcement. Defaults to Inf.}
 
-\item{alpha.value}{Numeric. Influence factor of pheromone level on path selection.}
+\item{alpha}{A non-negative numeric value. Exponent controlling the influence
+of pheromone values on the probability of selecting a component during
+solution construction. Defaults to 1.}
 
-\item{elitism.percentage}{Numeric in \link{0,1}. Fraction of top ants preserved each iteration.}
+\item{elite}{Numeric. Elitism rate between 0 and 1. Specifies the proportion
+of elite ants whose solutions are preserved and directly propagated to the
+next iteration. Defaults to 0.}
 
-\item{prob.floor}{Numeric in (0, 0.5). Minimum selection probability assigned to
-each node option (probability floor constraint). After applying the floor, the
-remaining probability mass is proportionally rescaled among the other options
-to preserve relative likelihoods.}
+\item{prob_min}{Numeric. Minimum probability floor between 0 and 1.
+Applied during solution construction to avoid zero-probability choices.
+Defaults to 0.2.}
 
-\item{sig.diff}{Numeric. Minimum significant fitness difference for ranking.}
+\item{diff_tol}{Numeric. Significance difference threshold used for ranking.
+Values within this threshold are considered equal and receive the same rank.
+Default is 1.}
 }
 \value{
-List of ACO hyperparameters.
+A named list containing all ACO control parameters.
 }
 \description{
-Creates a list of control settings for the \code{\link{aco.operator}} function.
-These settings define the number of ants, iterations, pheromone update rules,
-probability bounding, and elitism.
+Creates a list of control settings for the \code{aco.operator} function.
 }
-\details{
-The \code{prob.floor} parameter implements a \emph{probability floor constraint with proportional
-rescaling} (also known as bounded probability adjustment). This prevents any decision
-option from having a probability lower than \code{prob.floor}, improving exploration
-stability in cases where pheromone values become highly imbalanced.
+\examples{
+acoControl()
+
+}
+\author{
+Zhonghui Huang
 }

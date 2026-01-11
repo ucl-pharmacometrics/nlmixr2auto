@@ -2,24 +2,35 @@
 % Please edit documentation in R/get.mod.lst.R
 \name{get.mod.lst}
 \alias{get.mod.lst}
-\title{Extract model parameters and statistics}
+\title{Summarize parameter estimates and run information from an nlmixr2 fit}
 \usage{
 get.mod.lst(fit.s, modi)
 }
 \arguments{
-\item{fit.s}{A fitted \code{nlmixr2} model object.}
+\item{fit.s}{A model object generated using nlmixr2.}
 
-\item{modi}{The current model number.}
+\item{modi}{A numeric identifier used to label the model results,
+for example when multiple models are evaluated in sequence.}
 }
 \value{
-A data frame containing the extracted model parameters and statistics.
+A data.frame with parameter summaries, model fit criteria
+(AIC, BIC, objective function value, log-likelihood, number of
+estimated parameters) and computation timings extracted from the
+fitted object.
 }
 \description{
-Extract model parameters and statistics from a fitted \code{nlmixr2} model object.
+Extracts fixed effects, between-subject variability,
+residual variability, estimation precision, confidence intervals,
+covariance structure, shrinkage, and key runtime metrics from a
+fitted model produced by nlmixr2.
+}
+\details{
+The function checks for the presence of each element before
+extraction to ensure robust handling of incomplete estimation or
+missing covariance results.
 }
 \examples{
-\dontrun{
-
+\donttest{
 pheno <- function() {
   ini({
     tcl <- log(0.008) # typical value of clearance
@@ -39,11 +50,14 @@ pheno <- function() {
 }
 
 # Fit the model using nlmixr2
-fit <- nlmixr2(one.compartment, pheno_sd, est="saem", saemControl(print=0))
+fit <- nlmixr2est::nlmixr2(pheno, pheno_sd, est="saem", nlmixr2est::saemControl(print=0))
 
 # Extract model results
 model_results <- get.mod.lst(fit,1)
 print(model_results)
 }
 
+}
+\author{
+Zhonghui Huang
 }

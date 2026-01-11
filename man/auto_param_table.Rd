@@ -2,48 +2,72 @@
 % Please edit documentation in R/modelGen.R
 \name{auto_param_table}
 \alias{auto_param_table}
-\title{Automatically Generate a Parameter Table with Initial Estimates}
+\title{Automatically generate a parameter table with initial estimates}
 \usage{
 auto_param_table(
   dat = NULL,
   param_table = NULL,
   nlmixr2autoinits = TRUE,
-  foldername = "model",
+  filename = "test",
+  out.dir = NULL,
+  out.inits = TRUE,
   ...
 )
 }
 \arguments{
-\item{dat}{A data frame containing observed data (required if \code{nlmixr2autoinits = TRUE}).}
+\item{dat}{A data frame containing observed data (required if
+\code{nlmixr2autoinits = TRUE}).}
 
-\item{param_table}{Optional. A user-provided parameter table (if provided, all other logic is skipped).}
+\item{param_table}{Optional. A user-provided parameter table (if
+provided, all other logic is skipped).}
 
-\item{nlmixr2autoinits}{Logical. Whether to automatically estimate initial values using \code{getPPKinits()}. Default is \code{TRUE}.}
+\item{nlmixr2autoinits}{Logical. Whether to automatically estimate
+initial values using \code{getPPKinits()}. Default is \code{TRUE}.}
 
-\item{foldername}{Character. Filename prefix for saving RDS of auto-generated initial estimates. Default is \code{"model"}.}
+\item{filename}{Character string specifying the base name for model output
+files generated during evaluation.}
+
+\item{out.dir}{Optional directory path used to store intermediate or cached
+model output files.}
+
+\item{out.inits}{Logical flag indicating whether the results returned
+by the automated initialization procedure should be saved to an RDS
+file. When TRUE, the output of the initialization step is written to
+disk for reproducibility or debugging purposes.}
 
 \item{...}{Additional arguments passed to \code{getPPKinits()}.}
 }
 \value{
-A \code{data.frame} representing the parameter table with initial estimates, ready for use in \code{nlmixr2()}.
+A \code{data.frame} representing the parameter table with initial
+estimates, ready for use in \code{nlmixr2()}.
 }
 \description{
-This function constructs a parameter table for \code{nlmixr2} model fitting. It supports:
-(1) direct use of a user-provided parameter table,
-(2) automatic initialization of parameters from data using \code{getPPKinits()},
-or (3) a fallback to a default initialized table via \code{initialize_param_table()}.
+Constructs a parameter table for nlmixr2 model fitting. It supports:
+\itemize{
+\item Direct use of a user-provided parameter table.
+\item Automatic initialization of parameters from data using
+\code{getPPKinits()}.
+\item Fallback to a default parameter table created by
+\code{initialize_param_table()}.
+}
 }
 \details{
-When \code{nlmixr2autoinits = TRUE}, this function estimates initial values from data,
-applies a name mapping to internal model parameters, performs log transformations where appropriate,
-and replaces problematic log values (e.g. log(0) or \code{NA}) with \code{log(0.01)} for numerical stability.
+When \code{nlmixr2autoinits = TRUE}, this function estimates initial values
+from data, applies a name mapping to internal model parameters,
+performs log transformations where appropriate, and replaces
+problematic log values (e.g. log(0) or \code{NA}) with \code{log(0.01)} for
+numerical stability.
 }
 \examples{
-\dontrun{
-dat <- your_data_frame
-param_tbl <- auto_param_table(dat = dat)
+\donttest{
+withr::with_dir(tempdir(), {
+auto_param_table(dat = pheno_sd)
+})
 }
-
 }
 \seealso{
-\code{\link[=getPPKinits]{getPPKinits()}}, \code{\link[=initialize_param_table]{initialize_param_table()}}
+\code{\link{getPPKinits}}, \code{\link{initialize_param_table}}
+}
+\author{
+Zhonghui Huang
 }

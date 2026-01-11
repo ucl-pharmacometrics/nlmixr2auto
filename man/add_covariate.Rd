@@ -59,3 +59,6 @@ add_covariate(
   beta_value = -0.2, use_fix = FALSE
 )
 }
+\author{
+Zhonghui Huang
+}

@@ -2,59 +2,50 @@
 % Please edit documentation in R/ga.operator.R
 \name{gaControl}
 \alias{gaControl}
-\title{Control Parameters for Genetic Algorithm}
+\title{Control parameters for genetic algorithm}
 \usage{
 gaControl(
-  npopsize = 20,
-  max.iter = 20,
-  prob.crossover = 0.7,
-  prob.mutation = 0.1,
-  sig.diff = 1,
-  nlocal.search = 3
+  npop = 20,
+  niter = 20,
+  pcross = 0.7,
+  pmut = 0.1,
+  diff_tol = 1,
+  nls = 3
 )
 }
 \arguments{
-\item{npopsize}{Integer. The number of individuals (chromosomes) in the
+\item{npop}{Integer. The number of individuals (chromosomes) in the
 population for each generation.}
 
-\item{max.iter}{Integer. The maximum number of generations to run the GA.}
+\item{niter}{Integer. The maximum number of generations to run the GA.}
 
-\item{prob.crossover}{Numeric in \eqn{[0, 1]}. Probability of performing
+\item{pcross}{Numeric in \eqn{[0, 1]}. Probability of performing
 crossover between two selected parents.}
 
-\item{prob.mutation}{Numeric in \eqn{[0, 1]}. Probability of mutating each
+\item{pmut}{Numeric in \eqn{[0, 1]}. Probability of mutating each
 bit in a chromosome.}
 
-\item{sig.diff}{Numeric. Minimum significant fitness difference used when
-ranking individuals (passed to \code{\link{rank_new}}).}
+\item{diff_tol}{A numeric value specifying the significance difference threshold.
+Values within this threshold are considered equal and receive the same rank.
+Default is 1.}
 
-\item{nlocal.search}{Integer. Frequency (in generations) of running local
+\item{nls}{Integer. Frequency (in generations) of running local
 exhaustive search around the best current model.}
 }
 \value{
-A list of GA control parameters, suitable for passing to
-\code{\link{ga.operator}} via its \code{ga.control} argument.
+A named list containing all GA control parameters.
 }
 \description{
-Creates a list of control settings for the \code{\link{ga.operator}} function.
-These settings define the size, number of generations, and probabilities
-for crossover and mutation, as well as other algorithm behavior parameters.
+Creates a list of control settings for the \code{ga.operator()} function.
 }
 \examples{
 # Default settings
 gaControl()
 
-# Custom GA configuration
-gaControl(
-  npopsize = 20,
-  max.iter = 50,
-  prob.crossover = 0.9,
-  prob.mutation = 0.05,
-  sig.diff = 0.5,
-  nlocal.search = 10
-)
-
 }
 \seealso{
 \code{\link{ga.operator}}, \code{\link{rank_new}}, \code{\link{runlocal}}
+}
+\author{
+Zhonghui Huang
 }

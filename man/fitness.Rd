@@ -13,98 +13,79 @@ fitness(
 )
 }
 \arguments{
-\item{search.space}{Character. Defines the structural model type
-(e.g., \code{"ivbase"}, \code{"oralbase"}).}
+\item{search.space}{Character, one of "ivbase" or "oralbase". Default is "ivbase".}
 
 \item{fit}{Data frame. Model summary from tools such as
 \code{get.mod.lst()}, with parameter estimates and diagnostics.}
 
-\item{dat}{Data frame. Observed data containing columns \code{EVID}, \code{DV},
-and \code{ID}; used for estimating default additive error if missing.}
+\item{dat}{A data frame containing pharmacokinetic data in standard
+nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+additional columns.}
 
-\item{penalty.control}{List created using \code{\link[=penaltyControl]{penaltyControl()}}, including:
+\item{penalty.control}{List created using \code{penaltyControl()}, including:
 \describe{
-\item{\code{penalty.value}}{Numeric. Default penalty multiplier used in
+\item{penalty.value}{Numeric. Default penalty multiplier used in
 binary violations.}
-\item{\code{step.penalties}}{Numeric vector or list. Penalties applied to
+\item{step.penalties}{Numeric vector or list. Penalties applied to
 step violations (mild, severe).}
-\item{\code{bounds}}{List of parameter lower/upper bounds, typically from
-\code{\link[=param.bounds]{param.bounds()}}.}
-\item{\code{thresholds}}{Named list of diagnostic constraints (e.g., RSE,
-shrinkage). Each contains a \code{method} ("binary" or "step") and the
+\item{bounds}{List of parameter lower/upper bounds, typically from
+\code{param.bounds()}.}
+\item{thresholds}{Named list of diagnostic constraints (e.g., RSE,
+shrinkage). Each contains a method ("binary" or "step") and the
 corresponding threshold or step levels.}
-\item{\code{penalty.terms}}{Character vector of constraint categories to
-penalize. Valid terms include \code{"theta"}, \code{"rse"},
-\code{"omega"}, \code{"shrinkage"}, \code{"sigma"}, \code{"correlation"},
-\code{"covariance"}, and \code{"total"}.}
+\item{penalty.terms}{Character vector of constraint categories to
+penalize. Valid terms include "theta", "rse", "omega",
+"shrinkage", "sigma", "correlation", "covariance", and "total".}
 }}
 
-\item{objf}{Character. Column name in \code{fit} used as the base objective
-function (e.g., \code{"AIC"}, \code{"BIC"}, \code{"OBJFV"}).}
+\item{objf}{Character. Column name in fit used as the base objective
+function (e.g., "AIC", "BIC", "OBJFV").}
 }
 \value{
-A data frame extending \code{fit} with the following:
+A data frame extending fit with the following:
 \itemize{
-\item \code{flag.*} columns: indicators of constraint violations
+\item flag.* columns: indicators of constraint violations
 (0 = no violation, 1 = mild, 2 = severe).
-\item \code{count.constraint.*} columns: number of violations per
+\item count.constraint.* columns: number of violations per
 constraint type.
-\item \code{fitness}: penalized objective function value, computed from the
-specified \code{objf} plus applicable penalties.
+\item fitness: penalized objective function value, computed from the
+specified objf plus applicable penalties.
 }
 }
 \description{
-This function evaluates the quality of a fitted model based on parameter
-bounds and diagnostic thresholds (e.g., relative standard error \link{RSE},
-shrinkage, residual error, and inter-individual correlation). Violations
-are flagged and penalized, either via binary (yes/no) or stepwise (graded)
-penalties.
+Evaluates the quality of a fitted model based on parameter
+bounds and diagnostic thresholds.
 }
 \examples{
-\dontrun{
+\donttest{
 # Fit a model (using nlmixr2)
 pheno <- function() {
   ini({
-    tcl <- log(0.008) # typical value of clearance
-    tv <-  log(0.6)   # typical value of volume
-    ## var(eta.cl)
+    tcl <- log(0.008)
+    tv <-  log(0.6)
     eta.cl + eta.v ~ c(1,
-                       0.01, 1) ## cov(eta.cl, eta.v), var(eta.v)
-    # interindividual variability on clearance and volume
-    add.err <- 0.1    # residual variability
+                       0.01, 1)
+    add.err <- 0.1
   })
   model({
-    cl <- exp(tcl + eta.cl) # individual value of clearance
-    v <- exp(tv + eta.v)    # individual value of volume
-    ke <- cl / v            # elimination rate constant
-    d/dt(A1) = - ke * A1    # model differential equation
-    cp = A1 / v             # concentration in plasma
-    cp ~ add(add.err)       # define error model
+    cl <- exp(tcl + eta.cl)
+    v <- exp(tv + eta.v)
+    ke <- cl / v
+    d/dt(A1) = - ke * A1
+    cp = A1 / v
+    cp ~ add(add.err)
   })
 }
-fit <- nlmixr2(pheno, pheno_sd, "saem", control = list(print = 0),
+fit <- nlmixr2est::nlmixr2(pheno, pheno_sd, "saem", control = list(print = 0),
               table = list(cwres = TRUE, npde = TRUE))
 Store. <- get.mod.lst(fit.s = fit, 1)
-# --- Example 1: Default settings (step penalties) ---
-result.default <- fitness(
-  fit = Store.,
-  dat = pheno_sd
-)
-print(result.default)
-result.binary <- fitness(
-  fit = Store.,
-  dat = pheno_sd,
-  penalty.control = penaltyControl(
-    thresholds = list(
-      rse = list(method = "binary"),
-      shrinkage = list(method = "binary")
-    )
-  )
-)
-print(result.binary)
+ fitness(fit = Store.,dat = pheno_sd)
 }
 
 }
 \seealso{
-\code{\link[=penaltyControl]{penaltyControl()}}, \code{\link[=param.bounds]{param.bounds()}}
+\code{\link{penaltyControl}()}, \code{\link{param.bounds}()}.
+}
+\author{
+Zhonghui Huang
 }

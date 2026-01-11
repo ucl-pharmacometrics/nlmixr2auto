@@ -32,7 +32,9 @@ ppkmodGen(
   rv = 1,
   allometric_scaling = 0,
   param_table = NULL,
-  return.func = FALSE
+  return.func = FALSE,
+  out.dir = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -95,6 +97,11 @@ Should contain columns: Name (parameter name), init (initial value),
 eta (TRUE/FALSE for variability inclusion), cov (covariate relationships).}
 
 \item{return.func}{Logical, whether to return a compiled function (default \code{FALSE} returns model code as text).}
+
+\item{out.dir}{Directory where model files and results are written. Defaults to
+the current working directory when not provided.}
+
+\item{verbose}{Logical; if \code{TRUE}, progress messages are printed.}
 }
 \value{
 Generates a text file ('modX.txt' where X = modi) containing the nlmixr-compatible model code.
@@ -108,7 +115,11 @@ with nlmixr syntax. The function handles various absorption types, multi-compart
 Michaelis-Menten kinetics, and different residual variability structures.
 }
 \examples{
-# Create a 1-compartment oral model with first-order absorption
+withr::with_dir(tempdir(), {
+#' # Create a 1-compartment oral model with first-order absorption
  ppkmodGen( no.cmpt = 1, abs.type = 1,return.func = TRUE,param_table = initialize_param_table())
-
+})
+}
+\author{
+Zhonghui Huang
 }

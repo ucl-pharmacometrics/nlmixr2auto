@@ -5,37 +5,41 @@
 \title{Control Parameters for Tabu Search}
 \usage{
 tabuControl(
-  tabu.duration = 3,
-  max.round = 20,
-  start.point = NULL,
+  tenure = 3,
+  niter = 20,
   aspiration = TRUE,
-  candidate.size = NULL,
-  tabu.policy = "attribute"
+  nsize = NULL,
+  policy = "attribute"
 )
 }
 \arguments{
-\item{tabu.duration}{Integer. Number of iterations a move remains tabu.}
+\item{tenure}{Integer. Number of iterations a move remains tabu.}
 
-\item{max.round}{Integer. Maximum number of search iterations.}
-
-\item{start.point}{Optional initial model code vector. If NULL, defaults to a 2-compartment model.}
+\item{niter}{Integer. Maximum number of search iterations.}
 
 \item{aspiration}{Logical. Whether to apply the aspiration criterion.
 If TRUE, tabu moves are allowed if they yield a solution strictly better
 than the global best found so far.}
 
-\item{candidate.size}{Optional integer. If not NULL, restricts neighborhood sear
+\item{nsize}{Optional integer. If not NULL, restricts neighborhood sear
 to a random subset of this size (candidate list strategy).}
 
-\item{tabu.policy}{Character. Type of tabu restriction:
+\item{policy}{Character. Type of tabu restriction:
 \itemize{
 \item \code{"attribute"} — forbid revisiting a variable value (default).
 \item \code{"move"} — forbid only specific from–to transitions.
 }}
 }
 \value{
-A list of Tabu Search hyperparameters.
+A named list containing all tabu control parameters.
 }
 \description{
-Creates a list of control settings for the \code{\link{tabu.operator}} function.
+Creates a list of control settings for the \code{tabu.operator} function.
+}
+\examples{
+tabuControl()
+
+}
+\author{
+Zhonghui Huang
 }

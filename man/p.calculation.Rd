@@ -4,52 +4,46 @@
 \alias{p.calculation}
 \title{Calculate selection probabilities for each node}
 \usage{
-p.calculation(node.list, prob.floor = NULL)
+p.calculation(nodeslst, prob_min = NULL)
 }
 \arguments{
-\item{node.list}{A data frame of nodes, including columns:
+\item{nodeslst}{A data frame of nodes, including columns:
 \describe{
-\item{phi}{Current pheromone level}
-\item{node.group}{Group ID for the decision step}
+\item{phi}{Current pheromone level \eqn{\phi}}
+\item{node.no}{Group ID for the decision step}
 \item{p}{Probability of selection (to be calculated)}
 }}
 
-\item{prob.floor}{Numeric scalar. Minimum probability each node is allowed to have
-within its decision group. Set to \code{NULL} or \code{0} to disable smoothing.}
-
-\item{search.space}{Character string or numeric code indicating the search space.
-Accepts \code{"ivbase"}, \code{"oralbase"}, or \code{1} (equivalent to \code{"ivbase"}).}
+\item{prob_min}{Numeric scalar. Minimum probability each node is allowed to have
+within its decision group. Set to NULL or 0 to disable smoothing.}
 }
 \value{
-The updated \code{node.list} with recalculated \code{p} values.
+The updated node list with recalculated p values.
 }
 \description{
-This function calculates the probability (\code{p}) of selecting each node in an
-Ant Colony Optimization (ACO) search, based on current pheromone levels (\code{phi}).
-It supports an optional probability floor (\code{prob.floor}) mechanism that ensures
-no node's probability drops below a minimum threshold, redistributing the
-remaining probability proportionally among other nodes in the same group.
+Calculates the probability of selecting each node in an ant colony
+optimization search, based on pheromone levels \eqn{\phi}.
 }
 \details{
-The probability for each node in a group is calculated as:
+Within each decision group \eqn{G}, selection probabilities are computed from
+pheromone levels \eqn{\phi} as:
 \deqn{p_i = \frac{\phi_i}{\sum_{j \in G} \phi_j}}
 
-If \code{prob.floor} is set and any calculated probability falls below this value,
+If prob_min is enabled and any calculated probability falls below this value,
 the algorithm:
 \enumerate{
-\item Sets all probabilities below \code{prob.floor} to \code{prob.floor}.
+\item Sets all probabilities below prob_min to prob_min.
 \item Redistributes the remaining probability mass proportionally among
 the other nodes in the same group.
 }
 
-This acts as a \strong{probability smoothing mechanism}, preventing premature
+This acts as a probability smoothing mechanism, preventing premature
 convergence by ensuring all nodes retain some chance of being explored.
 }
 \examples{
-\dontrun{
-node.list <- initNodeList(search.space = "ivbase", initial.phi = 1)
-updated.nodes <- p.calculation(
-                              node.list =  node.list,
-                              prob.floor = 0.2)
+node.list <- initNodeList(search.space = "ivbase", phi0 = 1)
+p.calculation(nodeslst = node.list, prob_min = 0.2)
 }
+\author{
+Zhonghui Huang
 }

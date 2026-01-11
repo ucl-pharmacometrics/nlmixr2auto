@@ -32,3 +32,6 @@ new  <- c(no.cmpt = 3, eta.vc = 0)  # validated neighbor (extra fix)
 detect_move(prev, new, original_neighbor = orig)
 
 }
+\author{
+Zhonghui Huang
+}

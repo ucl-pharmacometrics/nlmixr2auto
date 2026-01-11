@@ -7,24 +7,29 @@
 initialize_param(param_name, param_table)
 }
 \arguments{
-\item{param_name}{Character, name of the parameter to initialize (without "l" prefix)}
+\item{param_name}{Character, name of the parameter to initialize (without
+"l" prefix)}
 
-\item{param_table}{Dataframe containing parameter specifications, must include:
+\item{param_table}{Dataframe containing parameter specifications, must
+include:
 \itemize{
-\item \code{Name}: Character parameter names with "l" prefix (e.g., "lka" corresponds to param_name="ka")
+\item \code{Name}: Character parameter names with "l" prefix (e.g., "lka"
+corresponds to param_name="ka")
 \item \code{init}: Numeric initial values
 \item \code{fixed}: Integer flag (0/1) indicating fixed status (1 = fixed)
 }}
 }
 \value{
-Character vector containing generated initialization code line. Format:
+Character vector containing generated initialization code line.
+Format:
 \itemize{
 \item Fixed parameters: \verb{<param_name> <- fix(initial_value)}
 \item Estimated parameters: \verb{l<param_name> <- initial_value}
 }
 }
 \description{
-Generates parameter initialization code based on a parameter table, handling both fixed and estimated parameters.
+Generates parameter initialization code based on a parameter table, handling
+both fixed and estimated parameters.
 }
 \examples{
 # Create sample parameter table
@@ -33,4 +38,7 @@ param_table <- initialize_param_table()
 # Generate initialization code
 initialize_param("ka", param_table)  # Returns "ka <- fix(0.500)"
 initialize_param("cl", param_table)  # Returns "lcl <- 1.200"
+}
+\author{
+Zhonghui Huang
 }

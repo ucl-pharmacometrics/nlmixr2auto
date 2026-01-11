@@ -8,79 +8,81 @@ phi.calculate(
   r,
   search.space = "ivbase",
   fitness_history = NULL,
-  node.list.history = NULL,
-  param.Q = 1,
-  alpha.value = 1,
-  rho = 0.2,
-  sig.diff = 1,
-  lower.limit.phi = 1,
-  upper.limit.phi = Inf
+  nodeslst.hist = NULL,
+  Q = 1,
+  alpha = 1,
+  rho = 0.5,
+  diff_tol = 1,
+  phi0 = 2,
+  phi_min = 1,
+  phi_max = Inf
 )
 }
 \arguments{
-\item{r}{Integer. The current optimization round.}
+\item{r}{Integer. Current optimization round.}
 
-\item{search.space}{Character. Either \code{"ivbase"} or \code{"oralbase"}, determines
-which decision variables and node groups are used.}
+\item{search.space}{Character, one of "ivbase" or "oralbase".
+Default is "ivbase".}
 
-\item{fitness_history}{Data frame. History of all ants' fitness values and decision
+\item{fitness_history}{Data frame. History of ants' fitness values and decision
 variable selections across rounds.}
 
-\item{node.list.history}{Data frame. History of node-level pheromone values
+\item{nodeslst.hist}{Data frame. History of node-level pheromone values
 across previous rounds.}
 
-\item{alpha.value}{Numeric. Exponent used when converting ranks to pheromone
-contributions: \eqn{\Delta\phi \propto 1/\text{rank}^\alpha}.}
+\item{Q}{A positive numeric value. Pheromone scaling constant controlling the
+amount of pheromone deposited by high-quality solutions during each
+iteration. Defaults to 1.}
 
-\item{rho}{Numeric. Pheromone evaporation rate (fraction evaporated per iteration).}
+\item{alpha}{A non-negative numeric value. Exponent controlling the influence
+of pheromone values on the probability of selecting a component during
+solution construction. Defaults to 1.}
 
-\item{sig.diff}{Numeric. Significance threshold for distinguishing fitness ranks.}
+\item{rho}{Numeric in (0, 1). Pheromone evaporation rate. Higher values
+increase evaporation, encouraging exploration. Defaults to 0.5.}
 
-\item{lower.limit.phi}{Numeric. Lower bound on updated \eqn{\phi}.}
+\item{diff_tol}{Numeric. Tolerance threshold controlling when differences
+in fitness values are treated as meaningful during pheromone updates.
+Defaults to 1.}
 
-\item{upper.limit.phi}{Numeric. Upper bound on updated \eqn{\phi}.}
+\item{phi0}{A non-negative numeric value. Initial pheromone value assigned
+to all nodes at the start of the search. Defaults to 2.}
+
+\item{phi_min}{A non-negative numeric value. Lower bound for pheromone values, preventing
+premature convergence. Defaults to 1.}
+
+\item{phi_max}{A non-negative numeric value. Upper bound for pheromone values, limiting
+excessive reinforcement. Defaults to Inf.}
 }
 \value{
-A data frame (node list) with updated \code{phi} and \code{delta_phi} for each node.
+A data frame (node list) with updated \code{phi} and \code{delta_phi}
+for each node.
 }
 \description{
-Computes the pheromone increment (\eqn{\Delta \phi}) for each node
-in the ant colony optimization (ACO) search tree, and updates the global pheromone
-levels (\eqn{\phi}) based on the ants' paths in a given round.
+Compute pheromone increments (\code{delta_phi}) for each node in the ant colony
+optimization search tree and update the global pheromone levels (\code{phi})
+based on the ants' paths in the current round.
 }
 \details{
-Steps performed:
-\enumerate{
-\item \strong{Initialize node list} for the given search space with \eqn{\phi = 0}.
-\item \strong{Subset ants of current round} from \code{fitness_history}.
-\item \strong{Compute rank-based \eqn{\Delta\phi} weights}: ants with higher fitness
-receive larger contributions, scaled by \code{alpha.value}.
-\item \strong{Extract decision columns} (variables controlling path choices) and append
-the computed \eqn{\phi} values as a new column in \code{phi.dat}.
-\item \strong{Map local decision indices to global node numbers} using \code{node.group} and
-\code{local.node.no} from \code{node.list}.
+The update proceeds as follows:
 \itemize{
-\item For example, in \code{"ivbase"}, \code{"eta.km"} maps to group 8; in \code{"oralbase"}, \code{"eta.ka"}
-is included as group 7.
+\item Initialize the node list for the given search space with \eqn{phi = 0}.
+\item Subset the ants from the current round in \code{fitness_history}.
+\item Compute rank-based weights so better-performing ants contribute more:
+\deqn{\Delta \phi \propto 1 / \mathrm{rank}^{\alpha}.}
+\item Extract the decision columns and attach the computed weights to form
+a working table of ant paths and contributions.
+\item Map local decision indices to global node numbers using \code{node.no}
+and \code{local.edge.no} from the node list.
+\item For each node, sum contributions from ants that selected the node to
+obtain \eqn{\Delta \phi}, then update pheromone with evaporation:
+\deqn{\phi_{\mathrm{new}} = (1 - \rho)\,\phi_{\mathrm{prev}} + \Delta \phi.}
+\item Clamp updated \eqn{\phi} to be between \code{phi_min} and \code{phi_max}.
 }
-\item \strong{For each node}:
-\itemize{
-\item Identify ants that chose this node (\code{chosen_mask}).
-\item Sum their \eqn{\phi} values to get \code{delta_phi}.
-\item Update global \eqn{\phi} with evaporation:
-\deqn{\phi_{\text{new}} = (1-\rho) \cdot \phi_{\text{prev, recent}} + \Delta\phi}
-\item Clip \eqn{\phi} to \verb{[lower.limit.phi, upper.limit.phi]}.
-}
-}
-
-This update rule maintains both exploration (through evaporation) and exploitation
-(reinforcing paths chosen by better-performing ants).
 }
 \examples{
 # Define search space
 search.space <- "ivbase"
-initial.phi <- 0
-
 # Example fitness_history from round 1
 fitness_history <- data.frame(
   round   = rep(1, 8),
@@ -101,26 +103,22 @@ fitness_history <- data.frame(
 )
 
 # Example node list history
-node.list.history <- initNodeList(
+nodeslst.hist <- initNodeList(
   search.space = search.space,
-  initial.phi = initial.phi
+  phi0 = 2
 )
 
-# Call phi.calculate
-updated_nodes <- phi.calculate(
+ phi.calculate(
   r = 1,
   search.space = search.space,
   fitness_history = fitness_history,
-  node.list.history = node.list.history,
-  alpha.value = 1,
-  rho = 0.2,
-  sig.diff = 1,
-  lower.limit.phi = 1,
-  upper.limit.phi = Inf
+  nodeslst.hist = nodeslst.hist
 )
-print(updated_nodes )
 
 }
 \seealso{
-\code{\link{initNodeList}}, \code{\link{rank_new}}
+\link{initNodeList}, \link{rank_new}
+}
+\author{
+Zhonghui Huang
 }

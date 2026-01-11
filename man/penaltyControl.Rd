@@ -2,7 +2,7 @@
 % Please edit documentation in R/fitness.R
 \name{penaltyControl}
 \alias{penaltyControl}
-\title{Define penalty control settings for model fitness evaluation}
+\title{Configure penalty settings for model evaluation}
 \usage{
 penaltyControl(
   penalty.value = 10000,
@@ -14,51 +14,61 @@ penaltyControl(
 )
 }
 \arguments{
-\item{penalty.value}{Numeric. Default penalty applied for binary violations
+\item{penalty.value}{Numeric. Constant penalty assigned to binary violations
 and bound constraints.}
 
-\item{step.penalties}{Numeric vector of length 2. Penalties for mild and
-severe violations in step-based methods
-(e.g., \code{c(mild = 10, severe = 10000)}).}
+\item{step.penalties}{A named list defining penalty magnitudes used in
+step-wise procedures. Each element must contain a numeric vector of length
+two representing penalty levels for moderate and critical deviations.}
 
-\item{bounds}{A list of parameter bounds defined by \code{\link[=param.bounds]{param.bounds()}}
-(includes theta, omega, sigma, correlation).}
+\item{bounds}{A list specifying lower and upper parameter limits, as returned
+by param.bounds(). The structure can include limits for theta, omega, sigma,
+and correlation terms.}
 
-\item{thresholds}{A named list of threshold control for RSE and shrinkage.
-Each element should contain a \code{method} ("binary" or "step"), and:
+\item{thresholds}{A named list describing evaluation rules for RSE and
+shrinkage. Each component must include a field named method, with value
+binary or step, together with the corresponding limit definition:
 \itemize{
-\item For "binary": \code{threshold} (single value)
-\item For "step": \code{step.levels} (e.g., \code{c(30, 50)})
+\item If method = binary: a single cutoff value stored in threshold
+\item If method = step: two deviation boundaries stored in step.levels
 }}
 
-\item{penalty.terms}{Character vector of constraint types to penalize.
-Valid terms: "rse", "shrinkage", "theta", "omega", "sigma",
-"correlation", "covariance", "total".}
+\item{penalty.terms}{Character vector specifying which components are
+considered when penalties are reported. Recognized entries include:
+rse, shrinkage, theta, omega, sigma, correlation, covariance, and total.
+If total is included, penalties are aggregated across all components and
+any other entries are ignored.}
 }
 \value{
-A list containing penalty configuration for use in the \code{\link[=fitness]{fitness()}}
-function.
+A list containing the full penalty configuration for use in fitness().
 }
 \description{
-This function sets up penalty rules used in evaluating model quality based on
-bounds (e.g., parameter lower/upper limits) and threshold-based metrics such as
-RSE and shrinkage. Supports both binary and step penalty schemes.
+Defines rules governing penalty assignment during model adequacy evaluation.
+}
+\details{
+Penalization may be triggered by exceeding predefined parameter bounds
+(fixed-effect and variance-covariance elements) or by surpassing thresholds
+for relative standard error (RSE) or shrinkage criteria. Binary and step-wise
+penalty procedures are supported.
 }
 \examples{
-# Use all defaults
+# Default configuration
 penaltyControl()
 
-# Override only theta bounds
+# Custom bounds for selected fixed-effect parameters
 penaltyControl(bounds = param.bounds(
   theta = list(lower = list(cl = 0.01, vc = 0.01))
 ))
 
-# Use binary method for RSE with a custom threshold
+# Binary penalty method for RSE
 penaltyControl(thresholds = list(
   rse = list(method = "binary", threshold = 40)
 ))
 
 }
 \seealso{
-\code{\link[=param.bounds]{param.bounds()}}
+\code{\link{param.bounds}()}, \code{\link{fitness}()}.
+}
+\author{
+Zhonghui Huang
 }

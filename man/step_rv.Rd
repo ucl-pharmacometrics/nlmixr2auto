@@ -2,57 +2,107 @@
 % Please edit documentation in R/sf.operator.R
 \name{step_rv}
 \alias{step_rv}
-\title{Screen residual error model (rv)}
+\title{Evaluate residual error model structure}
 \usage{
 step_rv(
   dat,
-  state = list(),
+  start.mod = NULL,
   search.space = "ivbase",
+  no.cores = NULL,
   param_table = NULL,
   penalty.control = NULL,
   precomputed_results_file = NULL,
-  filename = NULL,
+  filename = "test",
+  foldername = NULL,
+  .modEnv = NULL,
+  verbose = TRUE,
   ...
 )
 }
 \arguments{
-\item{dat}{Data frame passed to \code{mod.run()}.}
+\item{dat}{A data frame containing pharmacokinetic data in standard
+nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+additional columns.}
 
-\item{state}{List with optional \code{best_code} (named integer vector) and \code{modi}.}
+\item{start.mod}{A named integer vector specifying the starting model
+code. If NULL, a base model is generated using \code{base_model()}.}
 
-\item{search.space}{Character scalar: \code{"ivbase"} or \code{"oralbase"}.}
+\item{search.space}{Character, one of \code{ivbase} or \code{oralbase}.
+Default is \code{ivbase}.}
 
-\item{param_table}{Parameter table passed to \code{mod.run()}.}
+\item{no.cores}{Integer. Number of CPU cores to use. If NULL, uses
+\code{rxode2::getRxThreads()}.}
 
-\item{penalty.control}{Optional penalty control passed to \code{mod.run()}.}
+\item{param_table}{Optional parameter table used during model estimation.}
 
-\item{...}{Forwarded to \code{mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).}
+\item{penalty.control}{Optional penalty control object used for reporting
+penalty terms in the results table.}
+
+\item{precomputed_results_file}{Optional path to a CSV file of previously computed
+model results used for caching.}
+
+\item{filename}{Optional character string used as a prefix for output files.
+Defaults to "test".}
+
+\item{foldername}{Character string specifying the name of the folder to be
+created in the current working directory to store intermediate results.
+If NULL, a name is generated automatically.}
+
+\item{.modEnv}{Optional environment used to store model indices and cached
+results across steps.}
+
+\item{verbose}{Logical. If TRUE, print progress messages.}
+
+\item{...}{Additional arguments passed to the model estimation function.}
 }
 \value{
-List with:
+A list with the following elements:
 \itemize{
-\item \code{results_table}: data.frame (Step, Model name, Model code, Fitness)
-\item \code{best_code}: named integer vector of the best candidate
-\item \code{best_row}: one-row data.frame (the best candidate)
+\item results_table: A data frame summarizing the evaluated residual
+error models and their fit statistics,
+\item best_code: A named integer vector corresponding to the selected
+model code,
+\item best_row: A one-row data frame containing the summary of the
+selected model.
 }
 }
 \description{
-Uses the current model as baseline and, if \code{rv == 3}, also evaluates
-\code{rv = 1} and \code{rv = 2} while keeping all other fields fixed.
-Chooses the candidate with the lowest Fitness.
+Evaluates alternative residual error model structures by modifying the
+residual variability setting in the model code.
+}
+\details{
+Candidate models are constructed by assigning different residual error
+types to the model code. Each candidate differs only in the residual
+variability specification, and all other structural and statistical
+components are kept unchanged. Model selection is based on comparison
+of Fitness values obtained during estimation.
 }
 \examples{
-\dontrun{
-state <- list(best_code = base_model("ivbase"), modi = 1L)
-res_rv <- step_rv(
-  dat = dat,
-  state = state,
-  search.space = "ivbase",
-  param_table = param_table,
-  penalty.control = penaltyControl()
-)
-res_rv$results_table
-res_rv$best_code
+\donttest{
+withr::with_dir(tempdir(), {
+  dat <- pheno_sd
+  param_table <- initialize_param_table()
+  param_table$init[param_table$Name == "lcl"] <- log(0.008)
+  param_table$init[param_table$Name == "lvc"] <- log(0.6)
+  penalty.control <- penaltyControl()
+  penalty.control$penalty.terms <-
+    c("rse","theta", "covariance","shrinkage","omega","correlation","sigma")
+
+  step_rv(
+    dat = dat,
+    search.space = "ivbase",
+    param_table = param_table,
+    filename = "step_rv_test",
+    penalty.control = penalty.control,
+    saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+  )
+})
 }
 
+}
+\seealso{
+\code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
+}
+\author{
+Zhonghui Huang
 }

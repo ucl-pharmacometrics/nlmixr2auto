@@ -1,440 +1,318 @@
-
-#' Initialize Node List for ACO Search Space
+#' Create control parameters for the ACO algorithm
 #'
-#' Creates the initial `node.list` data frame for the Ant Colony Optimization (ACO) search,
-#' defining nodes, their groups, initial pheromone values, and selection probabilities.
-#' Supports two search spaces: intravenous ("ivbase") and oral ("oralbase").
+#' Creates a list of control settings for the \code{aco.operator} function.
 #'
-#' @param search.space Character. Type of search space: `"ivbase"` (intravenous) or `"oralbase"` (oral, includes `eta.ka` nodes).
-#' @param initial.phi Numeric. Initial pheromone value assigned to each node.
+#' @param nants Integer. Number of ants (candidate solutions) generated
+#'   at each iteration. Defaults to 15.
+#' @param niter Integer. Maximum number of ACO iterations. Defaults to 20.
+#' @param Q A positive numeric value. Pheromone scaling constant controlling the
+#'   amount of pheromone deposited by high-quality solutions during each
+#'   iteration. Defaults to 1.
+#' @param rho Numeric in (0, 1). Pheromone evaporation rate. Higher values
+#'   increase evaporation, encouraging exploration. Defaults to 0.5.
+#' @param phi0 A non-negative numeric value. Initial pheromone value assigned
+#' to all nodes at the start of the search. Defaults to 2.
+#' @param phi_min A non-negative numeric value. Lower bound for pheromone values, preventing
+#'   premature convergence. Defaults to 1.
+#' @param phi_max A non-negative numeric value. Upper bound for pheromone values, limiting
+#'   excessive reinforcement. Defaults to Inf.
+#' @param alpha A non-negative numeric value. Exponent controlling the influence
+#'   of pheromone values on the probability of selecting a component during
+#'   solution construction. Defaults to 1.
+#' @param elite Numeric. Elitism rate between 0 and 1. Specifies the proportion
+#' of elite ants whose solutions are preserved and directly propagated to the
+#' next iteration. Defaults to 0.
+#' @param prob_min Numeric. Minimum probability floor between 0 and 1.
+#'   Applied during solution construction to avoid zero-probability choices.
+#'   Defaults to 0.2.
+#' @param diff_tol Numeric. Significance difference threshold used for ranking.
+#'   Values within this threshold are considered equal and receive the same rank.
+#'   Default is 1.
+#' @return A named list containing all ACO control parameters.
 #'
-#' @return A data frame representing the initialized node list, including:
-#'   \itemize{
-#'     \item `travel` — Travel counter (initialized to 0).
-#'     \item `node.no` — Node index number.
-#'     \item `local.node.no` — Index of the option within the node group.
-#'     \item `node.names` — Node name (e.g., `"eta.vp.no"`, `"eta.vp.yes"`).
-#'     \item `node.group` — Group ID for nodes that share a pheromone distribution.
-#'     \item `phi` — Initial pheromone value.
-#'     \item `delta_phi` — Change in pheromone (initialized to 0).
-#'     \item `p` — Initial selection probability for each node option.
-#'   }
+#' @author Zhonghui Huang
+#'
 #' @examples
-#' node.list.iv <- initNodeList(search.space = "ivbase", initial.phi = 1)
-#' node.list.oral <- initNodeList(search.space = "oralbase", initial.phi = 1)
+#' acoControl()
 #'
 #' @export
-initNodeList <- function(search.space,
-                         initial.phi) {
-  if (search.space == "ivbase") {
-    no.nodes <- 22
-    node.list.all <- data.frame(
-      travel = 0,
-      node.no = seq(1, no.nodes, 1),
-      local.node.no = c(
-        seq(1, 3, 1),
-        # compartments: 1Cmpt / 2Cmpt / 3Cmpt
-        seq(0, 1, 1),
-        # vp2
-        seq(0, 1, 1),
-        # q2
-        seq(0, 1, 1),
-        # vp
-        seq(0, 1, 1),
-        # q
-        seq(0, 1, 1),
-        # vc
-        seq(0, 1, 1),
-        # mm
-        seq(0, 1, 1),
-        # km
-        seq(0, 1, 1),
-        # mcorr
-        seq(1, 3, 1)   # residual error: add / prop / comb
-      ),
-      node.names = c(
-        "1Cmpt",
-        "2Cmpt",
-        "3Cmpt",
-        "eta.vp2.no",
-        "eta.vp2.yes",
-        "eta.q2.no",
-        "eta.q2.yes",
-        "eta.vp.no",
-        "eta.vp.yes",
-        "eta.q.no",
-        "eta.q.yes",
-        "eta.vc.no",
-        "eta.vc.yes",
-        "mm.no",
-        "mm.yes",
-        "eta.km.no",
-        "eta.km.yes",
-        "mcorr.no",
-        "mcorr.yes",
-        "add",
-        "prop",
-        "comb"
-      ),
-      node.group = c(rep(1, 3),
-                     sort(rep(seq(
-                       2, 9, 1
-                     ), 2)),
-                     rep(10, 3)),
-      phi = rep(initial.phi, no.nodes),
-      delta_phi = rep(0, no.nodes),
-      p = c(rep(round(1 / 3, 3), 3),
-            rep(0.5, 16),
-            rep(round(1 / 3, 3), 3))
-    )
-
-  } else if (search.space == "oralbase") {
-    no.nodes <- 24
-    node.list.all <- data.frame(
-      travel = 0,
-      node.no = seq(1, no.nodes, 1),
-      local.node.no = c(
-        seq(1, 3, 1),
-        # compartments: 1Cmpt / 2Cmpt / 3Cmpt
-        seq(0, 1, 1),
-        # vp2
-        seq(0, 1, 1),
-        # q2
-        seq(0, 1, 1),
-        # vp
-        seq(0, 1, 1),
-        # q
-        seq(0, 1, 1),
-        # vc
-        seq(0, 1, 1),
-        # ka (oral-specific absorption rate constant)
-        seq(0, 1, 1),
-        # mm
-        seq(0, 1, 1),
-        # km
-        seq(0, 1, 1),
-        # mcorr
-        seq(1, 3, 1)   # residual error: add / prop / comb
-      ),
-      node.names = c(
-        "1Cmpt",
-        "2Cmpt",
-        "3Cmpt",
-        "eta.vp2.no",
-        "eta.vp2.yes",
-        "eta.q2.no",
-        "eta.q2.yes",
-        "eta.vp.no",
-        "eta.vp.yes",
-        "eta.q.no",
-        "eta.q.yes",
-        "eta.vc.no",
-        "eta.vc.yes",
-        "eta.ka.no",
-        "eta.ka.yes",
-        # oral-specific
-        "mm.no",
-        "mm.yes",
-        "eta.km.no",
-        "eta.km.yes",
-        "mcorr.no",
-        "mcorr.yes",
-        "add",
-        "prop",
-        "comb"
-      ),
-      node.group = c(rep(1, 3),
-                     sort(rep(seq(
-                       2, 10, 1
-                     ), 2)),
-                     rep(11, 3)),
-      phi = rep(initial.phi, no.nodes),
-      delta_phi = rep(0, no.nodes),
-      p = c(rep(round(1 / 3, 3), 3),
-            rep(0.5, (no.nodes - 6)),
-            rep(round(1 / 3, 3), 3))
-    )
-
-  } else {
-    stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
-  }
-
-  return(node.list.all)
-}
-
-
-
-#' Control Parameters for Ant Colony Optimization
-#'
-#' Creates a list of control settings for the \code{\link{aco.operator}} function.
-#' These settings define the number of ants, iterations, pheromone update rules,
-#' probability bounding, and elitism.
-#'
-#' @param no.ants Integer. Number of ants per iteration.
-#' @param max.iter Integer. Maximum number of iterations.
-#' @param param.Q Numeric. Pheromone intensity parameter controlling the amount of pheromone
-#' @param rho Numeric in [0,1]. Pheromone evaporation rate per iteration.
-#' @param initial.phi Numeric. Initial pheromone level for all nodes.
-#' @param lower.limit.phi Numeric. Lower bound for pheromone level.
-#' @param upper.limit.phi Numeric. Upper bound for pheromone level.
-#' @param alpha.value Numeric. Influence factor of pheromone level on path selection.
-#' @param elitism.percentage Numeric in [0,1]. Fraction of top ants preserved each iteration.
-#' @param prob.floor Numeric in (0, 0.5). Minimum selection probability assigned to
-#' each node option (probability floor constraint). After applying the floor, the
-#' remaining probability mass is proportionally rescaled among the other options
-#' to preserve relative likelihoods.
-#' @param sig.diff Numeric. Minimum significant fitness difference for ranking.
-#'
-#' @details
-#' The \code{prob.floor} parameter implements a *probability floor constraint with proportional
-#' rescaling* (also known as bounded probability adjustment). This prevents any decision
-#' option from having a probability lower than \code{prob.floor}, improving exploration
-#' stability in cases where pheromone values become highly imbalanced.
-#'
-#' @return List of ACO hyperparameters.
-#' @export
-
-acoControl <- function(no.ants = 15,
-                       max.iter = 20,
-                       param.Q = 1,
+acoControl <- function(nants = 15,
+                       niter = 20,
+                       Q = 1,
                        rho = 0.5,
-                       initial.phi = 2,
-                       lower.limit.phi = 1,
-                       upper.limit.phi = Inf,
-                       alpha.value = 1,
-                       elitism.percentage = 0,
-                       prob.floor = 0.2,
-                       sig.diff = 1) {
+                       phi0 = 2,
+                       phi_min = 1,
+                       phi_max = Inf,
+                       alpha = 1,
+                       elite = 0,
+                       prob_min = 0.2,
+                       diff_tol = 1) {
   list(
-    no.ants = no.ants,
-    max.iter = max.iter,
-    param.Q = param.Q,
+    nants = nants,
+    niter = niter,
+    Q = Q,
     rho = rho,
-    initial.phi = initial.phi,
-    lower.limit.phi = lower.limit.phi,
-    upper.limit.phi = upper.limit.phi,
-    alpha.value = alpha.value,
-    elitism.percentage = elitism.percentage,
-    prob.floor = prob.floor,
-    sig.diff = sig.diff
+    phi0 = phi0,
+    phi_min = phi_min,
+    phi_max = phi_max,
+    alpha = alpha,
+    elite = elite,
+    prob_min = prob_min,
+    diff_tol = diff_tol
   )
 }
 
-
-#' Ant Colony Optimization (ACO) Operator for Model Selection
+#' ACO operator for model selection
 #'
-#' Implements an Ant Colony Optimization (ACO) algorithm to explore
-#' model space (e.g., pharmacometric structural models) and identify the best-performing
-#' model given observed data and parameter constraints.
+#' Implements an ant colony optimization algorithm to explore
+#' model space and identify the best-performing model given pre-defined fitness
+#' function.
 #'
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param aco.control A list of ACO control parameters defined by
+#'   \code{acoControl()}. Includes:
+#'   \itemize{
+#'     \item nants - number of ants per iteration.
+#'     \item niter - maximum number of iterations.
+#'     \item rho - pheromone evaporation rate.
+#'     \item phi0 - initial pheromone level.
+#'     \item phi_min, phi_max - bounds for pheromone levels.
+#'     \item alpha - pheromone weight exponent.
+#'     \item elite - proportion of best solutions preserved each iteration.
+#'     \item prob.min - minimum sampling probability.
+#'     \item diff_tol - threshold for significant fitness difference.
+#'   }
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param seed Integer. Random seed controlling the random sampling steps of the
+#'   ant colony optimization operator for reproducible runs. Default is 1234.
+#' @param ... Additional arguments passed to the underlying model fitting function
+#'   (e.g., \code{mod.run()}).
+#' @param .modEnv Optional environment used internally to store model indices,
+#'   cached parameter tables, and results across steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to \code{mod.run()}.
+#'
+#' @details
 #' The ACO approach uses a colony of "ants" to stochastically sample models,
 #' evaluate their fitness, and update pheromone trails that guide future searches.
 #' This iterative process balances exploration of new models with exploitation
 #' of promising candidates.
 #'
-#' @param dat A dataset (typically pharmacokinetic/pharmacodynamic data) used
-#'   for model estimation and evaluation.
-#' @param param_table Optional parameter table specifying initial estimates,
-#'   bounds, and parameter definitions. If `NULL`, it will be automatically
-#'   generated via \code{auto_param_table()}.
-#' @param search.space Character string specifying the search space type.
-#'   Options are:
-#'   \itemize{
-#'     \item `"ivbase"` — base IV model search space.
-#'     \item `"oralbase"` — base oral model search space.
-#'   }
-#' @param no.cores Integer. Number of CPU cores to use for parallelization.
-#'   Defaults to \code{rxode2::getRxThreads()}.
-#' @param foldername Character string. Base folder name for output storage.
-#' @param filename Character string. Base file name for result storage.
-#' @param aco.control A list of ACO control parameters, typically generated by
-#'   \code{acoControl()}. Includes:
-#'   \itemize{
-#'     \item no.ants — number of ants per iteration.
-#'     \item max.iter — maximum number of iterations.
-#'     \item rho — pheromone evaporation rate.
-#'     \item initial.phi — initial pheromone level.
-#'     \item lower.limit.phi, upper.limit.phi — bounds for pheromone levels.
-#'     \item alpha.value — pheromone weight exponent.
-#'     \item elitism.percentage — proportion of best solutions preserved each iteration.
-#'     \item prob.floor — minimum sampling probability.
-#'     \item sig.diff — threshold for significant fitness difference.
-#'   }
-#' @param penalty.control A list of penalty function settings, typically from
-#'   \code{penaltyControl()}, to handle invalid or poor-fitting models.
-#' @param precomputed_results_file Optional. A file path to precomputed model results
-#'   to avoid redundant evaluations.
-#' @param seed.no Integer. Random seed for reproducibility.
-#' @param ... Additional arguments passed to the underlying model fitting function
-#'   (e.g., \code{mod.run()}).
-#'
 #' @return An object of class \code{"acoOperatorResult"}, containing:
 #' \itemize{
-#'   \item \code{$`Final Selected Code`} — Vector representation of the best model.
-#'   \item \code{$`Final Selected Model Name`} — Human-readable name of the selected model.
-#'   \item \code{$`Model Run History`} — Data frame of model runs across iterations.
-#'   \item \code{$`Node Run History`} — History of pheromone probabilities for each iteration.
+#'   \item \code{$`Final Selected Code`} - Vector representation of the best model.
+#'   \item \code{$`Final Selected Model Name`} - Human-readable name of the selected model.
+#'   \item \code{$`Model Run History`} - Data frame of model runs across iterations.
+#'   \item \code{$`Node Run History`} - History of pheromone probabilities for each iteration.
 #' }
 #'
+#' @author Zhonghui Huang
+#'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' withr::with_dir(tempdir(), {
 #' # Example usage with phenotype dataset
 #' outs <- aco.operator(
 #'   dat = pheno_sd,
 #'   param_table = NULL,
 #'   search.space = "ivbase",
-#'   saem.control = saemControl(
+#'   aco.control = acoControl(),
+#'   saem.control = nlmixr2est::saemControl(
 #'     seed = 1234,
-#'     nBurn = 15,
-#'     nEm   = 15,
+#'     nBurn = 200,
+#'     nEm   = 300,
 #'     logLik = TRUE
 #'   )
 #' )
-#'
-#' # Print summary
 #' print(outs)
+#' })
 #' }
 #'
-#' @seealso \code{\link{acoControl}}, \code{\link{penaltyControl}}, \code{\link{saemControl}}
+#' @seealso \code{\link{acoControl}}, \code{\link{penaltyControl}},
+#' \code{\link{saemControl}}
 #'
 #' @export
-
 aco.operator <- function(dat,
                          param_table = NULL,
-                         search.space = "ivbase",
-                         no.cores = rxode2::getRxThreads(),
-                         foldername = "test",
-                         filename = "test",
+                         search.space = c("ivbase", "oralbase"),
+                         no.cores = NULL,
                          aco.control = acoControl(),
                          penalty.control = penaltyControl(),
                          precomputed_results_file = NULL,
-                         seed.no = 1234,
+                         foldername = NULL,
+                         filename = "test",
+                         seed = 1234,
+                         .modEnv = NULL,
+                         verbose = TRUE,
                          ...) {
-  # --- Extract ACO control parameters ---
-  no.ants <- aco.control$no.ants
-  max.iter <- aco.control$max.iter
-  param.Q <-aco.control$param.Q
-  rho <- aco.control$rho
-  initial.phi <- aco.control$initial.phi
-  lower.limit.phi <- aco.control$lower.limit.phi
-  upper.limit.phi <- aco.control$upper.limit.phi
-  alpha.value <- aco.control$alpha.value
-  elitism.percentage <- aco.control$elitism.percentage
-  prob.floor <- aco.control$prob.floor
-  sig.diff <- aco.control$sig.diff
-  # --- Setup ---
-  set.seed(seed.no)
-  current.date <- Sys.Date()
-
-  # Create temporary output directory
-  outputdir <- paste0("ACO_",
-                      current.date,
-                      "-",
-                      foldername,
-                      "_",
-                      digest::digest(dat),
-                      "_temp")
-  if (!dir.exists(outputdir)) {
-    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
-  }
-  setwd(file.path(getwd(), outputdir))
-  storage.path <- getwd()
-
-  # --- Initialize parameter table ---
-  param_table <- auto_param_table(
-    dat = dat,
-    param_table = param_table,
-    nlmixr2autoinits = TRUE,
-    foldername = foldername
-  )
-
-  # Search Space Definiation
-  if (search.space == "ivbase") {
-    bit.names <- c(
-      "no.cmpt",
-      "eta.km",
-      "eta.vc",
-      "eta.vp",
-      "eta.vp2",
-      "eta.q",
-      "eta.q2",
-      "mm",
-      "mcorr",
-      "rv"
-    )
-
-  } else if (search.space == "oralbase") {
-    bit.names <- c(
-      "no.cmpt",
-      "eta.km",
-      "eta.vc",
-      "eta.vp",
-      "eta.vp2",
-      "eta.q",
-      "eta.q2",
-      "eta.ka",
-      "mm",
-      "mcorr",
-      "rv"
-    )
-
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
+    # .modEnv <- get(".modEnv", inherits = TRUE)
   } else {
-    stop("Unknown search.space type: must be 'ivbase' or 'oralbase'")
+    .modEnv <- new.env(parent = emptyenv())
   }
 
-    ##########################Start###############################
-    #  Subsequent iterations ---
-  pb <-
-    progress::progress_bar$new(
-      format = " ACO Search [:bar] :percent (iteration :current/:total)\n",
-      total = max.iter,
-      clear = FALSE,
-      width = 60
-    )
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+  if (is.null(.modEnv$saem.control))
+    .modEnv$saem.control <- NULL
 
-    for (aco.iter in 1:max.iter) {
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
+  }
+
+  if (is.null(foldername) || !nzchar(foldername)) {
+    foldername <-
+      paste0("acoCache_", filename, "_", digest::digest(dat))
+  }
+  if (!dir.exists(foldername)) {
+    dir.create(foldername,
+               showWarnings = FALSE,
+               recursive = TRUE)
+  }
+  # Set random seed
+  if (!is.numeric(seed) ||
+      length(seed) != 1 || is.na(seed) || is.infinite(seed)) {
+    stop("`seed` must be a single finite numeric value", call. = FALSE)
+  }
+  if (abs(seed) > .Machine$integer.max) {
+    stop("`seed` exceeds valid integer range", call. = FALSE)
+  }
+  seed <- as.integer(seed)
+  withr::local_rng_version("4.2.0")
+  withr::local_seed(seed)
+
+  # Initial estimates
+  if (!is.null(param_table)) {
+    param_table_use <- param_table
+  } else if (!is.null(.modEnv$param_table)) {
+    param_table_use <- .modEnv$param_table
+  } else {
+    param_table_use <- auto_param_table(
+      dat = dat,
+      nlmixr2autoinits = TRUE,
+      filename = filename,
+      out.dir = file.path(getwd(), foldername)
+    )
+    .modEnv$param_table <- param_table_use
+  }
+
+  param_table <- param_table_use
+
+  # ACO does not support a custom search space.
+  custom_config <- NULL
+
+  search.space <-
+    match.arg(search.space, choices = c("ivbase", "oralbase"))
+  # if (identical(search.space, "custom")) {
+  #   stop(
+  #     "aco currently does not support search.space = 'custom'. Use 'ivbase' or 'oralbase'.",
+  #     call. = FALSE
+  #   )
+  # }
+  cfg <- spaceConfig(search.space)
+
+  bit.names <- if (identical(search.space, "custom")) {
+    if (is.null(custom_config) || is.null(custom_config$params)) {
+      stop("custom_config$params must be provided when search.space = 'custom'",
+           call. = FALSE)
+    }
+    custom_config$params
+  } else {
+    cfg$params
+  }
+
+  old_handlers <- progressr::handlers()
+  old_enable <- getOption("progressr.enable")
+
+  on.exit({
+    options(progressr.enable = old_enable)
+    if (length(old_handlers) > 0) {
+      progressr::handlers(old_handlers)
+    } else {
+      progressr::handlers(list())
+    }
+  }, add = TRUE)
+
+  if (isTRUE(verbose)) {
+    progressr::handlers("txtprogressbar")
+  } else {
+    progressr::handlers("void")
+  }
+
+  progressr::with_progress({
+    p <- progressr::progressor(steps = aco.control$niter)
+    for (aco.iter in 1:aco.control$niter) {
       if (aco.iter == 1) {
-        node.list.0 <- initNodeList(search.space = search.space,
-                                    initial.phi = initial.phi)
-        node.list.history <- node.list.0
+        nodeslst0 <- initNodeList(search.space = search.space,
+                                  phi0 = aco.control$phi0)
+        nodeslst.hist <- nodeslst0
         cycle.all.list <- list()
 
-        # Create initial ant population
-        initial.ants <- createAnts(
-          search.space = search.space,
-          no.ants = no.ants,
-          initialize = TRUE,
-          node.list = node.list.0
-        )
-
-        initial.ants <- t(vapply(seq_len(ncol(initial.ants)),  #
-                                 function(i) {
-                                   validateModels(
-                                     string = pmax(unname(initial.ants[, i]), 0),
-                                     search.space = search.space,
-                                     code.source = "ACO"
-                                   )
-                                 },
-                                 numeric(nrow(initial.ants))))
+        initial.ants <- createAnts(search.space,
+                                   aco.control$nants,
+                                   init = TRUE,
+                                   nodeslst = nodeslst0)
+        initial.ants <- t(vapply(seq_len(ncol(
+          initial.ants
+        )),  #
+        function(i) {
+          validStringcat(string = pmax(unname(initial.ants[, i]), 0),
+                         search.space = search.space)
+        },
+        numeric(nrow(
+          initial.ants
+        ))))
 
         colnames(initial.ants) <- bit.names
         cycle.all.list[[1]] <- initial.ants
 
         # Model running and fitness evaluation
         data.ants <- as.data.frame(initial.ants)
-
         data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                     function(k) {
-                                      string_vec <- as.vector(initial.ants[k,])
+                                      string_vec <- as.vector(initial.ants[k, ])
                                       result <- try(mod.run(
-                                        r                = aco.iter,
-                                        dat              = dat,
-                                        search.space     = search.space,
-                                        string           = string_vec,
-                                        param_table      = param_table,
-                                        penalty.control  = penalty.control,
+                                        string               = string_vec,
+                                        dat                  = dat,
+                                        search.space         = search.space,
+                                        no.cores             = no.cores,
+                                        param_table          = param_table,
                                         precomputed_results_file = precomputed_results_file,
-                                        filename         = filename,
+                                        filename             = filename,
+                                        foldername           = foldername,
+                                        .modEnv              = .modEnv,
+                                        verbose =  verbose,
                                         ...
                                       ),
                                       silent = TRUE)
@@ -457,23 +335,24 @@ aco.operator <- function(dat,
         fitness_history <- rbind(fitness_history, data.ants)
 
         #  Update pheromone levels and probabilities ---
-        node.list.1 <- phi.calculate(
+        nodeslst1 <- phi.calculate(
           r = aco.iter,
           search.space = search.space,
           fitness_history = fitness_history,
-          node.list.history = node.list.history,
-          param.Q = param.Q,
-          alpha.value = alpha.value,
-          rho = rho,
-          sig.diff = sig.diff,
-          lower.limit.phi = lower.limit.phi,
-          upper.limit.phi = upper.limit.phi
+          nodeslst.hist = nodeslst.hist,
+          Q = aco.control$Q,
+          alpha = aco.control$alpha,
+          rho = aco.control$rho,
+          diff_tol = aco.control$diff_tol,
+          phi0 = aco.control$phi0,
+          phi_min = aco.control$phi_min,
+          phi_max = aco.control$phi_max
         )
 
-        node.list.s <- p.calculation(node.list = node.list.1,
-                                     prob.floor = prob.floor)
+        nodeslsts <- p.calculation(nodeslst = nodeslst1,
+                                   prob_min = aco.control$prob_min)
 
-        node.list.history <- rbind(node.list.history, node.list.s)
+        nodeslst.hist <- rbind(nodeslst.hist, nodeslsts)
       }
       else{
         # Identify current best model (elitism)
@@ -482,17 +361,30 @@ aco.operator <- function(dat,
         bestmodelcode <- bestmodel[1, bit.names]
 
         # Generate next generation of ants
-        cycle.all <- createAnts(
-          search.space = search.space,
-          no.ants = no.ants,
-          initialize = FALSE,
-          node.list = node.list.s
-        )
-
+        cycle.all <- if (is.null(seed)) {
+          createAnts(
+            search.space = search.space,
+            nants = aco.control$nants,
+            init = FALSE,
+            nodeslst = nodeslsts,
+            custom_config = custom_config
+          )
+        } else {
+          withr::with_seed(seed, {
+            createAnts(
+              search.space = search.space,
+              nants = aco.control$nants,
+              init = FALSE,
+              nodeslst = nodeslsts,
+              custom_config = custom_config
+            )
+          })
+        }
         # Apply elitism: preserve top-performing ants
-        no.elitism <- max(round(no.ants * elitism.percentage, 0), 1)
+        no.elitism <-
+          max(round(aco.control$nants * aco.control$elite, 0), 1)
         for (loop.no.elitism in 1:no.elitism) {
-          cycle.all[, (no.ants - loop.no.elitism + 1)] <-
+          cycle.all[, (aco.control$nants - loop.no.elitism + 1)] <-
             as.numeric(bestmodelcode)
         }
         cycle.all.list[[aco.iter]] <- cycle.all
@@ -501,27 +393,25 @@ aco.operator <- function(dat,
         data.ants <-
           as.data.frame(t(vapply(seq_len(ncol(cycle.all)),
                                  function(i) {
-                                   validateModels(
-                                     string = pmax(unname(cycle.all[, i]), 0),
-                                     search.space = search.space,
-                                     code.source = "ACO"
-                                   )
+                                   validStringcat(string = pmax(unname(cycle.all[, i]), 0),
+                                                  search.space = search.space)
                                  },
                                  numeric(nrow(cycle.all)))))
         colnames(data.ants) <- bit.names
-
         data.ants$fitness <- vapply(seq_len(nrow(data.ants)),
                                     function(k) {
-                                      string_vec <- as.vector(as.numeric(data.ants[k,]))
+                                      string_vec <- as.vector(data.ants[k,])
                                       result <- try(mod.run(
-                                        r = aco.iter,
-                                        dat = dat,
-                                        search.space = search.space,
-                                        string = string_vec,
-                                        param_table = param_table,
-                                        penalty.control = penalty.control,
+                                        string               = string_vec,
+                                        dat                  = dat,
+                                        search.space         = search.space,
+                                        no.cores             = no.cores,
+                                        param_table          = param_table,
                                         precomputed_results_file = precomputed_results_file,
-                                        filename = filename,
+                                        filename             = filename,
+                                        foldername           = foldername,
+                                        .modEnv              = .modEnv,
+                                        verbose = verbose,
                                         ...
                                       ),
                                       silent = TRUE)
@@ -545,93 +435,81 @@ aco.operator <- function(dat,
                 data.ants)
 
         # Update pheromone trails
-        node.list.s <- phi.calculate(
+        nodeslsts <- phi.calculate(
           r = aco.iter,
           search.space = search.space,
           fitness_history = fitness_history,
-          node.list.history = node.list.history,
-          param.Q = param.Q,
-          alpha.value = alpha.value,
-          rho = rho,
-          sig.diff = sig.diff,
-          lower.limit.phi = lower.limit.phi,
-          upper.limit.phi = upper.limit.phi
+          nodeslst.hist = nodeslst.hist,
+          Q = aco.control$Q,
+          alpha = aco.control$alpha,
+          rho = aco.control$rho,
+          diff_tol = aco.control$diff_tol,
+          phi0 = aco.control$phi0,
+          phi_min = aco.control$phi_min,
+          phi_max = aco.control$phi_max
         )
 
         # Update probabilities
-        node.list.s <- p.calculation(node.list = node.list.s,
-                                     prob.floor = prob.floor)
+        nodeslsts <- p.calculation(nodeslst = nodeslsts,
+                                   prob_min = aco.control$prob_min)
 
         # Extend node history
-        node.list.history <- rbind(node.list.history, node.list.s)
+        nodeslst.hist <- rbind(nodeslst.hist, nodeslsts)
       }
-      pb$tick()
-    }
 
-  # ----------------------------
-  # Final output (ACO)
-  # ----------------------------
+      p(sprintf("ACO iteration %d / %d", aco.iter, aco.control$niter))
+    }
+  })
+
+  # Final output
   names(bestmodelcode) <- bit.names
-  best_model_name <- CodetoMod(sel.best.code = bestmodelcode,
+  best_model_name <- parseName(modcode = bestmodelcode,
                                search.space  = search.space)
 
-  best_idx <- which(apply(Store.all[, names(bestmodelcode)], 1, function(x) {
-    all(x == bestmodelcode)
-  }))[1]
+  best_idx <-
+    which(apply(.modEnv$Store.all[, names(bestmodelcode)], 1, function(x) {
+      all(x == bestmodelcode)
+    }))[1]
 
-  best_row <- Store.all[best_idx, c("model.num", "round.num")]
+  best_row <-
+    .modEnv$Store.all[best_idx, c("model.num", "round.num")]
 
   out <- new.env(parent = emptyenv())
   class(out) <- "acoOperatorResult"
   out[["Final Selected Code"]] <- bestmodelcode
   out[["Final Selected Model Name"]] <- best_model_name
   out[["Best Model First Occurrence"]] <- paste0(
-    "Best model first appears at model ", best_row$model.num,
-    ", round ", best_row$round.num, "."
+    "Best model first appears at model ",
+    best_row$model.num,
+    ", round ",
+    best_row$round.num,
+    "."
   )
   out[["Model Run History"]] <-
-    as.data.frame(Store.all, stringsAsFactors = FALSE)
-  out[["Node Run History"]] <- node.list.history
-
-  on.exit({
-    rm(modi, r, Store.all, precomputed_cache_loaded, envir = .GlobalEnv)
-  }, add = TRUE)
+    as.data.frame(.modEnv$Store.all, stringsAsFactors = FALSE)
+  out[["Node Run History"]] <- nodeslst.hist
 
   return(out)
 }
 
-#' Print Method for ACO Operator Results
+#' Print method for ACO operator results
 #'
-#' This function defines the \code{print} method for objects of class
-#' \code{"acoOperatorResult"} produced by \code{\link{aco.operator}}.
-#' It displays the final selected model code and the corresponding model name
-#' in a formatted, colorized output.
+#' Print ACO operator results.
 #'
-#' @param x An object of class \code{"acoOperatorResult"}, typically the output
-#'   of \code{\link{aco.operator}}.
+#' @param x An "acoOperatorResult" object.
 #' @param ... Additional arguments (currently ignored).
 #'
-#' @return Invisibly returns the input object \code{x}.
-#'
-#' @examples
-#' \dontrun{
-#' # Run ACO model selection
-#' outs <- aco.operator(dat = pheno_sd)
-#'
-#' # Print results in formatted style
-#' print(outs)
-#' }
+#' @return Invisibly returns x.
 #'
 #' @seealso \code{\link{aco.operator}}
 #'
+#' @author Zhonghui Huang
+#'
 #' @export
-
 print.acoOperatorResult <- function(x, ...) {
-  # Print final selected model code
   cat(crayon::green$bold("\n=== Final Selected Model Code (ACO) ===\n"))
   print(x$`Final Selected Code`)
 
-  # Print final selected model name
   cat(crayon::green$bold("\n=== Final Selected Model Name (ACO) ===\n"))
   cat(x$`Final Selected Model Name`, "\n")
 

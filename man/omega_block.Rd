@@ -35,7 +35,6 @@ Generates the code for the omega block matrix in nlmixr2 syntax,
 supporting both independent variance terms and correlated covariance structures.
 }
 \examples{
-\dontrun{
 # Example eta table structure
 eta_table <- initialize_param_table()
 
@@ -44,5 +43,8 @@ omega_block(c("eta.cl", "eta.vc"), mcorr = 0, eta_table)
 
 # Generate covariance block
 omega_block(c("eta.cl", "eta.vc"), mcorr = 1, eta_table)
+
 }
+\author{
+Zhonghui Huang
 }

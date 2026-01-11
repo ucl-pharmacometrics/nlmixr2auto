@@ -2,45 +2,21 @@
 % Please edit documentation in R/tabu.operator.R
 \name{print.tabuOperatorResult}
 \alias{print.tabuOperatorResult}
-\title{Print Method for Tabu Search Results}
+\title{Print method for tabu operator results}
 \usage{
 \method{print}{tabuOperatorResult}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{tabuOperatorResult}, typically the
-output from \code{\link{tabu.operator}}.}
+\item{x}{A "tabuOperatorResult" object.}
 
-\item{...}{Additional arguments (currently not used).}
+\item{...}{Additional arguments (currently ignored).}
 }
 \value{
-The function is called for its side effects (printing). It returns
-the input object \code{x} invisibly.
+Invisibly returns x.
 }
 \description{
-This function defines the print method for objects of class
-\code{tabuOperatorResult}, which are returned by the
-\code{\link{tabu.operator}} function. It prints the final selected
-model code and the corresponding human-readable model name obtained
-by the Tabu Search algorithm.
-}
-\details{
-The function prints:
-\itemize{
-\item The \strong{final selected model code}, as a named numeric vector.
-\item The \strong{final selected model name}, generated via \code{CodetoMod()}.
-}
-
-Colored console output is provided using the \pkg{crayon} package,
-to visually distinguish results from other optimization operators
-(e.g., ACO).
-}
-\examples{
-\dontrun{
-result <- tabu.operator(dat = mydata, search.space = "ivbase")
-print(result)   # automatically calls print.tabuOperatorResult
-}
-
+Print tabu operator results.
 }
 \seealso{
-\code{\link{tabu.operator}}, \code{\link{CodetoMod}}
+\code{\link{tabu.operator}}
 }

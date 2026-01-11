@@ -48,9 +48,9 @@ Parameters are organized with:
 }
 \examples{
 # Generate default parameter table
-param_table <- initialize_param_table()
-# View parameter table and structure
-param_table
-str(param_table)
+initialize_param_table()
 
+}
+\author{
+Zhonghui Huang
 }

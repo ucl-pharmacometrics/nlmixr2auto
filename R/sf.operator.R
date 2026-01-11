@@ -1,172 +1,123 @@
-#' Create a base model code for stepwise model search
+#' Screen number of compartments
 #'
-#' Generates a named numeric vector representing the base model code
-#' for a given search space (\code{"ivbase"} or \code{"oralbase"}).
-#' The returned vector contains model specification fields such as
-#' number of compartments, IIV flags, Michaelis–Menten term, correlation flag,
-#' and residual error model.
+#' Runs candidate models with one, two, and three compartments by modifying only
+#' the compartment setting in the current model code.
 #'
-#' Users can optionally supply a custom base model code via \code{custom_base}.
-#' The function will validate its type and length according to the chosen
-#' \code{search.space} and return it with proper element names.
-#'
-#' @param search.space Character scalar: either \code{"ivbase"} (9 elements)
-#'   or \code{"oralbase"} (10 elements). Default is \code{"ivbase"}.
-#' @param custom_base Optional numeric vector representing a user-specified
-#'   base model code. Must have length 9 for \code{"ivbase"} or 10 for
-#'   \code{"oralbase"}.
-#'
-#' @return A named integer vector representing the model code, with elements:
-#'   \itemize{
-#'     \item \code{no.cmpt}   — Number of compartments
-#'     \item \code{eta.km}    — IIV flag for Km
-#'     \item \code{eta.vc}    — IIV flag for Vc
-#'     \item \code{eta.vp}    — IIV flag for Vp
-#'     \item \code{eta.vp2}   — IIV flag for Vp2
-#'     \item \code{eta.q}     — IIV flag for Q
-#'     \item \code{eta.q2}    — IIV flag for Q2
-#'     \item \code{mm}        — Michaelis–Menten term flag
-#'     \item \code{mcorr}     — Correlation flag between ETAs
-#'     \item \code{eps.model} — Residual error model code
-#'   }
-#'   For \code{"ivbase"}, the last element (\code{eps.model}) is in position 9.
-#'
-#' @examples
-#' base_model("ivbase")
-#' base_model("oralbase")
-#' base_model("ivbase", custom_base = c(2,1,0,0,0,0,0,0,3))
-#'
-#' @export
-base_model <- function(search.space = "ivbase",
-                       custom_base = NULL) {
-  # Element names for the full oralbase vector
-  element_names <- c(
-    "no.cmpt",
-    "eta.km",
-    "eta.vc",
-    "eta.vp",
-    "eta.vp2",
-    "eta.q",
-    "eta.q2",
-    "mm",
-    "mcorr",
-    "rv"
-  )
-
-  if (!is.null(custom_base)) {
-    if (!is.numeric(custom_base)) {
-      stop("custom_base must be a numeric vector.")
-    }
-    if (search.space == "ivbase" && length(custom_base) != 9L) {
-      stop("For search.space = 'ivbase', model code must have length 9.")
-    }
-    if (search.space == "oralbase" && length(custom_base) != 10L) {
-      stop("For search.space = 'oralbase', model code must have length 10.")
-    }
-    return(setNames(
-      as.integer(custom_base),
-      if (search.space == "ivbase")
-        element_names[1:9]
-      else
-        element_names
-    ))
-  }
-
-  default_code <- c(
-    no.cmpt = 1,
-    eta.km  = 0,
-    eta.vc  = 0,
-    eta.vp  = 0,
-    eta.vp2 = 0,
-    eta.q   = 0,
-    eta.q2  = 0,
-    eta.ka  = 0,
-    mm      = 0,
-    mcorr   = 0,
-    rv      = 3
-  )
-
-  if (search.space == "ivbase") {
-    return(default_code[c(1:7, 9:11)])
-  } else if (search.space == "oralbase") {
-    return(default_code)
-  } else {
-    stop("Invalid search.space. Must be 'ivbase' or 'oralbase'.")
-  }
-}
-
-
-
-
-
-
-#' Screen number of compartments from the current/baseline model
-#'
-#' Clones the current model code (from \code{state$best_code}, or from
-#' \code{base_model(search.space, custom_base = ...)} if \code{state$best_code}
-#' is \code{NULL}) and generates three candidates by setting
-#' \code{no.cmpt} to 1, 2, and 3 while keeping all other positions unchanged.
-#' Each candidate is evaluated with \code{mod.run()} and the best (lowest
-#' \code{Fitness}) is returned alongside a results table for logging.
-#'
-#' @param dat A pharmacokinetic dataset passed through to \code{mod.run()}.
-#' @param state A list-like state that may contain:
-#'   \itemize{
-#'     \item \code{best_code}: named integer vector for the current model code (may be \code{NULL})
-#'     \item \code{modi}: optional value forwarded to \code{mod.run()} (if absent, defaults to 1)
-#'   }
-#' @param search.space Character scalar, e.g. \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Object passed through to \code{mod.run()}.
-#' @param ... Additional arguments forwarded to \code{mod.run()}. Must include
-#'   \code{custom_base} (a numeric vector) used by \code{base_model()} to
-#'   initialize the starting code when \code{state$best_code} is \code{NULL}.
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Internal environment used to store model indices and cached
+#'   results across steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to mod.run. These may include
+#'   custom_base, which is used to initialize the baseline model when no
+#'   best_code is present in start.mod.
 #'
 #' @details
-#' Candidates are formed by copying the starting code and changing only the
-#' \code{no.cmpt} element to \{1, 2, 3\}. Named codes are converted to unnamed
-#' numeric vectors (\code{unname()}) when passed to \code{mod.run()}.
-#' If \code{state$modi} is \code{NULL}, a default of \code{1} is used.
+#' Three candidate models are created by modifying only the number of
+#' compartments in the starting model code. The candidate codes are evaluated
+#' sequentially, and a results table containing model names, model codes,
+#' Fitness values, and information criteria is returned for logging and
+#' decision making.
 #'
-#' @return A list with:
+#' @return A list with the following elements:
 #' \itemize{
-#'   \item \code{results_table}: \code{data.frame} with columns
-#'         \code{Step}, \code{"Model name"}, \code{"Model code"}, \code{Fitness}
-#'   \item \code{best_code}: named integer vector of the best candidate’s model code
-#'   \item \code{best_row}: one-row \code{data.frame} (the best candidate)
+#'   \item results_table: a data frame with one row per candidate model,
+#'         including model description and fit statistics
+#'   \item best_code: named integer vector corresponding to the best candidate
+#'   \item best_row: one-row data frame containing the best candidate summary
 #' }
 #'
-#' @examples
-#' # Initialize state (if needed)
-
-#' # Run the compartment screening (custom_base is required and forwarded via ...):
-#'res <- step_compartments(
-#'  dat = dat,
-#'  state = state,
-#'  search.space = "ivbase",
-#'  param_table = param_table,
-#'  saem.control = saemControl(nBurn = 10,nEm = 10),
-#'  table.control = tableControl(cwres = T)
-#')
+#' @author Zhonghui Huang
 #'
-#' # Log both all candidates and the best candidate, and update state$best_code:
-#' state <- modlog_state(state, results_table = res$results_table, step_name = "no. of compartments")
+#' @examples
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- pheno_sd
+#'   string <- c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1)
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
+#'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
+#'   penalty.control = penaltyControl()
+#'   penalty.control$penalty.terms = c("rse", "theta", "covariance")
+#'   step_compartments(
+#'     dat = dat,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_cmpt_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
+#' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
 #'
 #' @export
 
 step_compartments <-
-  function(dat, state, search.space, param_table,penalty.control=NULL,precomputed_results_file=NULL,filename=NULL,...) {
-    dots <- list(...)
-    # custom_base <- dots$custom_base
-    if (!is.null(dots$custom_base)) {
-      custom_base <- dots$custom_base
+  function(dat,
+           start.mod = NULL,
+           search.space = "ivbase",
+           no.cores = NULL,
+           param_table = NULL,
+           penalty.control = NULL,
+           precomputed_results_file = NULL,
+           filename = "test",
+           foldername = NULL,
+           .modEnv = NULL,
+           verbose = TRUE,
+           ...) {
+    # Determine which .modEnv to use
+    if (!is.null(.modEnv)) {
+      if (!is.environment(.modEnv)) {
+        stop("`.modEnv` must be an environment", call. = FALSE)
+      }
     } else {
-      custom_base <- NULL
+      .modEnv <- new.env(parent = emptyenv())
     }
 
-    if (!is.null(state$best_code)) {
-      current_code <- state$best_code
+    # Ensure essential keys exist in .modEnv
+    if (is.null(.modEnv$modi))
+      .modEnv$modi <- 1L
+    if (is.null(.modEnv$r))
+      .modEnv$r <- 1L
+    if (is.null(.modEnv$Store.all))
+      .modEnv$Store.all <- NULL
+    if (is.null(.modEnv$precomputed_cache_loaded))
+      .modEnv$precomputed_cache_loaded <- FALSE
+    if (is.null(.modEnv$precomputed_results))
+      .modEnv$precomputed_results <- NULL
+    if (is.null(.modEnv$param_table))
+      .modEnv$param_table <- NULL
+
+    if (is.null(no.cores)) {
+      no.cores <- rxode2::getRxThreads()
+    }
+
+    if (!is.null(start.mod)) {
+      current_code <- start.mod
     } else {
-      current_code <- base_model(search.space=search.space, custom_base = custom_base)
+      current_code <-
+        base_model(search.space = search.space)
     }
 
     candidate_codes <- lapply(1:3, function(k) {
@@ -180,22 +131,32 @@ step_compartments <-
         string       = unname(code_vec),
         dat          = dat,
         search.space = search.space,
+        no.cores = no.cores,
         param_table  = param_table,
         precomputed_results_file =   precomputed_results_file,
-        filename=filename,
+        filename = filename,
+        foldername = foldername,
+        .modEnv = .modEnv,
+        verbose = verbose,
         ...
       )
     }, numeric(1))
 
-    # 4) results table
     model_names <- vapply(candidate_codes,
                           function(code)
-                            CodetoMod(search.space, unname(code)),
+                            parseName(modcode = unname(code), search.space = search.space),
                           character(1))
     model_codes_chr <- vapply(candidate_codes,
                               function(code)
                                 paste(unname(code), collapse = ","),
                               character(1))
+
+    AICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$AIC
+    BICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$BIC
+    OFVvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$OBJFV
 
     results_table <- data.frame(
       Step          = "No. of compartments",
@@ -203,84 +164,145 @@ step_compartments <-
       "Model name"  = model_names,
       "Model code"  = model_codes_chr,
       Fitness       = fits,
+      AIC           = c(AICvals),
+      BIC           = c(BICvals),
+      OFV           = c(OFVvals),
       stringsAsFactors = FALSE
     )
 
-    # 5) pick best
     best_idx  <- which.min(results_table$Fitness)
     best_row  <- results_table[best_idx, , drop = FALSE]
     best_code <- candidate_codes[[best_idx]]
 
-    r<<-r+1
+    # Increment round number
+    .modEnv$r <- .modEnv$r + 1L
+
     list(results_table = results_table,
          best_code     = best_code,
          best_row      = best_row)
   }
 
 
-#' Screen elimination type (Michaelis–Menten on/off)
+#' Screen elimination type (linear vs Michaelis-Menten)
 #'
-#' This step compares a standard linear elimination model (`mm = 0`)
-#' versus a Michaelis–Menten elimination model (`mm = 1`) while keeping
-#' all other positions of the current model code unchanged.
+#' Runs linear and Michaelis-Menten elimination candidates by modifying only the
+#' elimination setting in the current model code.
 #'
-#' If `mm = 0`, any IIV term for Km (`eta.km`) will be automatically set to 0.
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional internal environment used to store model indices
+#'   and cached results across model-selection steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to \code{mod.run()}.
 #'
-#' @param dat Dataset passed to \code{mod.run()}.
-#' @param state List-like with optional fields:
-#'   \itemize{
-#'     \item \code{best_code}: named integer vector (starting code). If NULL, \code{base_model()} is used.
-#'     \item \code{modi}: forwarded to \code{mod.run()} (default \code{1} if NULL).
-#'   }
-#' @param search.space Character scalar: either \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{mod.run()}.
-#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
-#'   \code{custom_base} used by \code{base_model()}.
+#' @details
+#' When mm = 0, any inter-individual variability term for Km
+#' (eta.km) present in the model code is automatically set to zero.
 #'
-#' @return A list with:
+#' @return A list with the following elements:
 #' \itemize{
-#'   \item \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness
-#'   \item \code{best_code}: named integer vector of the best candidate’s model code
-#'   \item \code{best_row}: one-row \code{data.frame} (the best candidate)
+#'   \item results_table: a data.frame with one row per candidate
+#'   model, including model description, Fitness, AIC, BIC, and OFV.
+#'   \item best_code: named integer vector corresponding to the best
+#'   candidate's model code.
+#'   \item best_row: one-row data.frame summarizing the best
+#'   candidate.
 #' }
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
-#' \dontrun{
-#' # Example dataset and parameter table would normally come from your workflow
-#' dat <- your_data_frame
-#' param_table <- your_param_table
-#'
-#' # Initialize state with a base model
-#' state <- list(best_code = base_model("ivbase"), modi = 1)
-#'
-#' # Run elimination type screening
-#' res_mm <- step_elimination(
-#'   dat = dat,
-#'   state = state,
-#'   search.space = "ivbase",
-#'   param_table = param_table
-#' )
-#'
-#' # View results
-#' res_mm$results_table
-#' res_mm$best_code
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- pheno_sd
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
+#'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
+#'   penalty.control = penaltyControl()
+#'   penalty.control$penalty.terms = c("rse", "theta", "covariance")
+#'   # Initialize start.mod with a base model
+#'    start.mod <- base_model("ivbase")
+#'   step_elimination(
+#'     dat = dat,
+#'     start.mod = start.mod,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_elim_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
 #' }
 #'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
+#'
 #' @export
+
 step_elimination <-
-  function(dat, state, search.space, param_table,penalty.control=NULL,precomputed_results_file=NULL,filename=NULL, ...) {
-    dots <- list(...)
-    if (!is.null(dots$custom_base)) {
-      custom_base <- dots$custom_base
+  function(dat,
+           start.mod = NULL,
+           search.space = "ivbase",
+           no.cores = NULL,
+           param_table = NULL,
+           penalty.control = NULL,
+           precomputed_results_file = NULL,
+           filename = "test",
+           foldername = NULL,
+           .modEnv = NULL,
+           verbose = TRUE,
+           ...) {
+    # Determine which .modEnv to use
+    if (!is.null(.modEnv)) {
+      if (!is.environment(.modEnv)) {
+        stop("`.modEnv` must be an environment", call. = FALSE)
+      }
+      # .modEnv <- get(".modEnv", inherits = TRUE)
     } else {
-      custom_base <- NULL
+      .modEnv <- new.env(parent = emptyenv())
+    }
+
+    # Ensure essential keys exist in .modEnv
+    if (is.null(.modEnv$modi))
+      .modEnv$modi <- 1L
+    if (is.null(.modEnv$r))
+      .modEnv$r <- 1L
+    if (is.null(.modEnv$Store.all))
+      .modEnv$Store.all <- NULL
+    if (is.null(.modEnv$precomputed_cache_loaded))
+      .modEnv$precomputed_cache_loaded <- FALSE
+    if (is.null(.modEnv$precomputed_results))
+      .modEnv$precomputed_results <- NULL
+    if (is.null(.modEnv$param_table))
+      .modEnv$param_table <- NULL
+
+    if (is.null(no.cores)) {
+      no.cores <- rxode2::getRxThreads()
     }
     # starting code
-    if (!is.null(state$best_code)) {
-      current_code <- state$best_code
+    if (!is.null(start.mod)) {
+      current_code <- start.mod
     } else {
       current_code <-
-        base_model(search.space = search.space, custom_base = custom_base)
+        base_model(search.space = search.space)
     }
 
     # candidates: mm = 0 and mm = 1
@@ -298,230 +320,608 @@ step_elimination <-
         string       = unname(code_vec),
         dat          = dat,
         search.space = search.space,
+        no.cores = no.cores,
         param_table  = param_table,
-        precomputed_results_file=   precomputed_results_file,
+        precomputed_results_file =   precomputed_results_file,
         filename = filename,
+        foldername = foldername,
+        .modEnv = .modEnv,
+        verbose = verbose,
         ...
       )
     }, numeric(1))
 
-    to_name <- function(code) {
-      if (exists("CodetoMod", mode = "function")) {
-        CodetoMod(search.space, unname(code))
-      } else {
-        paste0("Model_", paste(unname(code), collapse = "_"))
-      }
-    }
-
-    model_names <- vapply(candidate_codes, to_name, character(1))
+    model_names <- vapply(candidate_codes,
+                          function(code)
+                            parseName(modcode = unname(code),search.space = search.space),
+                          character(1))
     model_codes_chr <-
       vapply(candidate_codes, function(code)
         paste(unname(code), collapse = ","), character(1))
 
+    AICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$AIC
+    BICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$BIC
+    OFVvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$OBJFV
+
     results_table <- data.frame(
-       Step        = "Elimination type",
-       "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      Step        = "Elimination type",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
       "Model name" = model_names,
       "Model code" = model_codes_chr,
       Fitness      = fits,
+      AIC           = c(AICvals),
+      BIC           = c(BICvals),
+      OFV           = c(OFVvals),
       stringsAsFactors = FALSE
     )
 
     best_idx <- which.min(results_table$Fitness)
+    best_row  <- results_table[best_idx, , drop = FALSE]
+    best_code <- candidate_codes[[best_idx]]
 
-    r<<-r+1
+    # Increment round number
+    .modEnv$r <- .modEnv$r + 1L
 
-    list(
-      results_table = results_table,
-      best_code     = candidate_codes[[best_idx]],
-      best_row      = results_table[best_idx, , drop = FALSE]
-    )
+    list(results_table = results_table,
+         best_code     = best_code,
+         best_row      = best_row)
   }
 
 
+#' Evaluate inter-individual variability on Km
+#'
+#' Runs candidate models with and without IIV on \eqn{K_m} by modifying only the
+#' corresponding random-effect setting in the current model code.
+#'
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase". Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional internal environment used to store model indices
+#'   and cached results across model-selection steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments forwarded to mod.run().
+#'
+#' @details
+#' This step is executed only when the starting model code specifies
+#' Michaelis--Menten elimination (mm = 1). If mm is not equal to 1 in
+#' the starting model, no model comparison is performed.
 
-#' Stepwise inclusion of inter-individual variability (IIV)
-#'
-#' Two-stage procedure:
-#' 1) Special IIV:
-#'    - If \code{mm = 1} and \code{eta.km = 0}, test \code{eta.km = 1}.
-#'    - If \code{search.space = "oralbase"} and \code{eta.ka = 0}, test \code{eta.ka = 1}.
-#' 2) Structural IIV (forward selection):
-#'    - 1-compartment: \code{eta.vc}
-#'    - 2-compartment: \code{eta.vc, eta.vp, eta.q}
-#'    - 3-compartment: \code{eta.vc, eta.vp, eta.q, eta.vp2, eta.q2}
-#'    At each iteration, turn exactly one available IIV from 0 to 1, evaluate all candidates,
-#'    accept the single best improvement, and stop when no improvement occurs.
-#'
-#' @param dat Data frame passed to \code{mod.run()}.
-#' @param state List-like object with:
-#'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
-#'   - \code{modi}: optional; forwarded to \code{mod.run()} (default \code{1L}).
-#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{mod.run()}.
-#' @param penalty.control Optional penalty control object passed to \code{mod.run()}.
-#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
-#'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
-#'
-#' @return A list with:
-#'   - \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness.
-#'   - \code{best_code}: final best model code (named integer vector).
-#'   - \code{best_row}: one-row \code{data.frame} for the best entry.
-#'
-#' @examples
-#' \dontrun{
-#'
-#' dat <- pheno_sd
-#' param_table <-   param_table<-auto_param_table(dat = dat,
-#'                                 param_table = param_table,
-#'                                 nlmixr2autoinits = T)
-#'results_iiv <- step_iiv(
-#'  dat = dat,
-#'  state = list(),
-#'  search.space = "ivbase",
-#'  param_table = param_table,
-#'  penalty.control =   penalty.control
-#')
-#'
-#' results_iiv$results_table
-#' results_iiv$best_code
-#'results_iiv$best_row
+#' @return
+#' A list with the following elements:
+#' \itemize{
+#'   \item results_table: A data.frame summarizing the evaluated models.
+#'   \item best_code: A named integer vector representing the selected
+#'     model code.
+#'   \item best_row: A one-row data.frame corresponding to the selected
+#'     model.
 #' }
 #'
+#' @author Zhonghui Huang
+#'
+#' @examples
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- pheno_sd
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
+#'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
+#'
+#'   penalty.control <- penaltyControl()
+#'   penalty.control$penalty.terms <-
+#'     c("rse", "theta", "covariance", "shrinkage", "omega")
+#'   start.mod <- base_model("ivbase")
+#'   start.mod["mm"] <- 1L
+#'   step_iiv_km(
+#'     dat = dat,
+#'     start.mod = start.mod,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_etakm_test",
+#'     penalty.control = penalty.control,
+#'    saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
+#' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
+#'
 #' @export
-step_iiv <- function(dat,
-                     state=list(),
-                     search.space="ivbase",
-                     param_table=NULL,
-                     penalty.control = NULL,
-                     precomputed_results_file=NULL,
-                     filename=NULL,
-                     ...) {
 
-  dots <- list(...)
-  if (!is.null(dots$custom_base)) {
-    custom_base <- dots$custom_base
+step_iiv_km <- function(dat,
+                        start.mod = NULL,
+                        search.space ="ivbase",
+                        no.cores = NULL,
+                        param_table = NULL,
+                        penalty.control = NULL,
+                        precomputed_results_file = NULL,
+                        filename = "test",
+                        foldername = NULL,
+                        .modEnv = NULL,
+                        verbose = TRUE,
+                        ...) {
+  # Determine which .modEnv to use
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
   } else {
-    custom_base <- NULL
+    .modEnv <- new.env(parent = emptyenv())
+  }
+
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
   }
 
   # Starting code
-  if (!is.null(state$best_code)) {
-    current_code <- state$best_code
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
   } else {
-    current_code <- base_model(search.space = search.space, custom_base = custom_base)
+    current_code <-
+      base_model(search.space = search.space)
   }
 
-  all_results <- NULL
-
-  # ---------------- Special IIV: eta.km (only if mm = 1) ----------------
+  # eta.km (only if mm = 1)
   if ("mm" %in% names(current_code) && current_code["mm"] == 1L &&
-      "eta.km" %in% names(current_code) && current_code["eta.km"] == 0L) {
-
-    candidate_codes <- list(
-      current_code,
-      {tmp <- current_code; tmp["eta.km"] <- 1L; tmp}
-    )
+      "eta.km" %in% names(current_code) &&
+      current_code["eta.km"] == 0L) {
+    candidate_codes <- list(current_code,
+                            {
+                              tmp <- current_code
+                              tmp["eta.km"] <- 1L
+                              tmp
+                            })
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        string           = unname(code_vec),
-        dat              = dat,
-        search.space     = search.space,
-        param_table      = param_table,
-        penalty.control  = penalty.control,
+        string       = unname(code_vec),
+        dat          = dat,
+        search.space = search.space,
+        no.cores = no.cores,
+        param_table  = param_table,
         precomputed_results_file =   precomputed_results_file,
-        filename=filename,
+        filename = filename,
+        foldername = foldername,
+        .modEnv = .modEnv,
+        verbose = verbose,
         ...
       )
     }, numeric(1))
 
-    model_names <- vapply(candidate_codes, function(code) {
-      if (exists("CodetoMod", mode = "function")) {
-        CodetoMod(search.space = search.space, sel.best.code = unname(code))
-      } else {
-        paste0("Model_", paste(unname(code), collapse = "_"))
-      }
-    }, character(1))
+    model_names <- vapply(candidate_codes,
+                          function(code)
+                            parseName(modcode = unname(code), search.space = search.space),
+                          character(1))
 
     model_codes_chr <- vapply(candidate_codes, function(code) {
       paste(unname(code), collapse = ",")
     }, character(1))
 
+    AICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$AIC
+    BICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$BIC
+    OFVvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$OBJFV
+
     results_table <- data.frame(
-      Step         = "IIV on Km",
+      Step        = "IIV on Km",
       "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
       "Model name" = model_names,
       "Model code" = model_codes_chr,
       Fitness      = fits,
+      AIC           = c(AICvals),
+      BIC           = c(BICvals),
+      OFV           = c(OFVvals),
       stringsAsFactors = FALSE
     )
-    all_results <- rbind(all_results, results_table)
 
     best_idx <- which.min(results_table$Fitness)
-    current_code <- candidate_codes[[best_idx]]
+    best_row  <- results_table[best_idx, , drop = FALSE]
+    best_code <- candidate_codes[[best_idx]]
+
+    # Increment round number
+    .modEnv$r <- .modEnv$r + 1L
+
+    list(
+      results_table = results_table,
+      best_code     = best_code,
+      best_row      = best_row
+    )
+  }
+}
+
+
+#' Evaluate inter-individual variability on Ka
+#'
+#' Runs candidate models with and without IIV on \eqn{K_a} by modifying only the
+#' corresponding random-effect setting in the current model code.
+#'
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase". Default is "oralbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv An optional environment used to store intermediate
+#'   results across model runs.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments forwarded to `mod.run()`.
+#'
+#' @details
+#' This step is executed only when the search space is "oralbase" and the
+#' starting model code does not already include inter-individual
+#' variability on \eqn{K_a}. If these conditions are not met, no model
+#' comparison is performed.
+#'
+#' @return
+#' A list with the following elements:
+#' \itemize{
+#'   \item results_table: A data.frame summarizing the evaluated models.
+#'   \item best_code: A named integer vector representing the selected
+#'     model code.
+#'   \item best_row: A one-row data.frame corresponding to the selected
+#'     model.
+#' }
+#'
+#' @author Zhonghui Huang
+#'
+#' @examples
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- theo_sd
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(2)
+#'   param_table$init[param_table$Name == "lvc"] <- log(30)
+#'
+#'   penalty.control <- penaltyControl()
+#'   penalty.control$penalty.terms <-
+#'     c("rse", "theta", "covariance", "shrinkage", "omega")
+#'
+#'   start.mod <- base_model("oralbase")
+#'
+#'   step_iiv_ka(
+#'     dat = dat,
+#'     start.mod = start.mod,
+#'     search.space = "oralbase",
+#'     param_table = param_table,
+#'     filename = "step_etaka_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
+#' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
+#'
+#' @export
+#'
+step_iiv_ka <- function(dat,
+                        start.mod = NULL,
+                        search.space = "oralbase",
+                        no.cores = NULL,
+                        param_table = NULL,
+                        penalty.control = NULL,
+                        precomputed_results_file = NULL,
+                        filename = "test",
+                        foldername = NULL,
+                        .modEnv = NULL,
+                        verbose = TRUE,
+                        ...) {
+  # Determine which .modEnv to use
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
+  } else {
+    .modEnv <- new.env(parent = emptyenv())
   }
 
-  # ---------------- Special IIV: eta.ka (only for oralbase) ----------------
-  if (identical(search.space, "oralbase") &&
-      "eta.ka" %in% names(current_code) && current_code["eta.ka"] == 0L) {
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
 
-    candidate_codes <- list(
-      current_code,
-      {tmp <- current_code; tmp["eta.ka"] <- 1L; tmp}
-    )
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
+  }
+
+  # Starting code
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
+  } else {
+    current_code <-
+      base_model(search.space = search.space)
+  }
+
+  # eta.ka (only for oralbase)
+  if (identical(search.space, "oralbase") &&
+      "eta.ka" %in% names(current_code) &&
+      current_code["eta.ka"] == 0L) {
+    candidate_codes <- list(current_code,
+                            {
+                              tmp <- current_code
+                              tmp["eta.ka"] <- 1L
+                              tmp
+                            })
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        string           = unname(code_vec),
-        dat              = dat,
-        search.space     = search.space,
-        param_table      = param_table,
-        penalty.control  = penalty.control,
-        precomputed_results_file=   precomputed_results_file,
-        filename=filename,
+        string       = unname(code_vec),
+        dat          = dat,
+        search.space = search.space,
+        no.cores = no.cores,
+        param_table  = param_table,
+        precomputed_results_file =   precomputed_results_file,
+        filename = filename,
+        foldername = foldername,
+        .modEnv = .modEnv,
+        verbose = verbose,
         ...
       )
     }, numeric(1))
 
-    model_names <- vapply(candidate_codes, function(code) {
-      if (exists("CodetoMod", mode = "function")) {
-        CodetoMod(search.space = search.space, sel.best.code = unname(code))
-      } else {
-        paste0("Model_", paste(unname(code), collapse = "_"))
-      }
-    }, character(1))
+    model_names <- vapply(candidate_codes,
+                          function(code)
+                            parseName(modcode = unname(code), search.space = search.space),
+                          character(1))
 
     model_codes_chr <- vapply(candidate_codes, function(code) {
       paste(unname(code), collapse = ",")
     }, character(1))
 
+    AICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$AIC
+    BICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$BIC
+    OFVvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$OBJFV
+
     results_table <- data.frame(
-      Step         = "IIV on Ka",
+      Step        = "IIV on Ka",
       "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
       "Model name" = model_names,
       "Model code" = model_codes_chr,
       Fitness      = fits,
+      AIC           = c(AICvals),
+      BIC           = c(BICvals),
+      OFV           = c(OFVvals),
       stringsAsFactors = FALSE
     )
-    all_results <- rbind(all_results, results_table)
 
     best_idx <- which.min(results_table$Fitness)
-    current_code <- candidate_codes[[best_idx]]
+    best_row  <- results_table[best_idx, , drop = FALSE]
+    best_code <- candidate_codes[[best_idx]]
+
+    # Increment round number
+    .modEnv$r <- .modEnv$r + 1L
+
+    list(
+      results_table = results_table,
+      best_code     = best_code,
+      best_row      = best_row
+    )
+  }
+}
+
+
+#' Forward selection of IIV on structural parameters
+#'
+#' Implements a forward selection procedure to assess the inclusion of
+#' inter-individual variability on structural pharmacokinetic parameters.
+#'
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional environment for storing intermediate results
+#'   across model runs.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to the model estimation
+#'   function.
+#'
+#' @details
+#' The procedure begins with an initial model and proceeds iteratively.
+#' At each step, candidate models are generated by adding exactly one
+#' additional IIV (random-effect) term while keeping all other aspects of
+#' the model unchanged. If any candidate improves the chosen fitness
+#' criterion, the best-improving candidate becomes the new reference model
+#' for the next iteration. The algorithm stops when no further improvement
+#' is achieved.
+#' The set of parameters eligible for IIV depends on the number of
+#' compartments:
+#' \itemize{
+#'   \item One-compartment models: clearance and central volume
+#'   \item Two-compartment models: clearance, central volume, peripheral
+#'         volume, and inter-compartmental clearance
+#'   \item Three-compartment models: clearance, central volume,
+#'         peripheral volumes, and inter-compartmental clearances
+#' }
+#'
+#' @return
+#' A list with three elements:
+#' \itemize{
+#'   \item results_table: A data frame summarizing all models evaluated
+#'     during the forward selection process.
+#'   \item best_code: A named integer vector corresponding to the selected
+#'     model.
+#'   \item best_row: A one-row data frame containing the results of the
+#'     selected model.
+#' }
+#'
+#' @author Zhonghui Huang
+#'
+#' @examples
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- Bolus_2CPT[Bolus_2CPT$SD==1,]
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(4)
+#'   param_table$init[param_table$Name == "lvc2cmpt"] <- log(70)
+#'   param_table$init[param_table$Name == "lvp2cmpt"] <- log(40)
+#'   param_table$init[param_table$Name == "lq2cmpt"] <- log(4)
+#'
+#'   penalty.control <- penaltyControl()
+#'   penalty.control$penalty.terms <-
+#'     c("rse", "theta", "covariance", "shrinkage", "omega")
+#'
+#'   start.mod <- base_model("ivbase")
+#'   start.mod["no.cmpt"] <- 2L
+#'   step_iiv_f(
+#'     dat = dat,
+#'     start.mod = start.mod,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_eta_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
+#' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
+#'
+#' @export
+#'
+#'
+step_iiv_f <- function(dat,
+                       start.mod = NULL,
+                       search.space = "ivbase",
+                       no.cores = NULL,
+                       param_table = NULL,
+                       penalty.control = NULL,
+                       precomputed_results_file = NULL,
+                       filename = "test",
+                       foldername = NULL,
+                       .modEnv = NULL,
+                       verbose = TRUE,
+                       ...) {
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
+  } else {
+    .modEnv <- new.env(parent = emptyenv())
   }
 
-  # ---------------- Structural IIV (forward selection) ----------------
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
+  }
+
+  # Starting code
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
+  } else {
+    current_code <-
+      base_model(search.space = search.space)
+  }
+  # Structural IIV (forward selection)
   struct_iiv <- c("eta.vc")
 
   no.cmpt <- suppressWarnings(as.integer(current_code[["no.cmpt"]]))
-  if (no.cmpt >= 2L) struct_iiv <- c(struct_iiv, "eta.vp", "eta.q")
-  if (no.cmpt >= 3L) struct_iiv <- c(struct_iiv, "eta.vp2", "eta.q2")
+  if (no.cmpt >= 2L) {
+    struct_iiv <- c(struct_iiv, "eta.vp", "eta.q")
+  }
+  if (no.cmpt >= 3L) {
+    struct_iiv <- c(struct_iiv, "eta.vp2", "eta.q2")
+  }
   # struct_iiv <- struct_iiv[struct_iiv %in% names(current_code)]
 
   keep_going <- TRUE
+  all_results <- NULL
   while (keep_going) {
     available <- struct_iiv[current_code[struct_iiv] == 0L]
-    if (length(available) == 0L) break
+    if (length(available) == 0L)
+      break
     # Baseline + "add one IIV" candidates
     candidate_codes <- vector("list", length(available) + 1L)
     candidate_codes[[1L]] <- current_code
@@ -534,38 +934,51 @@ step_iiv <- function(dat,
 
     fits <- vapply(candidate_codes, function(code_vec) {
       mod.run(
-        string           = unname(code_vec),
-        dat              = dat,
-        search.space     = search.space,
-        param_table      = param_table,
-        penalty.control  = penalty.control,
-        precomputed_results_file=   precomputed_results_file,
-        filename=filename,
+        string       = unname(code_vec),
+        dat          = dat,
+        search.space = search.space,
+        no.cores = no.cores,
+        param_table  = param_table,
+        precomputed_results_file =   precomputed_results_file,
+        filename = filename,
+        foldername = foldername,
+        .modEnv = .modEnv,
+        verbose = verbose,
         ...
       )
     }, numeric(1))
 
-    model_names <- vapply(candidate_codes, function(code) {
-      if (exists("CodetoMod", mode = "function")) {
-        CodetoMod(search.space = search.space, sel.best.code = unname(code))
-      } else {
-        paste0("Model_", paste(unname(code), collapse = "_"))
-      }
-    }, character(1))
+    model_names <- vapply(candidate_codes,
+                          function(code)
+                            parseName(modcode = unname(code), search.space = search.space),
+                          character(1))
 
     model_codes_chr <- vapply(candidate_codes, function(code) {
       paste(unname(code), collapse = ",")
     }, character(1))
 
+    AICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$AIC
+    BICvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$BIC
+    OFVvals <-
+      .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r, ]$OBJFV
+
     results_table <- data.frame(
-      Step         = "IIV (forward)",
+      Step        = "IIV (forward)",
       "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
       "Model name" = model_names,
       "Model code" = model_codes_chr,
       Fitness      = fits,
+      AIC           = c(AICvals),
+      BIC           = c(BICvals),
+      OFV           = c(OFVvals),
       stringsAsFactors = FALSE
     )
+
     all_results <- rbind(all_results, results_table)
+
+    .modEnv$r <- .modEnv$r + 1L
 
     best_idx <- which.min(results_table$Fitness)
 
@@ -577,108 +990,177 @@ step_iiv <- function(dat,
     }
   }
 
-  # ---------------- Finalize outputs ----------------
   if (!is.null(all_results)) {
-    best_row <- all_results[which.min(all_results$Fitness), , drop = FALSE]
+    best_row <-
+      all_results[which.min(all_results$Fitness), , drop = FALSE]
+    best_idx <- which.min(results_table$Fitness)
+    best_code <- candidate_codes[[best_idx]]
   } else {
-
+    # return the original start model
     base_fit <- mod.run(
       string           = unname(current_code),
       dat              = dat,
       search.space     = search.space,
+      no.cores = no.cores,
       param_table      = param_table,
       penalty.control  = penalty.control,
-      precomputed_results_file=   precomputed_results_file,
-      filename=filename,
+      precomputed_results_file =   precomputed_results_file,
+      foldername = foldername,
+      filename = filename,
+      .modEnv = .modEnv,
+      verbose = verbose,
       ...
     )
+
+    last_row <- utils::tail(.modEnv$Store.all, 1)
     best_row <- data.frame(
-      Step = "IIV (none)",
-      "Model name" = if (exists("CodetoMod", mode = "function")) {
-        CodetoMod(search.space = search.space, sel.best.code = unname(current_code))
-      } else {
-        paste0("Model_", paste(unname(current_code), collapse = "_"))
-      },
+      Step = "IIV (forward)",
+      "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
+      "Model name" =
+        parseName(modcode = unname(current_code), search.space = search.space),
       "Model code" = paste(unname(current_code), collapse = ","),
       Fitness = base_fit,
+      AIC     = last_row$AIC,
+      BIC     = last_row$BIC,
+      OFV     = last_row$OBJFV,
       stringsAsFactors = FALSE
     )
     all_results <- best_row
+    best_code <- current_code
+
+    .modEnv$r <- .modEnv$r + 1L
   }
-  r<<-r+1
-  list(
-    results_table = all_results,
-    best_code     = current_code,
-    best_row      = best_row
-  )
+
+  list(results_table = all_results,
+       best_code     = current_code,
+       best_row      = best_row)
 }
 
-#' Screen ETA correlation (on vs off)
+
+#' Evaluate inclusion of ETA correlation structure
 #'
-#' Tests whether enabling ETA correlation (\code{mcorr = 1}) improves the fitness
-#' over keeping it disabled (\code{mcorr = 0}), while keeping all other fields fixed.
+#' Evaluates whether correlation between inter-individual random
+#' effects (ETA correlation) should be included in the model.
 #'
-#' @param dat Data frame passed to \code{mod.run()}.
-#' @param state List-like with:
-#'   - \code{best_code}: starting named integer/numeric vector; if \code{NULL}, \code{base_model()} is used.
-#'   - \code{modi}: optional; forwarded to \code{mod.run()} (default \code{1L}).
-#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{mod.run()}.
-#' @param penalty.control Optional penalty control object forwarded to \code{mod.run()}.
-#' @param ... Additional arguments forwarded to \code{mod.run()}. May include
-#'   \code{custom_base} for \code{base_model()} when \code{state$best_code} is \code{NULL}.
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param penalty.control A list of penalty control parameters defined by
+#'   \code{penaltyControl()}, specifying penalty values used for model diagnostics
+#'   during fitness evaluation.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional environment used to store model indices and cached
+#'   results across steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to the model estimation function.
 #'
-#' @return A list with:
-#'   - \code{results_table}: \code{data.frame} with columns Step, Model name, Model code, Fitness.
-#'   - \code{best_code}: named integer vector of the best candidate’s model code.
-#'   - \code{best_row}: one-row \code{data.frame} (the best candidate).
+#' @details
+#' Two candidate models are constructed by toggling the correlation setting
+#' of inter-individual random effects in the model code. Model selection is
+#' based on comparison of Fitness values returned during estimation.
+#'
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item results_table: A data frame summarizing the evaluated models,
+#'   \item best_code: A named integer vector corresponding to the selected
+#'     model code,
+#'   \item best_row: A one-row data frame containing the summary of the
+#'     selected model.
+#' }
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
-#' \dontrun{
-#' dat <- your_data
-#' param_table <- your_param_table
-#' state <- list(best_code = base_model("ivbase"), modi = 1L)
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- pheno_sd
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
+#'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
 #'
-#'result_corr <- step_correlation(
-#'  dat = dat,
-#'  search.space = "ivbase",
-#'  param_table = param_table,
-#'  penalty.control = penaltyControl()
-#')
-#'result_corr$results_table
-#'result_corr$best_code
-#'result_corr$best_row
-#'}
+#'   penalty.control <- penaltyControl()
+#'   penalty.control$penalty.terms <-
+#'     c("rse", "theta", "covariance", "shrinkage", "omega")
+#'   start.mod <- base_model("ivbase")
+#'   start.mod["eta.vc"] <- 1L
+#'   step_correlation(
+#'     dat = dat,
+#'     start.mod = start.mod,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_mcorr_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
+#' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
 #'
 #' @export
+#'
 step_correlation <- function(dat,
-                             state=list(),
-                             search.space="ivbase",
-                             param_table=NULL,
+                             start.mod = NULL,
+                             search.space = "ivbase",
+                             no.cores = NULL,
+                             param_table = NULL,
                              penalty.control = NULL,
-                             precomputed_results_file=NULL,
-                             filename=NULL,
+                             precomputed_results_file = NULL,
+                             filename = "test",
+                             foldername = NULL,
+                             .modEnv = NULL,
+                             verbose = TRUE,
                              ...) {
-  dots <- list(...)
-  if (!is.null(dots$custom_base)) {
-    custom_base <- dots$custom_base
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
   } else {
-    custom_base <- NULL
+    .modEnv <- new.env(parent = emptyenv())
+  }
+
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
   }
 
   # starting code
-  if (!is.null(state$best_code)) {
-    current_code <- state$best_code
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
   } else {
     current_code <-
-      base_model(search.space = search.space, custom_base = custom_base)
+      base_model(search.space = search.space)
   }
 
-  corrcode <- suppressWarnings(as.integer(current_code["mcorr"]))
-  alt_val <- if (corrcode == 0L)
-    1L
-  else
-    0L
+  corrcode <- current_code["mcorr"]
+  alt_val <- 1L - corrcode
 
   candidate_codes <- list(current_code,
                           {
@@ -689,105 +1171,177 @@ step_correlation <- function(dat,
 
   fits <- vapply(candidate_codes, function(code_vec) {
     mod.run(
-      string           = unname(code_vec),
-      dat              = dat,
-      search.space     = search.space,
-      param_table      = param_table,
-      penalty.control  = penalty.control,
-      precomputed_results_file= precomputed_results_file,
-      filename=filename,
+      string       = unname(code_vec),
+      dat          = dat,
+      search.space = search.space,
+      no.cores = no.cores,
+      param_table  = param_table,
+      precomputed_results_file =   precomputed_results_file,
+      filename = filename,
+      foldername = foldername,
+      .modEnv = .modEnv,
+      verbose =  verbose,
       ...
     )
   }, numeric(1))
 
-  model_names <- vapply(candidate_codes, function(code) {
-    if (exists("CodetoMod", mode = "function")) {
-      CodetoMod(search.space = search.space,
-                sel.best.code = unname(code))
-    } else {
-      paste0("Model_", paste(unname(code), collapse = "_"))
-    }
-  }, character(1))
+  model_names <- vapply(candidate_codes,
+                        function(code)
+                          parseName(modcode = unname(code), search.space = search.space),
+                        character(1))
 
   model_codes_chr <- vapply(candidate_codes, function(code) {
     paste(unname(code), collapse = ",")
   }, character(1))
 
+  AICvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$AIC
+  BICvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$BIC
+  OFVvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$OBJFV
+
   results_table <- data.frame(
-    Step         = "ETA correlation",
+    Step        = "Eta correlation",
     "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
     "Model name" = model_names,
     "Model code" = model_codes_chr,
     Fitness      = fits,
+    AIC           = c(AICvals),
+    BIC           = c(BICvals),
+    OFV           = c(OFVvals),
     stringsAsFactors = FALSE
   )
 
   best_idx <- which.min(results_table$Fitness)
-  r<<-r+1
-  list(
-    results_table = results_table,
-    best_code     = candidate_codes[[best_idx]],
-    best_row      = results_table[best_idx, , drop = FALSE]
-  )
+  best_row  <- results_table[best_idx, , drop = FALSE]
+  best_code <- candidate_codes[[best_idx]]
+
+  .modEnv$r <- .modEnv$r + 1L
+
+  list(results_table = results_table,
+       best_code     = best_code,
+       best_row      = best_row)
 }
 
 
-#' Screen residual error model (rv)
+#' Evaluate residual error model structure
 #'
-#' Uses the current model as baseline and, if \code{rv == 3}, also evaluates
-#' \code{rv = 1} and \code{rv = 2} while keeping all other fields fixed.
-#' Chooses the candidate with the lowest Fitness.
+#' Evaluates alternative residual error model structures by modifying the
+#' residual variability setting in the model code.
 #'
-#' @param dat Data frame passed to \code{mod.run()}.
-#' @param state List with optional \code{best_code} (named integer vector) and \code{modi}.
-#' @param search.space Character scalar: \code{"ivbase"} or \code{"oralbase"}.
-#' @param param_table Parameter table passed to \code{mod.run()}.
-#' @param penalty.control Optional penalty control passed to \code{mod.run()}.
-#' @param ... Forwarded to \code{mod.run()} (e.g., \code{filename}, controls, \code{custom_base}).
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of \code{ivbase} or \code{oralbase}.
+#'   Default is \code{ivbase}.
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param param_table Optional parameter table used during model estimation.
+#' @param penalty.control Optional penalty control object used for reporting
+#'   penalty terms in the results table.
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional environment used to store model indices and cached
+#'   results across steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to the model estimation function.
 #'
-#' @return List with:
-#'   \itemize{
-#'     \item \code{results_table}: data.frame (Step, Model name, Model code, Fitness)
-#'     \item \code{best_code}: named integer vector of the best candidate
-#'     \item \code{best_row}: one-row data.frame (the best candidate)
-#'   }
+#' @details
+#' Candidate models are constructed by assigning different residual error
+#' types to the model code. Each candidate differs only in the residual
+#' variability specification, and all other structural and statistical
+#' components are kept unchanged. Model selection is based on comparison
+#' of Fitness values obtained during estimation.
+#'
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item results_table: A data frame summarizing the evaluated residual
+#'     error models and their fit statistics,
+#'   \item best_code: A named integer vector corresponding to the selected
+#'     model code,
+#'   \item best_row: A one-row data frame containing the summary of the
+#'     selected model.
+#' }
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
-#' \dontrun{
-#' state <- list(best_code = base_model("ivbase"), modi = 1L)
-#' res_rv <- step_rv(
-#'   dat = dat,
-#'   state = state,
-#'   search.space = "ivbase",
-#'   param_table = param_table,
-#'   penalty.control = penaltyControl()
-#' )
-#' res_rv$results_table
-#' res_rv$best_code
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#'   dat <- pheno_sd
+#'   param_table <- initialize_param_table()
+#'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
+#'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
+#'   penalty.control <- penaltyControl()
+#'   penalty.control$penalty.terms <-
+#'     c("rse","theta", "covariance","shrinkage","omega","correlation","sigma")
+#'
+#'   step_rv(
+#'     dat = dat,
+#'     search.space = "ivbase",
+#'     param_table = param_table,
+#'     filename = "step_rv_test",
+#'     penalty.control = penalty.control,
+#'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
+#'   )
+#' })
 #' }
+#'
+#' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
 #'
 #' @export
 step_rv <- function(dat,
-                    state = list(),
+                    start.mod = NULL,
                     search.space = "ivbase",
+                    no.cores = NULL,
                     param_table = NULL,
                     penalty.control = NULL,
-                    precomputed_results_file=NULL,
-                    filename=NULL,
+                    precomputed_results_file = NULL,
+                    filename = "test",
+                    foldername = NULL,
+                    .modEnv = NULL,
+                    verbose = TRUE,
                     ...) {
-  dots <- list(...)
-  custom_base <-
-    if (!is.null(dots$custom_base))
-      dots$custom_base
-  else
-    NULL
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
+  } else {
+    .modEnv <- new.env(parent = emptyenv())
+  }
+
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
+  }
 
   # starting code
-  if (!is.null(state$best_code)) {
-    current_code <- state$best_code
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
   } else {
     current_code <-
-      base_model(search.space = search.space, custom_base = custom_base)
+      base_model(search.space = search.space)
   }
 
   # baseline candidate
@@ -799,276 +1353,268 @@ step_rv <- function(dat,
     code
   })
 
-  # evaluate all candidates
   fits <- vapply(candidate_codes, function(code_vec) {
     mod.run(
-      string           = unname(code_vec),
-      dat              = dat,
-      search.space     = search.space,
-      param_table      = param_table,
-      penalty.control  = penalty.control,
-      precomputed_results_file=   precomputed_results_file,
-      filename=filename,
+      string       = unname(code_vec),
+      dat          = dat,
+      search.space = search.space,
+      no.cores = no.cores,
+      param_table  = param_table,
+      precomputed_results_file =   precomputed_results_file,
+      filename = filename,
+      foldername = foldername,
+      .modEnv = .modEnv,
+      verbose = verbose,
       ...
     )
   }, numeric(1))
 
-  # names & codes
   model_names <- vapply(candidate_codes,
                         function(code)
-                          CodetoMod(search.space = search.space, sel.best.code = unname(code)),
+                          parseName(modcode = unname(code), search.space = search.space),
                         character(1))
 
   model_codes_chr <- vapply(candidate_codes, function(code) {
     paste(unname(code), collapse = ",")
   }, character(1))
 
+  AICvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$AIC
+  BICvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$BIC
+  OFVvals <-
+    .modEnv$Store.all[.modEnv$Store.all$round.num == .modEnv$r,]$OBJFV
+
   results_table <- data.frame(
-    Step         = "Residual error types",
+    Step        = "Residual error types",
     "Penalty terms" = paste(penalty.control$penalty.terms, collapse = ", "),
     "Model name" = model_names,
     "Model code" = model_codes_chr,
     Fitness      = fits,
+    AIC           = c(AICvals),
+    BIC           = c(BICvals),
+    OFV           = c(OFVvals),
     stringsAsFactors = FALSE
   )
 
-  # choose best
   best_idx <- which.min(results_table$Fitness)
-  r<<-r+1
-  list(
-    results_table = results_table,
-    best_code     = candidate_codes[[best_idx]],
-    best_row      = results_table[best_idx, , drop = FALSE]
-  )
+  best_row  <- results_table[best_idx, , drop = FALSE]
+  best_code <- candidate_codes[[best_idx]]
+
+  .modEnv$r <- .modEnv$r + 1L
+
+  list(results_table =  results_table,
+       best_code     =  best_code,
+       best_row      =  best_row)
 }
 
 
 
-#' Stepwise Model Building for Nonlinear Mixed-Effects Models
+#' Stepwise model building operator for model selection
 #'
-#' The `sf.operator` function performs a stepwise model-building procedure
-#' for nonlinear mixed-effects (NLME) models, including testing the number of
-#' compartments, elimination type (e.g., Michaelis-Menten), inter-individual
-#' variability (IIV), correlations, and residual error models.
+#' Implements automated stepwise model selection for structural and statistical
+#' components of nonlinear mixed-effects models, evaluating the number of
+#' compartments, elimination type, inter-individual variability, correlation
+#' structures, and residual error models.
 #'
-#' This function is designed to work with the `nlmixr2` and `rxode2` workflow
-#' and will create intermediate model runs and results in a temporary directory.
-#'
-#' @param dat A dataset containing the pharmacokinetic/pharmacodynamic (PK/PD) data
-#'   to be modeled.
-#' @param search.space Character string specifying the structural model search space.
-#'   Must be either `"ivbase"` (intravenous bolus) or `"oralbase"` (oral administration).
-#' @param param_table Optional parameter table. If `NULL`, the function will generate
-#'   one automatically using \code{auto_param_table()}.
-#' @param penalty.control An object created by \code{penaltyControl()} specifying
-#'   penalty terms to be used in model selection.
-#' @param no.cores Integer specifying the number of threads for parallel execution.
-#'   Defaults to \code{rxode2::getRxThreads()}.
-#' @param foldername Character string for naming the output folder.
-#' @param filename Character string for naming output files.
-#' @param custom_base Optional custom base model to use instead of the default generated one.
-#' @param dynamic_fitness Logical; if `TRUE`, penalty terms change dynamically
-#'   during different steps of model building.
-#' @param precomputed_results_file Optional path to a file containing precomputed
-#'   stepwise search results to avoid rerunning steps.
-#' @param ... Additional arguments passed to the underlying stepwise functions.
+#' @param dat A data frame containing pharmacokinetic data in standard
+#'   nlmixr2 format, including "ID", "TIME", "EVID", and "DV", and may include
+#'   additional columns.
+#' @param param_table Optional data frame of initial parameter estimates. If NULL,
+#'   the table is generated by \code{auto_param_table()}.
+#' @param start.mod A named integer vector specifying the starting model
+#'   code. If NULL, a base model is generated using \code{base_model()}.
+#' @param search.space Character, one of "ivbase" or "oralbase".
+#'   Default is "ivbase".
+#' @param no.cores Integer. Number of CPU cores to use. If NULL, uses
+#'   \code{rxode2::getRxThreads()}.
+#' @param penalty.control An object created by \code{penaltyControl()} defining
+#'   penalty terms used in the fitness calculation.
+#' @param dynamic_fitness Logical; if `TRUE`, the set of penalty terms may
+#'   change dynamically across steps.
+#' @param steps Numeric or character vector defining the sequence of steps
+#'   to be executed. Each digit corresponds to a specific step:
+#'   \describe{
+#'     \item{1}{Number of compartments}
+#'     \item{2}{Elimination type}
+#'     \item{3}{IIV on Km}
+#'     \item{4}{IIV on Ka}
+#'     \item{5}{Forward selection of structural IIV}
+#'     \item{6}{Correlation between random effects}
+#'     \item{7}{Residual error model}
+#'   }
+#' @param precomputed_results_file Optional path to a CSV file of previously computed
+#'   model results used for caching.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a name is generated automatically.
+#' @param filename Optional character string used as a prefix for output files.
+#'   Defaults to "test".
+#' @param .modEnv Optional environment used internally to store model indices,
+#'   cached parameter tables, and results across steps.
+#' @param verbose Logical. If TRUE, print progress messages.
+#' @param ... Additional arguments passed to \code{mod.run()}.
 #'
 #' @details
-#' The procedure follows these steps:
-#' \enumerate{
-#'   \item **Step 1:** Select the optimal number of compartments.
-#'   \item **Step 2:** Determine the elimination type (linear vs. Michaelis–Menten).
-#'   \item **Step 3:** Test inclusion of inter-individual variability (IIV) terms.
-#'   \item **Step 4:** Explore correlations between random effects (if any `eta.*` terms exist).
-#'   \item **Step 5:** Explore different residual error models.
-#' }
+#' The stepwise procedure iterates over the specified steps in order.
+#' At each step, only a single component of the model is modified, while
+#' all other structural and statistical elements remain unchanged.
+#' Model comparison is based on a scalar fitness criterion returned by
+#' the estimation routine.
 #'
-#' If no `eta.*` parameters remain after Step 3 (sum equals zero), Step 4
-#' (correlation testing) will be skipped.
+#' The order and inclusion of steps are controlled by the user via a
+#' numeric step code sequence. Steps that are not applicable to the
+#' current model configuration may be skipped automatically.
 #'
-#' All intermediate results are stored in \code{Store.all} and the final best
-#' model code is returned in a structured object of class \code{"sfOperatorResult"}.
+#' The final best model is defined as the model with the minimum fitness
+#' value in the last completed estimation round.
 #'
-#' @return An object of class \code{"sfOperatorResult"} containing:
+#' @return
+#' An object of class \code{"sfOperatorResult"} with the following elements:
 #' \itemize{
-#'   \item \code{"Final Best Code"} – Best model code parameters.
-#'   \item \code{"Final Best Model Name"} – Name of the best model.
-#'   \item \code{"Stepwise Best Models"} – Summary of best models per step.
-#'   \item \code{"Stepwise History"} – Detailed results from each step.
-#'   \item \code{"Model Run History"} – All model runs performed.
+#'   \item \code{"Final Best Code"}: Named integer vector of the selected model code.
+#'   \item \code{"Final Best Model Name"}: Character string identifying the best model.
+#'   \item \code{"Stepwise Best Models"}: Data frame summarizing the best model
+#'     selected at each executed step.
+#'   \item \code{"Stepwise History"}: Named list containing full results for
+#'     each step using descriptive step names.
+#'   \item \code{"Model Run History"}: Data frame containing all model runs
+#'     performed during the procedure.
 #' }
 #'
-#' @seealso \code{\link{step_compartments}}, \code{\link{step_elimination}},
-#'   \code{\link{step_iiv}}, \code{\link{step_correlation}}, \code{\link{step_rv}}
+#' @seealso
+#' \code{\link{step_compartments}},
+#' \code{\link{step_elimination}},
+#' \code{\link{step_iiv_km}},
+#' \code{\link{step_iiv_f}},
+#' \code{\link{step_correlation}},
+#' \code{\link{step_rv}}
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
-
-#' \dontrun{
-#' result<-sf.operator(dat = pheno_sd)
-#' print(result)
+#' \donttest{
+#'  withr::with_dir(tempdir(), {
+#' out<-sf.operator(
+#'   dat = pheno_sd,
+#'   steps = 1234,
+#'   search.space = "ivbase",
+#'   saem.control = nlmixr2est::saemControl(
+#'     seed = 1234,
+#'     nBurn = 200,
+#'     nEm   = 300,
+#'     logLik = TRUE
+#'   )
+#' )
+#' print(out)
+#' })
 #' }
+#'
+#' @seealso
+#' \code{\link{auto_param_table}}, \code{\link{base_model}},
+#' \code{\link{penaltyControl}}, \code{\link{mod.run}}, \code{\link{ppkmodGen}},
+#' \code{\link{step_compartments}}, \code{\link{step_elimination}},
+#' \code{\link{step_iiv_km}}, \code{\link{step_iiv_ka}}, \code{\link{step_iiv_f}},
+#' \code{\link{step_correlation}}, \code{\link{step_rv}}
 #'
 #' @export
 
 sf.operator <- function(dat,
+                        start.mod = NULL,
                         search.space = "ivbase",
+                        no.cores = NULL,
                         param_table = NULL,
-                        penalty.control = penaltyControl(),
-                        no.cores = rxode2::getRxThreads(),
-                        foldername = "test",
-                        filename = "test",
-                        custom_base = NULL,
+                        steps = 123567,
                         dynamic_fitness = TRUE,
-                        precomputed_results_file =NULL,
+                        penalty.control = penaltyControl(),
+                        precomputed_results_file = NULL,
+                        foldername = NULL,
+                        filename = "test",
+                        .modEnv = NULL,
+                        verbose = TRUE,
                         ...) {
-
-  current.date<-Sys.Date()
-  outputdir <-
-    paste0("Step_",
-           current.date,
-           "-",
-           foldername,
-           "_",
-           digest::digest(dat),
-           "_temp")
-
-  if (!dir.exists(outputdir)) {
-    dir.create(outputdir, showWarnings = FALSE, recursive = TRUE)
+  if (!is.null(.modEnv)) {
+    if (!is.environment(.modEnv)) {
+      stop("`.modEnv` must be an environment", call. = FALSE)
+    }
+    # .modEnv <- get(".modEnv", inherits = TRUE)
   } else {
-    message(
-      sprintf(
-        "Output directory '%s' already exists. Using existing directory.",
-        outputdir
-      )
-    )
+    .modEnv <- new.env(parent = emptyenv())
   }
 
-  setwd(paste0(getwd(), "/", outputdir))
-
-  # Set initial estimate
-  param_table <- auto_param_table(
-    dat = dat,
-    param_table = param_table,
-    nlmixr2autoinits = T,
-    foldername = foldername
-  )
-
-  current <- base_model(search.space = search.space,
-                        custom_base = custom_base)
-
-  r <<- 1
-  #################################Step1. No. of compartment##########################
-  message(crayon::blue(
-    paste0(
-      "Running Stepwise 1. Structural Model----------------------------------------------------"
-    )
-  ))
-
-  message(crayon::blue(
-    paste0(
-      "Test number of compartments----------------------------------------------------"
-    )
-  ))
-
-  state <- list()
-
-   if (isTRUE(dynamic_fitness)) {
-     penalty.control$penalty.terms = c("rse", "theta", "covariance")
-   }
-
-  result.steps.compartments <-   step_compartments(
-    dat = dat,
-    state = state,
-    search.space = search.space,
-    param_table = param_table,
-    penalty.control = penalty.control,
-    precomputed_results_file=  precomputed_results_file,
-    filename=filename,
-    ...
-  )
-  ##################### Step2. Michaelis-Menten kinetics###############
-  message(crayon::blue(
-    paste0(
-      "Analyse elimination type----------------------------------------------------"
-    )
-  ))
-  result.steps.MM <-   step_elimination(
-    dat = dat,
-    state = result.steps.compartments,
-    search.space = search.space,
-    param_table = param_table,
-    penalty.control = penalty.control,
-    filename = filename,
-    ...
-  )
-
-  ####################### Step3. Random effects############################
-  message(crayon::blue(
-    paste0(
-      "Test IIV on parameters----------------------------------------------------"
-    )
-  ))
-
-  if (isTRUE(dynamic_fitness)) {
-    penalty.control$penalty.terms = c("rse", "theta", "covariance", "shrinkage", "omega")
+  # Ensure essential keys exist in .modEnv
+  if (is.null(.modEnv$modi))
+    .modEnv$modi <- 1L
+  if (is.null(.modEnv$r))
+    .modEnv$r <- 1L
+  if (is.null(.modEnv$Store.all))
+    .modEnv$Store.all <- NULL
+  if (is.null(.modEnv$precomputed_cache_loaded))
+    .modEnv$precomputed_cache_loaded <- FALSE
+  if (is.null(.modEnv$precomputed_results))
+    .modEnv$precomputed_results <- NULL
+  if (is.null(.modEnv$param_table))
+    .modEnv$param_table <- NULL
+  if (is.null(.modEnv$saem.control))
+    .modEnv$saem.control <- NULL
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
+  }
+  if (is.null(no.cores)) {
+    no.cores <- rxode2::getRxThreads()
   }
 
-  result.steps.iiv <-   step_iiv(
-    dat = dat,
-    state = result.steps.MM,
-    search.space = search.space,
-    param_table = param_table,
-    penalty.control = penalty.control,
-    filename = filename,
-    ...
+  if (is.null(foldername) || !nzchar(foldername)) {
+    foldername <- paste0("stepCache_", filename, "_", digest::digest(dat))
+  }
+  if (!dir.exists(foldername)) {
+    dir.create(foldername, showWarnings = FALSE, recursive = TRUE)
+  }
+  # step map
+  # .step_map <- list(
+  #   `1` = step_compartments,
+  #   `2` = step_elimination,
+  #   `3` = step_iiv_km,
+  #   `4` = step_iiv_ka,
+  #   `5` = step_iiv_f,
+  #   `6` = step_correlation,
+  #   `7` = step_rv
+  # )
+  .step_map <- list(
+    `1` = get("step_compartments", envir = parent.frame()),
+    `2` = get("step_elimination",  envir = parent.frame()),
+    `3` = get("step_iiv_km",        envir = parent.frame()),
+    `4` = get("step_iiv_ka",        envir = parent.frame()),
+    `5` = get("step_iiv_f",         envir = parent.frame()),
+    `6` = get("step_correlation",   envir = parent.frame()),
+    `7` = get("step_rv",            envir = parent.frame())
   )
 
-  ######################## Step 3. Explore correlation. ##########################
-  message(crayon::blue(
-    paste0(
-      "Test Correlation between parameters----------------------------------------------------"
-    )
-  ))
+  .step_name <- c(
+    `1` = "Number of compartments",
+    `2` = "Elimination type",
+    `3` = "IIV on Km",
+    `4` = "IIV on Ka",
+    `5` = "IIV (forward selection)",
+    `6` = "ETA correlation",
+    `7` = "Residual error model"
+  )
 
- if (isTRUE(dynamic_fitness)) {
-   penalty.control$penalty.terms = c(
-     "rse",
-     "theta",
-     "covariance",
-     "shrinkage",
-     "omega",
-     "correlation"
-   )
-  }
-
-  eta_core_sum <-
-    sum(result.steps.iiv$best_code[c("eta.vc", "eta.vp", "eta.vp2", "eta.q", "eta.q2")], na.rm = TRUE)
-   mm <- result.steps.iiv$best_code["mm"]
-
-  result.steps.corr <- NULL
-  if ((mm == 0 && eta_core_sum > 0) ||
-      (mm == 1 && (result.steps.iiv$best_code["eta.km"] == 1 || eta_core_sum > 1))) {
-
-    result.steps.corr <- step_correlation(
-      dat = dat,
-      state = result.steps.iiv,
-      search.space = search.space,
-      param_table = param_table,
-      penalty.control = penalty.control,
-      filename = filename,
-      ...
-    )
-  }
-  ######################## Step 4. Explore RV model ##############################
-
-  message(crayon::blue(
-    paste0(
-      "Explore types of residual errors----------------------------------------------------"
-    )
-  ))
-
-  if (isTRUE(dynamic_fitness)) {
-    penalty.control$penalty.terms = c(
+  .penalty_map <- list(
+    `1` = c("rse", "theta", "covariance"),
+    `2` = c("rse", "theta", "covariance"),
+    `3` = c("rse", "theta", "covariance", "shrinkage", "omega"),
+    `4` = c("rse", "theta", "covariance", "shrinkage", "omega"),
+    `5` = c("rse", "theta", "covariance", "shrinkage", "omega"),
+    `6` = c(
+      "rse",
+      "theta",
+      "covariance",
+      "shrinkage",
+      "omega",
+      "correlation"
+    ),
+    `7` = c(
       "rse",
       "theta",
       "covariance",
@@ -1077,118 +1623,179 @@ sf.operator <- function(dat,
       "correlation",
       "sigma"
     )
+  )
+
+  # Parse steps (allow integer or character)
+  if (length(steps) == 1) {
+    steps <- strsplit(as.character(steps), "")[[1]]
   }
 
-  if (is.null(result.steps.corr)){
-    result.steps.rv <- step_rv(
+  # Validate steps
+  bad_steps <- setdiff(steps, names(.step_map))
+  if (length(bad_steps) > 0) {
+    stop("Unknown step codes: ",
+         paste(bad_steps, collapse = ", "),
+         call. = FALSE)
+  }
+
+  # Initial estimates
+  if (!is.null(param_table)) {
+    param_table_use <- param_table
+  } else if (!is.null(.modEnv$param_table)) {
+    param_table_use <- .modEnv$param_table
+  } else {
+    param_table_use <- auto_param_table(
       dat = dat,
-      state = result.steps.iiv,
+      nlmixr2autoinits = TRUE,
+      filename = filename,
+      out.dir = file.path(getwd(), foldername)
+    )
+    .modEnv$param_table <- param_table_use
+  }
+
+  param_table <- param_table_use
+
+  if (!is.null(start.mod)) {
+    current_code <- start.mod
+  } else {
+    current_code <-
+      base_model(search.space = search.space)
+  }
+
+  step_results <- list()
+  for (s in steps) {
+    # dynamic fitness control
+    if (isTRUE(dynamic_fitness)) {
+      new_terms <- .penalty_map[[as.character(s)]]
+      if (!is.null(new_terms)) {
+        penalty.control$penalty.terms <- new_terms
+      }
+    }
+
+    step_fun <- .step_map[[s]]
+    if (verbose) {
+      message(crayon::blue(
+        paste0(
+          "Running Step ",
+          s,
+          ": ",
+          .step_name[[as.character(s)]],
+          " ----------------------------------------------------"
+        )
+      ))
+    }
+
+    res <- step_fun(
+      dat = dat,
+      start.mod = current_code,
       search.space = search.space,
       param_table = param_table,
       penalty.control = penalty.control,
+      precomputed_results_file = precomputed_results_file,
       filename = filename,
+      foldername = foldername,
+      .modEnv = .modEnv,
       ...
     )
+
+    # Some steps are conditional and may return NULL
+    if (is.null(res)) {
+      if (verbose) {
+        message(paste0("Step ",
+                       s,
+                       ": ",
+                       .step_name[[as.character(s)]],
+                       " skipped."))
+      }
+      next
+    }
+
+    step_results[[s]] <- res
+    current_code <- res$best_code
   }
 
-  if (!is.null( result.steps.corr)){
-  result.steps.rv <-   step_rv(
-    dat = dat,
-    state = result.steps.corr,
-    search.space = search.space,
-    param_table = param_table,
-    penalty.control = penalty.control,
-    filename = filename,
-    ...
-  )
- }
-
-  out <- new.env(parent = emptyenv())
+  out <- list()
   class(out) <- "sfOperatorResult"
-  latest_round <- subset(Store.all, round.num == max(Store.all$round.num, na.rm = TRUE))
+  latest_round <-
+    subset(.modEnv$Store.all,
+           round.num == max(.modEnv$Store.all$round.num, na.rm = TRUE))
   best_row <- latest_round[which.min(latest_round$fitness), ]
 
   if (search.space == "ivbase") {
     cols_to_extract <- c(
-      "no.cmpt", "eta.vmax", "eta.km", "eta.cl", "eta.vc",
-      "eta.vp", "eta.vp2", "eta.q", "eta.q2",
-      "mm", "mcorr", "rv"
+      "no.cmpt",
+      "eta.vmax",
+      "eta.km",
+      "eta.cl",
+      "eta.vc",
+      "eta.vp",
+      "eta.vp2",
+      "eta.q",
+      "eta.q2",
+      "mm",
+      "mcorr",
+      "rv"
     )
   } else {
     cols_to_extract <- c(
-      "no.cmpt", "eta.vmax", "eta.km", "eta.cl", "eta.vc",
-      "eta.vp", "eta.vp2", "eta.q", "eta.q2", "eta.ka",
-      "mm", "mcorr", "rv"
+      "no.cmpt",
+      "eta.vmax",
+      "eta.km",
+      "eta.cl",
+      "eta.vc",
+      "eta.vp",
+      "eta.vp2",
+      "eta.q",
+      "eta.q2",
+      "eta.ka",
+      "mm",
+      "mcorr",
+      "rv"
     )
   }
 
   # Assign the selected columns from the best row to the output
-  out[["Final Best Code"]] <- best_row[, cols_to_extract, drop = FALSE]
+  tmp <- best_row[, cols_to_extract, drop = FALSE]
+  rownames(tmp) <- NULL
+  out[["Final Best Code"]] <- tmp
 
-  out[["Final Best Model Name"]] <-
-    result.steps.rv$best_row$Model.name
-  out[["Stepwise Best Models"]] <- data.frame(
-    rbind(
-      result.steps.compartments$best_row,
-      result.steps.MM$best_row,
-      result.steps.iiv$best_row,
-      result.steps.corr$best_row,
-      result.steps.rv$best_row
-    ),
-    row.names = NULL,
-    stringsAsFactors = FALSE
-  )
+  last_step <- utils::tail(step_results, 1)[[1]]
 
-  out[["Stepwise History"]]     <- list(
-    "Step 1 Compartments" = result.steps.compartments,
-    "Step 2 Elimination"  = result.steps.MM,
-    "Step 3 IIV"          = result.steps.iiv,
-    "Step 4 Correlation"  = result.steps.corr,
-    "Step 5 RV"           = result.steps.rv
-  )
+  out[["Final Best Model Name"]] <-last_step$best_row$Model.name
+
+  out[["Stepwise Best Models"]] <-
+    do.call(rbind,
+            Map(function(s, x) {
+              df <- x$best_row
+              df
+            },
+            names(step_results),
+            step_results))
+
+  out[["Stepwise History"]] <-
+    stats::setNames(step_results,
+             .step_name[names(step_results)])
 
   out[["Model Run History"]] <-
-    as.data.frame(Store.all, stringsAsFactors = FALSE)
-
-  on.exit({
-    rm(modi, r, Store.all, precomputed_cache_loaded, envir = .GlobalEnv)
-  }, add = TRUE)
+    as.data.frame(.modEnv$Store.all, stringsAsFactors = FALSE)
 
   return(out)
 }
 
 
-#' Print Method for sfOperatorResult Objects
+#' Print method for sfOperatorResult objects
 #'
 #' Defines a custom print method for objects of class
-#' \code{sfOperatorResult}. It displays the best model code, best model name,
-#' and the stepwise selection history with formatted colors using the
-#' \pkg{crayon} package.
+#' 'sfOperatorResult'.
 #'
-#' @param x An object of class \code{sfOperatorResult}, typically returned by
-#'   a model selection procedure.
-#' @param ... Further arguments passed to or from other methods (currently unused).
+#' @param x An object of class 'sfOperatorResult'.
+#' @param ... Further arguments passed to or from other methods
+#'   (currently unused).
 #'
-#' @return Invisibly returns \code{x}, after printing its contents to the console.
-#'
-#' @details
-#' This method prints:
-#' \itemize{
-#'   \item \strong{Best Model Code}: The final chosen model's code.
-#'   \item \strong{Best Model Name}: The final chosen model's name.
-#'   \item \strong{Stepwise Selection History}: A record of the best models
-#'         found at each step of a stepwise selection process.
-#' }
-#'
-#' @examples
-#' \dontrun{
-#' # Assuming `res` is an object of class "sfOperatorResult"
-#' print(res)
-#' }
-#'
-#' @seealso \code{\link[crayon]{crayon}} for text formatting utilities.
-#'
+#' @return Invisibly returns x.
+
 #' @export
+#'
 print.sfOperatorResult <- function(x, ...) {
   cat(crayon::green$bold("\n=== Best Model Code ===\n"))
   print(x$`Final Best Code`)
@@ -1196,4 +1803,6 @@ print.sfOperatorResult <- function(x, ...) {
   cat(x$`Final Best Model Name`, "\n")
   cat("\n=== Stepwise Selection History ===\n")
   print(x$`Stepwise Best Models`)
+  invisible(x)
 }
+

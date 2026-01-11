@@ -9,7 +9,8 @@ perturb_2bit(prev_string, search.space, max.try = 1000)
 \arguments{
 \item{prev_string}{A named numeric vector representing the current model.}
 
-\item{search.space}{The search space ("ivbase" or "oralbase").}
+\item{search.space}{Character, one of "ivbase" or "oralbase".
+Default is "ivbase".}
 
 \item{max.try}{Maximum number of attempts to generate a valid perturbed model.}
 }
@@ -19,9 +20,8 @@ A \code{list} with two named numeric vectors:
 \item{validated_neighbor}{validated and usable model code}
 }
 \description{
-This function randomly flips two parameters ("2-bit change") in the current
-model string to generate a perturbed candidate. The candidate is then passed
-through \code{validateModels()} to ensure pharmacological validity.
+Randomly flips two parameters ("2-bit change") in the current model string
+to generate a perturbed candidate.
 }
 \details{
 The function returns both:
@@ -41,4 +41,7 @@ perturb <- perturb_2bit(prev, search.space = "ivbase")
 perturb$original_neighbor   # original 2-bit flip
 perturb$validated_neighbor  # validated model
 
+}
+\author{
+Zhonghui Huang
 }

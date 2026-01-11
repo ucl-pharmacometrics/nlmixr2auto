@@ -2,35 +2,24 @@
 % Please edit documentation in R/aco.operator.R
 \name{print.acoOperatorResult}
 \alias{print.acoOperatorResult}
-\title{Print Method for ACO Operator Results}
+\title{Print method for ACO operator results}
 \usage{
 \method{print}{acoOperatorResult}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{"acoOperatorResult"}, typically the output
-of \code{\link{aco.operator}}.}
+\item{x}{An "acoOperatorResult" object.}
 
 \item{...}{Additional arguments (currently ignored).}
 }
 \value{
-Invisibly returns the input object \code{x}.
+Invisibly returns x.
 }
 \description{
-This function defines the \code{print} method for objects of class
-\code{"acoOperatorResult"} produced by \code{\link{aco.operator}}.
-It displays the final selected model code and the corresponding model name
-in a formatted, colorized output.
-}
-\examples{
-\dontrun{
-# Run ACO model selection
-outs <- aco.operator(dat = pheno_sd)
-
-# Print results in formatted style
-print(outs)
-}
-
+Print ACO operator results.
 }
 \seealso{
 \code{\link{aco.operator}}
+}
+\author{
+Zhonghui Huang
 }

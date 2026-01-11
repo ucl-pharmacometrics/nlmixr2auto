@@ -65,5 +65,7 @@ build_odeline(no.cmpt = 2, route = "oral")
 
 # One-compartment IV model with Michaelis-Menten elimination
 build_odeline(mm = 1, route = "bolus")
- @export
+}
+\author{
+Zhonghui Huang
 }

@@ -4,13 +4,13 @@
 \alias{rank_new}
 \title{Ranking with significance difference threshold}
 \usage{
-rank_new(x1, sig.diff)
+rank_new(x1, diff_tol)
 }
 \arguments{
 \item{x1}{A numeric vector to be ranked.}
 
-\item{sig.diff}{A numeric value specifying the significance difference threshold. Values within this
-threshold are considered equal and receive the same rank.}
+\item{diff_tol}{A numeric value specifying the significance difference threshold.
+Values within this threshold are considered equal and receive the same rank.}
 }
 \value{
 A numeric vector representing the adjusted ranks of the input values.
@@ -20,11 +20,12 @@ Performs a custom ranking of a numeric vector,and ajusts the ranks of values tha
 differ by less than a specified threshold, ensuring they receive the same rank.
 }
 \examples{
-\dontrun{
 x1 <- c(10, 20, 20.5, 30)
-sig.diff <- 1
-ranked_list <- rank_new(x1, sig.diff)
+diff_tol <- 1
+ranked_list <- rank_new(x1, diff_tol)
 print(ranked_list)
-}
 
+}
+\author{
+Zhonghui Huang
 }

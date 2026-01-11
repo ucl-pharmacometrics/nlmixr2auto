@@ -38,12 +38,11 @@
 #'   \item{Description}{Text description of parameter's biological/pharmacometric meaning}
 #' }
 #'
+#' @author Zhonghui Huang
+#'
 #' @examples
 #' # Generate default parameter table
-#' param_table <- initialize_param_table()
-#' # View parameter table and structure
-#' param_table
-#' str(param_table)
+#' initialize_param_table()
 #'
 #' @export
 #'
@@ -300,7 +299,7 @@ initialize_param_table <- function() {
     c("eta.cl", "eta.vc", "eta.vp", "eta.vp2", "eta.q", "eta.q2")
 
   # Add correlation parameters for block 1
-  combination_block1 <- combn(omega_block1, 2, simplify = FALSE)
+  combination_block1 <- utils::combn(omega_block1, 2, simplify = FALSE)
   for (combo in combination_block1) {
     combined_name <-
       paste0("cor.eta_",
@@ -320,7 +319,7 @@ initialize_param_table <- function() {
   }
 
   # Add correlation parameters for block 2
-  combination_block2 <- combn(omega_block2, 2, simplify = FALSE)
+  combination_block2 <- utils::combn(omega_block2, 2, simplify = FALSE)
   for (combo in combination_block2) {
     combined_name <-
       paste0("cor.eta_",
@@ -345,40 +344,62 @@ initialize_param_table <- function() {
 }
 
 
-#' Automatically Generate a Parameter Table with Initial Estimates
+#' Automatically generate a parameter table with initial estimates
 #'
-#' This function constructs a parameter table for `nlmixr2` model fitting. It supports:
-#' (1) direct use of a user-provided parameter table,
-#' (2) automatic initialization of parameters from data using `getPPKinits()`,
-#' or (3) a fallback to a default initialized table via `initialize_param_table()`.
-#'
-#' When `nlmixr2autoinits = TRUE`, this function estimates initial values from data,
-#' applies a name mapping to internal model parameters, performs log transformations where appropriate,
-#' and replaces problematic log values (e.g. log(0) or `NA`) with `log(0.01)` for numerical stability.
-#'
-#' @param dat A data frame containing observed data (required if `nlmixr2autoinits = TRUE`).
-#' @param param_table Optional. A user-provided parameter table (if provided, all other logic is skipped).
-#' @param nlmixr2autoinits Logical. Whether to automatically estimate initial values using `getPPKinits()`. Default is `TRUE`.
-#' @param foldername Character. Filename prefix for saving RDS of auto-generated initial estimates. Default is `"model"`.
-#' @param ... Additional arguments passed to `getPPKinits()`.
-#'
-#' @return A `data.frame` representing the parameter table with initial estimates, ready for use in `nlmixr2()`.
-#'
-#' @examples
-#' \dontrun{
-#' dat <- your_data_frame
-#' param_tbl <- auto_param_table(dat = dat)
+#' Constructs a parameter table for nlmixr2 model fitting. It supports:
+#' \itemize{
+#'   \item Direct use of a user-provided parameter table.
+#'   \item Automatic initialization of parameters from data using
+#'         \code{getPPKinits()}.
+#'   \item Fallback to a default parameter table created by
+#'         \code{initialize_param_table()}.
 #' }
 #'
-#' @seealso [getPPKinits()], [initialize_param_table()]
+#' @details
+#' When `nlmixr2autoinits = TRUE`, this function estimates initial values
+#' from data, applies a name mapping to internal model parameters,
+#' performs log transformations where appropriate, and replaces
+#' problematic log values (e.g. log(0) or `NA`) with `log(0.01)` for
+#' numerical stability.
+#'
+#' @param dat A data frame containing observed data (required if
+#'   `nlmixr2autoinits = TRUE`).
+#' @param param_table Optional. A user-provided parameter table (if
+#'   provided, all other logic is skipped).
+#' @param nlmixr2autoinits Logical. Whether to automatically estimate
+#'   initial values using \code{getPPKinits()}. Default is `TRUE`.
+#' @param filename Character string specifying the base name for model output
+#'   files generated during evaluation.
+#' @param out.dir Optional directory path used to store intermediate or cached
+#'   model output files.
+#' @param out.inits Logical flag indicating whether the results returned
+#'   by the automated initialization procedure should be saved to an RDS
+#'   file. When TRUE, the output of the initialization step is written to
+#'   disk for reproducibility or debugging purposes.
+#' @param ... Additional arguments passed to \code{getPPKinits()}.
+#'
+#' @return A `data.frame` representing the parameter table with initial
+#'   estimates, ready for use in `nlmixr2()`.
+#'
+#' @author Zhonghui Huang
+#'
+#' @examples
+#' \donttest{
+#' withr::with_dir(tempdir(), {
+#' auto_param_table(dat = pheno_sd)
+#' })
+#' }
+#' @seealso \code{\link{getPPKinits}}, \code{\link{initialize_param_table}}
 #'
 #' @export
 
 auto_param_table <- function(dat = NULL,
-                               param_table = NULL,
-                               nlmixr2autoinits = TRUE,
-                               foldername = "model",
-                               ...) {
+                             param_table = NULL,
+                             nlmixr2autoinits = TRUE,
+                             filename = "test",
+                             out.dir = NULL,
+                             out.inits = TRUE,
+                             ...) {
   # Case 1: User has provided a param_table — use it as-is
   if (!is.null(param_table)) {
     return(param_table)
@@ -389,23 +410,23 @@ auto_param_table <- function(dat = NULL,
     if (is.null(dat)) {
       stop("`dat` must be provided when `nlmixr2autoinits = TRUE`")
     }
-
-    # Defensive check: is getPPKinits available?
-    if (!exists("getPPKinits", mode = "function")) {
-      stop("`getPPKinits()` not found. Please ensure the 'nlmixt2autoinit' package is loaded.")
-    }
     # Run automated initialization procedure
-    getinits. <- getPPKinits(dat, ...)
+    getinits. <- nlmixr2autoinit::getPPKinits(dat, ...)
 
-    # Save the result for reproducibility/debugging
-    saveRDS(getinits., file = paste0(foldername, ".inits.RDS"))
-
+    if (isTRUE(out.inits)) {
+      if (is.null(out.dir)) {
+        out.dir = getwd()
+      }
+      saveRDS(getinits.,
+              file = file.path(out.dir, paste0(filename, ".inits.RDS")))
+    }
     # Extract the recommended initial estimates
     inits.out <- getinits.$Recommended_initial_estimates
-    inits.out$Values <- suppressWarnings(as.numeric(inits.out$Values))
+    inits.out$Values <-
+      suppressWarnings(as.numeric(inits.out$Values))
 
     # Remove rows with missing values
-    inits.out <- inits.out[!is.na(inits.out$Values), ]
+    inits.out <- inits.out[!is.na(inits.out$Values),]
 
     # Map external parameter names to internal model variable names
     param_map <- c(
@@ -428,14 +449,15 @@ auto_param_table <- function(dat = NULL,
 
     # Keep only recognized parameters
     valid_rows <- inits.out$Parameters %in% names(param_map)
-    filtered_vals <- inits.out[valid_rows, ]
+    filtered_vals <- inits.out[valid_rows,]
 
     # Rename parameters using the internal naming convention
     vals <- filtered_vals$Values
     names(vals) <- param_map[filtered_vals$Parameters]
 
     # Identify parameters that require log transformation
-    log_transform_names <- setdiff(names(vals), c("sigma_add", "sigma_prop"))
+    log_transform_names <-
+      setdiff(names(vals), c("sigma_add", "sigma_prop"))
     log_vals <- vals
 
     # Apply log transformation (base e) to required parameters
@@ -443,15 +465,19 @@ auto_param_table <- function(dat = NULL,
 
     # Replace log(0), -Inf, or NA with log(0.01) to ensure numerical stability
     log_vals[log_transform_names][is.na(log_vals[log_transform_names]) |
-                                    log_vals[log_transform_names] == -Inf] <- log(0.01)
+                                    log_vals[log_transform_names] == -Inf] <-
+      log(0.01)
 
-    # Generate a default parameter table (structure only)
+    # Generate a default parameter table
     param_table <- initialize_param_table()
 
     # Replace default initial values with estimated/log-transformed values
-    param_table <- param_table %>%
-      dplyr::mutate(init = dplyr::if_else(Name %in% names(log_vals), log_vals[Name], init))
-
+    # param_table <- param_table %>%
+    #   dplyr::mutate(init = dplyr::if_else(Name %in% names(log_vals), log_vals[Name], init))
+    param_table <- dplyr::mutate(
+      param_table,
+      init = dplyr::if_else(Name %in% names(log_vals), log_vals[Name], init)
+    )
     return(param_table)
   }
 
@@ -462,17 +488,24 @@ auto_param_table <- function(dat = NULL,
 
 #' Initialize model parameters from parameter table
 #'
-#' Generates parameter initialization code based on a parameter table, handling both fixed and estimated parameters.
+#' Generates parameter initialization code based on a parameter table, handling
+#' both fixed and estimated parameters.
 #'
-#' @param param_name Character, name of the parameter to initialize (without "l" prefix)
-#' @param param_table Dataframe containing parameter specifications, must include:
-#'   - `Name`: Character parameter names with "l" prefix (e.g., "lka" corresponds to param_name="ka")
+#' @param param_name Character, name of the parameter to initialize (without
+#'   "l" prefix)
+#' @param param_table Dataframe containing parameter specifications, must
+#'   include:
+#'   - `Name`: Character parameter names with "l" prefix (e.g., "lka"
+#'     corresponds to param_name="ka")
 #'   - `init`: Numeric initial values
 #'   - `fixed`: Integer flag (0/1) indicating fixed status (1 = fixed)
 #'
-#' @return Character vector containing generated initialization code line. Format:
+#' @return Character vector containing generated initialization code line.
+#'   Format:
 #'   - Fixed parameters: `<param_name> <- fix(initial_value)`
 #'   - Estimated parameters: `l<param_name> <- initial_value`
+#'
+#' @author Zhonghui Huang
 #'
 #' @examples
 #' # Create sample parameter table
@@ -490,11 +523,11 @@ initialize_param <- function(param_name, param_table) {
 
   # Check if the parameter exists in the table
   if (nrow(param_row) == 0) {
-    stop(paste("Parameter", lookup_name, "not found in parameter table."))
+    stop(paste("Parameter", paste0("l", param_name), "not found in parameter table."))
   }
   # Check for duplicate entries in the table
   if (nrow(param_row) > 1) {
-    stop(paste("Multiple entries found for", lookup_name))
+    stop(paste("Multiple entries found for", paste0("l", param_name)))
   }
 
   # Extract the initial value and fixed status from the row
@@ -533,21 +566,30 @@ initialize_param <- function(param_name, param_table) {
 
 #' Add inter-individual variability to a parameter
 #'
-#' Defines a model string for a parameter, optionally adding inter-individual variability.
+#' Defines a model string for a parameter, optionally adding inter-individual
+#' variability.
 #'
 #' @param param_name Character. The name of the parameter.
-#' @param eta_flag Integer. If 1, inter-individual variability is added; otherwise, it is not.
-#' @param param_table Data frame. A table containing parameter details with columns `Name`, `init`, and optionally bounds like `lb` and `ub`.
-#' @param param.type Integer. Transformation type: 1=Exponential, 2=Logistic. Defaults to 1.
+#' @param eta_flag Integer. If 1, inter-individual variability is added;
+#'   otherwise, it is not.
+#' @param param_table Data frame. A table containing parameter details with
+#'   columns `Name`, `init`, and optionally bounds like `lb` and `ub`.
+#' @param param.type Integer. Transformation type: 1=Exponential, 2=Logistic.
+#'   Defaults to 1.
 #'
 #' @return A list containing:
 #'   \item{mod}{Character. The model string for the parameter.}
-#'   \item{eta_init}{Character. The initialization string for the variability parameter (if applicable).}
+#'   \item{eta_init}{Character. The initialization string for the variability
+#'   parameter (if applicable).}
+#'
+#' @author Zhonghui Huang
+#'
 #' @examples
-#' param_table <-initialize_param_table()
+#' param_table <- initialize_param_table()
 #' add_variability("cl", 1, param_table)
-#'  @export
-
+#'
+#' @export
+#'
 add_variability <- function(param_name, eta_flag, param_table,param.type=1) {
 
   eta_init <- ""
@@ -608,8 +650,9 @@ add_variability <- function(param_name, eta_flag, param_table,param.type=1) {
 #'   - When `mcorr = 0`: Returns individual variance terms in formula syntax
 #'   - When `mcorr = 1`: Returns covariance block structure in matrix syntax
 #'
+#' @author Zhonghui Huang
+#'
 #' @examples
-#' \dontrun{
 #' # Example eta table structure
 #' eta_table <- initialize_param_table()
 #'
@@ -618,14 +661,15 @@ add_variability <- function(param_name, eta_flag, param_table,param.type=1) {
 #'
 #' # Generate covariance block
 #' omega_block(c("eta.cl", "eta.vc"), mcorr = 1, eta_table)
-#' }
+#'
 #' @export
+#'
 omega_block <- function(param_list, mcorr, eta_table) {
 
   # Handling mcorr=0 case: output only independent variance terms
   if (mcorr == 0) {
     eta_values <-
-      setNames(eta_table$init[grep("^eta\\.", eta_table$Name)],
+      stats::setNames(eta_table$init[grep("^eta\\.", eta_table$Name)],
                eta_table$Name[grep("^eta\\.", eta_table$Name)])
 
     # Generate individual lines for each parameter in formula syntax
@@ -644,12 +688,12 @@ omega_block <- function(param_list, mcorr, eta_table) {
 
   # Create lookup for eta values
   eta_values <-
-    setNames(eta_table$init[grep("^eta\\.", eta_table$Name)],
+    stats::setNames(eta_table$init[grep("^eta\\.", eta_table$Name)],
              eta_table$Name[grep("^eta\\.", eta_table$Name)])
 
   # Create lookup for cor.eta values
   cor_eta_values <-
-    setNames(eta_table$init[grep("^cor\\.eta_", eta_table$Name)],
+    stats::setNames(eta_table$init[grep("^cor\\.eta_", eta_table$Name)],
              eta_table$Name[grep("^cor\\.eta_", eta_table$Name)])
 
   # Generate a lower triangular matrix representation
@@ -733,11 +777,6 @@ omega_block <- function(param_list, mcorr, eta_table) {
 #'                    \item 2 = Transit compartment model
 #'                  }
 #'
-#' @return A character vector containing ODE equations for the specified configuration.
-#'         Includes differential equations for drug compartments, absorption models,
-#'         and derived parameters.
-#'
-#'
 #' @details
 #'  Parameter Constraints:
 #' The function includes error checking for incompatible parameter combinations:
@@ -746,13 +785,19 @@ omega_block <- function(param_list, mcorr, eta_table) {
 #'   \item Dual absorption (abs.type=4) not supported for mixed routes
 #' }
 #'
+#' @return A character vector containing ODE equations for the specified configuration.
+#'         Includes differential equations for drug compartments, absorption models,
+#'         and derived parameters.
+#'
+#' @author Zhonghui Huang
+#'
 #' @examples
 #' # Two-compartment model with first-order absorption
 #' build_odeline(no.cmpt = 2, route = "oral")
 #'
 #' # One-compartment IV model with Michaelis-Menten elimination
 #' build_odeline(mm = 1, route = "bolus")
-#'  @export
+#' @export
 
 build_odeline <- function(mm = 0,
                           no.cmpt = 1,
@@ -924,6 +969,8 @@ build_odeline <- function(mm = 0,
 #'   \item Other covariates: Default beta = -0.1 with message
 #' }
 #'
+#' @author Zhonghui Huang
+#'
 #' @examples
 #' # Add weight effect to clearance
 #'  add_covariate( "cl", "WT", "cl = exp(tcl)")
@@ -1039,15 +1086,21 @@ add_covariate <- function(param_name,
 #' Should contain columns: Name (parameter name), init (initial value),
 #' eta (TRUE/FALSE for variability inclusion), cov (covariate relationships).
 #' @param return.func Logical, whether to return a compiled function (default `FALSE` returns model code as text).
+#' @param out.dir Directory where model files and results are written. Defaults to
+#'   the current working directory when not provided.
+#' @param verbose Logical; if `TRUE`, progress messages are printed.
 #'
 #' @return Generates a text file ('modX.txt' where X = modi) containing the nlmixr-compatible model code.
 #' The file is written to the current working directory. No explicit return value.
 #' If `return.func = TRUE`, returns a compiled model function object.
 #'
-#' @examples
-#' # Create a 1-compartment oral model with first-order absorption
-#'  ppkmodGen( no.cmpt = 1, abs.type = 1,return.func = TRUE,param_table = initialize_param_table())
+#' @author Zhonghui Huang
 #'
+#' @examples
+#' withr::with_dir(tempdir(), {
+#' #' # Create a 1-compartment oral model with first-order absorption
+#'  ppkmodGen( no.cmpt = 1, abs.type = 1,return.func = TRUE,param_table = initialize_param_table())
+#' })
 #' @export
 
 ppkmodGen<- function(modi=1,
@@ -1077,7 +1130,9 @@ ppkmodGen<- function(modi=1,
                      rv=1,
                      allometric_scaling=0,
                      param_table=NULL,
-                     return.func=FALSE) {
+                     return.func=FALSE,
+                     out.dir = NULL,
+                     verbose=TRUE) {
 
  # Initialize tokens
   ka_init <- ""
@@ -1518,18 +1573,30 @@ ppkmodGen<- function(modi=1,
   )
 
   model_content <- model_content[model_content != ""]
-  # Write the model to a file
-  file_conn <- file(paste0("mod", modi, ".txt"))
+
+  if (is.null(out.dir) || !nzchar(out.dir)) {
+    out.dir <- getwd()
+  }
+  # validate user-specified directory
+  if (!dir.exists(out.dir)) {
+    if (file.exists(out.dir)) {
+      stop("out.dir exists but is not a directory: ", out.dir, call. = FALSE)
+    } else {
+      stop("out.dir does not exist: ", out.dir, call. = FALSE)
+    }
+  }
+  mod_file <- file.path(out.dir, paste0("mod", modi, ".txt"))
+  file_conn <- file(mod_file)
   writeLines(model_content, file_conn)
   close(file_conn)
 
   file_name <- paste0("mod", modi, ".txt")
-  message(
-    sprintf("[Success] Model file created in current working directory:\n%s/%s",
-            getwd(),
-            file_name)
-  )
-
+  if (verbose){
+    message(
+      "[Success] Model file created:\n",
+      normalizePath(mod_file, mustWork = FALSE)
+    )
+  }
   # Evaluate the function to return it as an object
   if (return.func==T){
   f <- eval(parse(text = paste(model_content, collapse = "\n")))
