@@ -15,6 +15,7 @@ install_github("ucl-pharmacometrics/nlmixr2auto")
 ## Examples
 Stepwsie example
 ``` r
+library(nlmixr2)
 library(nlmixr2autoinit)
 library(nlmixr2auto)
 
@@ -40,7 +41,7 @@ print(outs)
 
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
-# Dose Route                                bolus          
+#   Dose Route                                bolus          
 # Dose Type                                 combined_doses 
 # Number of Subjects                        59             
 # Number of Observations                    155            
@@ -49,65 +50,59 @@ print(outs)
 # Subjects with Multiple-Dose Data          56             
 # Observations after Multiple Doses         120            
 # ----------------------------------------  ------
-# Estimating half-life....................
+#   Estimating half-life....................
 # Half-life estimation complete: Estimated t1/2 = 16.44 h
 # Evaluating the predictive performance of calculated one-compartment model parameters....................
 # Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
 # Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
 # Run parameter sweeping on multi-compartmental PK parameters....................
-# Running Stepwise 1. Structural Model----------------------------------------------------
-# Test number of compartments----------------------------------------------------
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod1.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod2.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod3.txt
-# Analyse elimination type----------------------------------------------------
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod4.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod5.txt
-# Test IIV on parameters----------------------------------------------------
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod6.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod7.txt
-# Test Correlation between parameters----------------------------------------------------
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod8.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod9.txt
-# Explore types of residual errors----------------------------------------------------
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod10.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod11.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/nlmixr2test/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/Step_2025-11-17-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod12.txt
+# Running Step 1: Number of compartments ----------------------------------------------------
+#   [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod1.txt
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=1234; print=1
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod2.txt
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod3.txt
+# Running Step 2: Elimination type ----------------------------------------------------
+#   [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod4.txt
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod5.txt
+# Running Step 3: IIV on Km ----------------------------------------------------
+#   Step 3: IIV on Km skipped.
+# Running Step 5: IIV (forward selection) ----------------------------------------------------
+#   [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod6.txt
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod7.txt
+# Running Step 6: ETA correlation ----------------------------------------------------
+#   [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod8.txt
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod9.txt
+# Running Step 7: Residual error model ----------------------------------------------------
+#   [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod10.txt
+# [Success] Model file created:
+#   /home/zhonghuihuang/pheno_sd/mod11.txt
+# [Success] Model file created:
+  # /home/zhonghuihuang/pheno_sd/mod12.txt
 # > print(outs)
-# 
 # === Best Model Code ===
-#    no.cmpt eta.vmax eta.km eta.cl eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
-# 11       1        0      0      1      1      0       0     0      0  0     1  3
+#   no.cmpt eta.vmax eta.km eta.cl eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
+# 1       1        0      0      1      1      0       0     0      0  0     1  3
 # 
 # === Best Model Name ===
-# iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_combined 
+#   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 
 # 
 # === Stepwise Selection History ===
-#                   Step                                                Penalty.terms
-# 1  No. of compartments                                       rse, theta, covariance
-# 2     Elimination type                                       rse, theta, covariance
-# 3        IIV (forward)                     rse, theta, covariance, shrinkage, omega
-# 4      ETA correlation        rse, theta, covariance, shrinkage, omega, correlation
-# 5 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma
-#                                                         Model.name          Model.code  Fitness
-# 1   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11182.26
-# 2   iv_1cmpt_etaCL_First-order elimination_No correlation_combined 1,0,0,0,0,0,0,0,0,3 11182.26
-# 3 iv_1cmpt_etaCLVC_First-order elimination_No correlation_combined 1,0,1,0,0,0,0,0,0,3 11094.81
-# 4 iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86
-# 5 iv_1cmpt_etaCLVC_First-order elimination_Eta_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86
-```
+#   Step                                                Penalty.terms                                       Model.name          Model.code  Fitness      AIC      BIC      OFV
+# 1  No. of compartments                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
+# 2     Elimination type                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
+# 5        IIV (forward)                     rse, theta, covariance, shrinkage, omega bolus_1cmpt_etaCLVC_FOelim_uncorrelated_combined 1,0,1,0,0,0,0,0,0,3 11094.81 1076.548 1094.808 779.6768
+# 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
+# 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
 
 GA example
 ``` r
