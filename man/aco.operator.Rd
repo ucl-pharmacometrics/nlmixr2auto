@@ -114,8 +114,11 @@ print(outs)
 
 }
 \seealso{
-\code{\link{acoControl}}, \code{\link{penaltyControl}},
-\code{\link{saemControl}}
+\code{\link{acoControl}},
+\code{\link{penaltyControl}},
+\code{\link{auto_param_table}},
+\code{\link{mod.run}},
+\code{\link{ppkmodGen}}
 }
 \author{
 Zhonghui Huang

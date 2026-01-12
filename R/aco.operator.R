@@ -145,8 +145,12 @@ acoControl <- function(nants = 15,
 #' })
 #' }
 #'
-#' @seealso \code{\link{acoControl}}, \code{\link{penaltyControl}},
-#' \code{\link{saemControl}}
+#' @seealso
+#' \code{\link{acoControl}},
+#' \code{\link{penaltyControl}},
+#' \code{\link{auto_param_table}},
+#' \code{\link{mod.run}},
+#' \code{\link{ppkmodGen}}
 #'
 #' @export
 aco.operator <- function(dat,

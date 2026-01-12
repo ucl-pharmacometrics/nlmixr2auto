@@ -66,7 +66,8 @@ auto_param_table(dat = pheno_sd)
 }
 }
 \seealso{
-\code{\link{getPPKinits}}, \code{\link{initialize_param_table}}
+\code{\link[nlmixr2autoinit:getPPKinits]{getPPKinits}},
+\code{\link{initialize_param_table}}
 }
 \author{
 Zhonghui Huang

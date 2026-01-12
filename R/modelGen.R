@@ -389,7 +389,8 @@ initialize_param_table <- function() {
 #' auto_param_table(dat = pheno_sd)
 #' })
 #' }
-#' @seealso \code{\link{getPPKinits}}, \code{\link{initialize_param_table}}
+#' @seealso \code{\link[nlmixr2autoinit:getPPKinits]{getPPKinits}},
+#' \code{\link{initialize_param_table}}
 #'
 #' @export
 
