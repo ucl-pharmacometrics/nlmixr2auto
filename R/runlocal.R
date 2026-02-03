@@ -22,9 +22,10 @@
 #'   during fitness evaluation.
 #' @param precomputed_results_file Optional path to a CSV file of previously computed
 #'   model results used for caching.
-#' @param foldername Character string specifying the name of the folder to be
-#'   created in the current working directory to store intermediate results.
-#'   If NULL, a temporary path is used via \code{tempdir()}.
+#' @param foldername Character string specifying the folder name for storing
+#'   intermediate results. If \code{NULL} (default), \code{tempdir()}
+#'   is used for temporary storage. If specified, a cache directory
+#'   is created in the current working directory.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param .modEnv Optional environment used to persist state across calls

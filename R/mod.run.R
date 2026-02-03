@@ -32,8 +32,10 @@
 #'   previous runs. Default is 1.
 #' @param precomputed_results_file Character string; path to a CSV file containing
 #'   pre-computed model results for caching
-#' @param foldername Character string; directory name for storing model files and
-#'   results. If NULL, a temporary path is used via \code{tempdir()}.
+#' @param foldername Character string specifying the folder name for storing
+#'   model files and results. If \code{NULL} (default), \code{tempdir()}
+#'   is used for temporary storage. If specified, a cache directory
+#'   is created in the current working directory.
 #' @param filename Character string; base name for output files (without extension).
 #'   Required parameter with no default.
 #' @param save_fit_rds Logical; if TRUE, save the fitted model object as an
@@ -356,8 +358,9 @@ mod.run <- function(string = NULL,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }
