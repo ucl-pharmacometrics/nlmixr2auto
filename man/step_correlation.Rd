@@ -78,12 +78,10 @@ based on comparison of Fitness values returned during estimation.
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
   dat <- pheno_sd
   param_table <- initialize_param_table()
   param_table$init[param_table$Name == "lcl"] <- log(0.008)
   param_table$init[param_table$Name == "lvc"] <- log(0.6)
-
   penalty.control <- penaltyControl()
   penalty.control$penalty.terms <-
     c("rse", "theta", "covariance", "shrinkage", "omega")
@@ -98,7 +96,6 @@ withr::with_dir(tempdir(), {
     penalty.control = penalty.control,
     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
   )
-})
 }
 
 }

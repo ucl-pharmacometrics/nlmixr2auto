@@ -97,7 +97,7 @@ acoControl <- function(nants = 15,
 #'   model results used for caching.
 #' @param foldername Character string specifying the name of the folder to be
 #'   created in the current working directory to store intermediate results.
-#'   If NULL, a name is generated automatically.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param seed Integer. Random seed controlling the random sampling steps of the
@@ -127,7 +127,6 @@ acoControl <- function(nants = 15,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #' # Example usage with phenotype dataset
 #' outs <- aco.operator(
 #'   dat = pheno_sd,
@@ -142,7 +141,6 @@ acoControl <- function(nants = 15,
 #'   )
 #' )
 #' print(outs)
-#' })
 #' }
 #'
 #' @seealso
@@ -196,8 +194,9 @@ aco.operator <- function(dat,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <-
-      paste0("acoCache_", filename, "_", digest::digest(dat))
+    # foldername <-
+    #   paste0("acoCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername,
@@ -225,12 +224,12 @@ aco.operator <- function(dat,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }
-
   param_table <- param_table_use
 
   # ACO does not support a custom search space.

@@ -72,7 +72,7 @@ tabuControl <- function(tenure = 3,
 #'   model results used for caching.
 #' @param foldername Character string specifying the name of the folder to be
 #'   created in the current working directory to store intermediate results.
-#'   If NULL, a name is generated automatically.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param seed Integer. Random seed controlling the random sampling steps of the
@@ -138,7 +138,6 @@ tabuControl <- function(tenure = 3,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #' # Example usage with phenotype dataset
 #' outs <- tabu.operator(
 #'   dat = pheno_sd,
@@ -153,7 +152,6 @@ tabuControl <- function(tenure = 3,
 #'   )
 #' )
 #' print(outs)
-#' })
 #' }
 #'
 #' @seealso
@@ -206,8 +204,9 @@ tabu.operator <- function(dat,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <-
-      paste0("tabuCache_", filename, "_", digest::digest(dat))
+    # foldername <-
+    #   paste0("tabuCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername,
@@ -235,8 +234,9 @@ tabu.operator <- function(dat,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }
@@ -372,11 +372,13 @@ tabu.operator <- function(dat,
                                              string               = string_vec,
                                              dat                  = dat,
                                              search.space         = search.space,
+                                             no.cores             = no.cores,
                                              param_table          = param_table,
                                              precomputed_results_file = precomputed_results_file,
                                              filename             = filename,
                                              foldername           = foldername,
-                                             .modEnv              = .modEnv
+                                             .modEnv              = .modEnv,
+                                             ...
                                            ),
                                            silent = TRUE)
                                            if (is.numeric(result) &&

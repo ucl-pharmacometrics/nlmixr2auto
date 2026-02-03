@@ -81,7 +81,6 @@ decision making.
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
   dat <- pheno_sd
   string <- c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1)
   param_table <- initialize_param_table()
@@ -97,7 +96,6 @@ withr::with_dir(tempdir(), {
     penalty.control = penalty.control,
     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
   )
-})
 }
 
 }

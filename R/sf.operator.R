@@ -50,7 +50,6 @@
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #'   string <- c(1, 0, 0, 0, 0, 0, 0, 0, 0, 1)
 #'   param_table <- initialize_param_table()
@@ -66,7 +65,6 @@
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -232,7 +230,6 @@ step_compartments <-
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
@@ -250,7 +247,6 @@ step_compartments <-
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -420,12 +416,10 @@ step_elimination <-
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
 #'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
-#'
 #'   penalty.control <- penaltyControl()
 #'   penalty.control$penalty.terms <-
 #'     c("rse", "theta", "covariance", "shrinkage", "omega")
@@ -440,7 +434,6 @@ step_elimination <-
 #'     penalty.control = penalty.control,
 #'    saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -587,7 +580,7 @@ step_iiv_km <- function(dat,
 #'   model results used for caching.
 #' @param foldername Character string specifying the name of the folder to be
 #'   created in the current working directory to store intermediate results.
-#'   If NULL, a name is generated automatically.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param .modEnv An optional environment used to store intermediate
@@ -615,18 +608,14 @@ step_iiv_km <- function(dat,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- theo_sd
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(2)
 #'   param_table$init[param_table$Name == "lvc"] <- log(30)
-#'
 #'   penalty.control <- penaltyControl()
 #'   penalty.control$penalty.terms <-
 #'     c("rse", "theta", "covariance", "shrinkage", "omega")
-#'
 #'   start.mod <- base_model("oralbase")
-#'
 #'   step_iiv_ka(
 #'     dat = dat,
 #'     start.mod = start.mod,
@@ -636,7 +625,6 @@ step_iiv_km <- function(dat,
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -828,18 +816,15 @@ step_iiv_ka <- function(dat,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- Bolus_2CPT[Bolus_2CPT$SD==1,]
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(4)
 #'   param_table$init[param_table$Name == "lvc2cmpt"] <- log(70)
 #'   param_table$init[param_table$Name == "lvp2cmpt"] <- log(40)
 #'   param_table$init[param_table$Name == "lq2cmpt"] <- log(4)
-#'
 #'   penalty.control <- penaltyControl()
 #'   penalty.control$penalty.terms <-
 #'     c("rse", "theta", "covariance", "shrinkage", "omega")
-#'
 #'   start.mod <- base_model("ivbase")
 #'   start.mod["no.cmpt"] <- 2L
 #'   step_iiv_f(
@@ -851,7 +836,6 @@ step_iiv_ka <- function(dat,
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -1086,12 +1070,10 @@ step_iiv_f <- function(dat,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
 #'   param_table$init[param_table$Name == "lvc"] <- log(0.6)
-#'
 #'   penalty.control <- penaltyControl()
 #'   penalty.control$penalty.terms <-
 #'     c("rse", "theta", "covariance", "shrinkage", "omega")
@@ -1106,7 +1088,6 @@ step_iiv_f <- function(dat,
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -1275,7 +1256,6 @@ step_correlation <- function(dat,
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #'   param_table <- initialize_param_table()
 #'   param_table$init[param_table$Name == "lcl"] <- log(0.008)
@@ -1283,7 +1263,6 @@ step_correlation <- function(dat,
 #'   penalty.control <- penaltyControl()
 #'   penalty.control$penalty.terms <-
 #'     c("rse","theta", "covariance","shrinkage","omega","correlation","sigma")
-#'
 #'   step_rv(
 #'     dat = dat,
 #'     search.space = "ivbase",
@@ -1292,7 +1271,6 @@ step_correlation <- function(dat,
 #'     penalty.control = penalty.control,
 #'     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #'   )
-#' })
 #' }
 #'
 #' @seealso \code{\link{mod.run}}, \code{\link{base_model}}, \code{\link{penaltyControl}}
@@ -1494,7 +1472,6 @@ step_rv <- function(dat,
 #'
 #' @examples
 #' \donttest{
-#'  withr::with_dir(tempdir(), {
 #' out<-sf.operator(
 #'   dat = pheno_sd,
 #'   steps = 1234,
@@ -1507,7 +1484,6 @@ step_rv <- function(dat,
 #'   )
 #' )
 #' print(out)
-#' })
 #' }
 #'
 #' @seealso
@@ -1565,7 +1541,8 @@ sf.operator <- function(dat,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <- paste0("stepCache_", filename, "_", digest::digest(dat))
+    # foldername <- paste0("stepCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername, showWarnings = FALSE, recursive = TRUE)
@@ -1647,8 +1624,9 @@ sf.operator <- function(dat,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }

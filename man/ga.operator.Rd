@@ -54,7 +54,7 @@ model results used for caching.}
 
 \item{foldername}{Character string specifying the name of the folder to be
 created in the current working directory to store intermediate results.
-If NULL, a name is generated automatically.}
+If NULL, a temporary path is used via \code{tempdir()}.}
 
 \item{filename}{Optional character string used as a prefix for output files.
 Defaults to "test".}
@@ -91,7 +91,6 @@ the next generation.
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
 # Example usage with phenotype dataset
 outs <- ga.operator(
   dat = pheno_sd,
@@ -106,7 +105,6 @@ outs <- ga.operator(
   )
 )
 print(outs)
-})
 }
 
 }

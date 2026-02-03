@@ -93,18 +93,15 @@ peripheral volumes, and inter-compartmental clearances
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
   dat <- Bolus_2CPT[Bolus_2CPT$SD==1,]
   param_table <- initialize_param_table()
   param_table$init[param_table$Name == "lcl"] <- log(4)
   param_table$init[param_table$Name == "lvc2cmpt"] <- log(70)
   param_table$init[param_table$Name == "lvp2cmpt"] <- log(40)
   param_table$init[param_table$Name == "lq2cmpt"] <- log(4)
-
   penalty.control <- penaltyControl()
   penalty.control$penalty.terms <-
     c("rse", "theta", "covariance", "shrinkage", "omega")
-
   start.mod <- base_model("ivbase")
   start.mod["no.cmpt"] <- 2L
   step_iiv_f(
@@ -116,7 +113,6 @@ withr::with_dir(tempdir(), {
     penalty.control = penalty.control,
     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
   )
-})
 }
 
 }

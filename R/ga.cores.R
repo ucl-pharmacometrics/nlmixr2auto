@@ -109,6 +109,8 @@ ga.crossover <- function(sel.population,
                          pcross,
                          npop,
                          nbits) {
+  # Shuffle parents for random pairing before crossover
+  sel.population <- sel.population[sample.int(nrow(sel.population)), , drop = FALSE]
   children.cross <- NULL
   target <- seq(1, npop, 2)
   for (chromo in target) {

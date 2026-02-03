@@ -33,8 +33,7 @@
 #' @param precomputed_results_file Character string; path to a CSV file containing
 #'   pre-computed model results for caching
 #' @param foldername Character string; directory name for storing model files and
-#'   results. If NULL, a default name will be generated based on filename
-#'   and data hash.
+#'   results. If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Character string; base name for output files (without extension).
 #'   Required parameter with no default.
 #' @param save_fit_rds Logical; if TRUE, save the fitted model object as an
@@ -133,7 +132,6 @@
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #' # Example 1: IV model with pre-defined search space
 #' param_table <- initialize_param_table()
 #' param_table$init[param_table$Name == "lcl"] <- log(0.008)
@@ -143,8 +141,6 @@
 #'   dat = pheno_sd,
 #'   search.space = "ivbase",
 #'   param_table = param_table,
-#'   filename = "modtestiv",
-#'   foldername= "modtestiv",
 #'   saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=200,nEm=300)
 #' )
 #'
@@ -157,8 +153,6 @@
 #'   dat = theo_sd,
 #'   search.space = "oralbase",
 #'   param_table = param_table,
-#'   filename = "modtestoral",
-#'   foldername= "modtestoral",
 #'   saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=200,nEm=300)
 #' )
 #'
@@ -185,11 +179,8 @@
 #'   search.space = "custom",
 #'   custom_config = simple_config,
 #'   param_table = param_table,
-#'   filename = "modtestas",
-#'   foldername= "modtestas",
 #'   saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=200,nEm=300)
 #' )
-#' })
 #' }
 #'
 #' @export
@@ -281,8 +272,9 @@ mod.run <- function(string = NULL,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <-
-      paste0("modRunCache_", filename, "_", digest::digest(dat))
+    # foldername <-
+    #   paste0("modRunCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername,

@@ -368,10 +368,11 @@ initialize_param_table <- function() {
 #'   provided, all other logic is skipped).
 #' @param nlmixr2autoinits Logical. Whether to automatically estimate
 #'   initial values using \code{getPPKinits()}. Default is `TRUE`.
+#' @param foldername Character string specifying the name of the folder to be
+#'   created in the current working directory to store intermediate results.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Character string specifying the base name for model output
 #'   files generated during evaluation.
-#' @param out.dir Optional directory path used to store intermediate or cached
-#'   model output files.
 #' @param out.inits Logical flag indicating whether the results returned
 #'   by the automated initialization procedure should be saved to an RDS
 #'   file. When TRUE, the output of the initialization step is written to
@@ -385,9 +386,7 @@ initialize_param_table <- function() {
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #' auto_param_table(dat = pheno_sd)
-#' })
 #' }
 #' @seealso \code{\link[nlmixr2autoinit:getPPKinits]{getPPKinits}},
 #' \code{\link{initialize_param_table}}
@@ -397,8 +396,8 @@ initialize_param_table <- function() {
 auto_param_table <- function(dat = NULL,
                              param_table = NULL,
                              nlmixr2autoinits = TRUE,
+                             foldername= NULL,
                              filename = "test",
-                             out.dir = NULL,
                              out.inits = TRUE,
                              ...) {
   # Case 1: User has provided a param_table — use it as-is
@@ -414,12 +413,14 @@ auto_param_table <- function(dat = NULL,
     # Run automated initialization procedure
     getinits. <- nlmixr2autoinit::getPPKinits(dat, ...)
 
+    if (is.null(foldername) || !nzchar(foldername)) {
+      # foldername <-
+      #   paste0("modRunCache_", filename, "_", digest::digest(dat))
+      foldername <- tempdir()
+    }
     if (isTRUE(out.inits)) {
-      if (is.null(out.dir)) {
-        out.dir = getwd()
-      }
-      saveRDS(getinits.,
-              file = file.path(out.dir, paste0(filename, ".inits.RDS")))
+      rds_file <- file.path(foldername,paste0(filename, ".inits.RDS"))
+      saveRDS(getinits., rds_file)
     }
     # Extract the recommended initial estimates
     inits.out <- getinits.$Recommended_initial_estimates

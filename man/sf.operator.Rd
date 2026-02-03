@@ -108,7 +108,6 @@ value in the last completed estimation round.
 }
 \examples{
 \donttest{
- withr::with_dir(tempdir(), {
 out<-sf.operator(
   dat = pheno_sd,
   steps = 1234,
@@ -121,7 +120,6 @@ out<-sf.operator(
   )
 )
 print(out)
-})
 }
 
 }

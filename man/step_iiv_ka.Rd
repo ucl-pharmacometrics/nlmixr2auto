@@ -47,7 +47,7 @@ Defaults to "test".}
 
 \item{foldername}{Character string specifying the name of the folder to be
 created in the current working directory to store intermediate results.
-If NULL, a name is generated automatically.}
+If NULL, a temporary path is used via \code{tempdir()}.}
 
 \item{.modEnv}{An optional environment used to store intermediate
 results across model runs.}
@@ -78,18 +78,14 @@ comparison is performed.
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
   dat <- theo_sd
   param_table <- initialize_param_table()
   param_table$init[param_table$Name == "lcl"] <- log(2)
   param_table$init[param_table$Name == "lvc"] <- log(30)
-
   penalty.control <- penaltyControl()
   penalty.control$penalty.terms <-
     c("rse", "theta", "covariance", "shrinkage", "omega")
-
   start.mod <- base_model("oralbase")
-
   step_iiv_ka(
     dat = dat,
     start.mod = start.mod,
@@ -99,7 +95,6 @@ withr::with_dir(tempdir(), {
     penalty.control = penalty.control,
     saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
   )
-})
 }
 
 }

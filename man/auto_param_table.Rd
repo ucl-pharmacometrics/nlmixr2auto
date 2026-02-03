@@ -8,8 +8,8 @@ auto_param_table(
   dat = NULL,
   param_table = NULL,
   nlmixr2autoinits = TRUE,
+  foldername = NULL,
   filename = "test",
-  out.dir = NULL,
   out.inits = TRUE,
   ...
 )
@@ -24,11 +24,12 @@ provided, all other logic is skipped).}
 \item{nlmixr2autoinits}{Logical. Whether to automatically estimate
 initial values using \code{getPPKinits()}. Default is \code{TRUE}.}
 
+\item{foldername}{Character string specifying the name of the folder to be
+created in the current working directory to store intermediate results.
+If NULL, a temporary path is used via \code{tempdir()}.}
+
 \item{filename}{Character string specifying the base name for model output
 files generated during evaluation.}
-
-\item{out.dir}{Optional directory path used to store intermediate or cached
-model output files.}
 
 \item{out.inits}{Logical flag indicating whether the results returned
 by the automated initialization procedure should be saved to an RDS
@@ -60,9 +61,7 @@ numerical stability.
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
 auto_param_table(dat = pheno_sd)
-})
 }
 }
 \seealso{

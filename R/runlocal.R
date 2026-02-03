@@ -24,7 +24,7 @@
 #'   model results used for caching.
 #' @param foldername Character string specifying the name of the folder to be
 #'   created in the current working directory to store intermediate results.
-#'   If NULL, a name is generated automatically.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param .modEnv Optional environment used to persist state across calls
@@ -63,7 +63,6 @@
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #'   dat <- pheno_sd
 #' # Example best model binary code
 #'   current_code <- c(1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0)
@@ -79,7 +78,6 @@
 #'   saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 #' )
 #' print(result_local)
-#' })
 #' }
 #' @export
 
@@ -126,8 +124,9 @@ runlocal <-  function(dat,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <-
-      paste0("gaCache_", filename, "_", digest::digest(dat))
+    # foldername <-
+    #   paste0("gaCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername,
@@ -144,8 +143,9 @@ runlocal <-  function(dat,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }

@@ -50,7 +50,7 @@ model results used for caching.}
 
 \item{foldername}{Character string specifying the name of the folder to be
 created in the current working directory to store intermediate results.
-If NULL, a name is generated automatically.}
+If NULL, a temporary path is used via \code{tempdir()}.}
 
 \item{filename}{Optional character string used as a prefix for output files.
 Defaults to "test".}
@@ -91,7 +91,6 @@ a GA "round".
 }
 \examples{
 \donttest{
-withr::with_dir(tempdir(), {
   dat <- pheno_sd
 # Example best model binary code
   current_code <- c(1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0)
@@ -107,7 +106,6 @@ withr::with_dir(tempdir(), {
   saem.control = nlmixr2est::saemControl(logLik = TRUE,nBurn=15,nEm=15)
 )
 print(result_local)
-})
 }
 }
 \seealso{

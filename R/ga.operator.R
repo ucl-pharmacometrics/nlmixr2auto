@@ -76,7 +76,7 @@ gaControl <- function(
 #'   model results used for caching.
 #' @param foldername Character string specifying the name of the folder to be
 #'   created in the current working directory to store intermediate results.
-#'   If NULL, a name is generated automatically.
+#'   If NULL, a temporary path is used via \code{tempdir()}.
 #' @param filename Optional character string used as a prefix for output files.
 #'   Defaults to "test".
 #' @param seed Integer. Random seed controlling the random sampling steps of the
@@ -111,7 +111,6 @@ gaControl <- function(
 #'
 #' @examples
 #' \donttest{
-#' withr::with_dir(tempdir(), {
 #' # Example usage with phenotype dataset
 #' outs <- ga.operator(
 #'   dat = pheno_sd,
@@ -126,7 +125,6 @@ gaControl <- function(
 #'   )
 #' )
 #' print(outs)
-#' })
 #' }
 #'
 #' @export
@@ -174,8 +172,9 @@ ga.operator <-  function(dat,
   }
 
   if (is.null(foldername) || !nzchar(foldername)) {
-    foldername <-
-      paste0("gaCache_", filename, "_", digest::digest(dat))
+    # foldername <-
+    #   paste0("gaCache_", filename, "_", digest::digest(dat))
+    foldername <- tempdir()
   }
   if (!dir.exists(foldername)) {
     dir.create(foldername,
@@ -205,8 +204,9 @@ ga.operator <-  function(dat,
     param_table_use <- auto_param_table(
       dat = dat,
       nlmixr2autoinits = TRUE,
+      foldername = foldername,
       filename = filename,
-      out.dir = file.path(getwd(), foldername)
+      out.inits = TRUE
     )
     .modEnv$param_table <- param_table_use
   }
