@@ -26,8 +26,7 @@ Imports:
     progressr,
     processx (> 3.8.0),
     withr,
-    crayon,
-    digest
+    crayon
 Encoding: UTF-8
 Language: en-US
 NeedsCompilation: no
