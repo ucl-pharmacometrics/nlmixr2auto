@@ -46,9 +46,10 @@ model results used for caching.}
 \item{filename}{Optional character string used as a prefix for output files.
 Defaults to "test".}
 
-\item{foldername}{Character string specifying the name of the folder to be
-created in the current working directory to store intermediate results.
-If NULL, a name is generated automatically.}
+\item{foldername}{Character string specifying the folder name for storing
+intermediate results. If \code{NULL} (default), \code{tempdir()}
+is used for temporary storage. If specified, a cache directory
+is created in the current working directory.}
 
 \item{.modEnv}{Internal environment used to store model indices and cached
 results across steps.}

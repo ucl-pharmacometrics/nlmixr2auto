@@ -62,8 +62,10 @@ previous runs. Default is 1.}
 \item{precomputed_results_file}{Character string; path to a CSV file containing
 pre-computed model results for caching}
 
-\item{foldername}{Character string; directory name for storing model files and
-results. If NULL, a temporary path is used via \code{tempdir()}.}
+\item{foldername}{Character string specifying the folder name for storing
+model files and results. If \code{NULL} (default), \code{tempdir()}
+is used for temporary storage. If specified, a cache directory
+is created in the current working directory.}
 
 \item{filename}{Character string; base name for output files (without extension).
 Required parameter with no default.}

@@ -24,9 +24,10 @@ provided, all other logic is skipped).}
 \item{nlmixr2autoinits}{Logical. Whether to automatically estimate
 initial values using \code{getPPKinits()}. Default is \code{TRUE}.}
 
-\item{foldername}{Character string specifying the name of the folder to be
-created in the current working directory to store intermediate results.
-If NULL, a temporary path is used via \code{tempdir()}.}
+\item{foldername}{Character string specifying the folder name for storing
+\code{nlmixr2autoinits} outputs. If \code{NULL} (default), \code{tempdir()}
+is used for temporary storage. If specified, a cache directory
+is created in the current working directory.}
 
 \item{filename}{Character string specifying the base name for model output
 files generated during evaluation.}
