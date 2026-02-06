@@ -38,6 +38,7 @@ outs <- sf.operator(
 )
 
 print(outs)
+
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
@@ -58,7 +59,7 @@ print(outs)
 # Running Step 1: Number of compartments ----------------------------------------------------
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod1.txt
-# SAEM control (core) = niter=20|30; nBurn=20; nEm=30; seed=1234; print=1
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=1234; print=1
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod2.txt
 # [Success] Model file created:
@@ -87,24 +88,23 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod11.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod12.txt
-# 
-# 
+# > 
 # > print(outs)
 # 
 # === Best Model Code ===
 #   no.cmpt eta.vmax eta.km eta.cl eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
-# 1       1        0      0      1      1      0       0     0      0  0     1  1
+# 1       1        0      0      1      1      0       0     0      0  0     1  3
 # 
 # === Best Model Name ===
-#   bolus_1cmpt_etaCLVC_FOelim_correlated_add 
+# bolus_1cmpt_etaCLVC_FOelim_correlated_combined 
 # 
 # === Stepwise Selection History ===
-#   Step                                                Penalty.terms                                       Model.name          Model.code  Fitness      AIC      BIC      OFV
-# 1  No. of compartments                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 1286.979 1261.762 1276.979 966.8906
-# 2     Elimination type                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 1286.979 1261.762 1276.979 966.8906
-# 5        IIV (forward)                     rse, theta, covariance, shrinkage, omega bolus_1cmpt_etaCLVC_FOelim_uncorrelated_combined 1,0,1,0,0,0,0,0,0,3 1175.111 1146.850 1165.111 849.9795
-# 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3 1168.921 1137.618 1158.921 838.7466
-# 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma        bolus_1cmpt_etaCLVC_FOelim_correlated_add 1,0,1,0,0,0,0,0,1,1 1055.980 1037.719 1055.980 740.8485
+#                   Step                                                Penalty.terms                                       Model.name          Model.code  Fitness      AIC      BIC      OFV
+# 1  No. of compartments                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
+# 2     Elimination type                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
+# 5        IIV (forward)                     rse, theta, covariance, shrinkage, omega bolus_1cmpt_etaCLVC_FOelim_uncorrelated_combined 1,0,1,0,0,0,0,0,0,3 11094.81 1076.548 1094.808 779.6768
+# 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
+# 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
 ```
 GA example
 ``` r
