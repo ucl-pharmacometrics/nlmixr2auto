@@ -38,10 +38,9 @@ outs <- sf.operator(
 )
 
 print(outs)
-
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
-#   Dose Route                                bolus          
+# Dose Route                                bolus          
 # Dose Type                                 combined_doses 
 # Number of Subjects                        59             
 # Number of Observations                    155            
@@ -50,59 +49,62 @@ print(outs)
 # Subjects with Multiple-Dose Data          56             
 # Observations after Multiple Doses         120            
 # ----------------------------------------  ------
-#   Estimating half-life....................
+# Estimating half-life....................
 # Half-life estimation complete: Estimated t1/2 = 16.44 h
 # Evaluating the predictive performance of calculated one-compartment model parameters....................
 # Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
 # Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
 # Run parameter sweeping on multi-compartmental PK parameters....................
 # Running Step 1: Number of compartments ----------------------------------------------------
-#   [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod1.txt
-# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=1234; print=1
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod2.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod1.txt
+# SAEM control (core) = niter=20|30; nBurn=20; nEm=30; seed=1234; print=1
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod3.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod2.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod3.txt
 # Running Step 2: Elimination type ----------------------------------------------------
-#   [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod4.txt
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod5.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod4.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod5.txt
 # Running Step 3: IIV on Km ----------------------------------------------------
-#   Step 3: IIV on Km skipped.
+# Step 3: IIV on Km skipped.
 # Running Step 5: IIV (forward selection) ----------------------------------------------------
-#   [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod6.txt
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod7.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod6.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod7.txt
 # Running Step 6: ETA correlation ----------------------------------------------------
-#   [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod8.txt
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod9.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod8.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod9.txt
 # Running Step 7: Residual error model ----------------------------------------------------
-#   [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod10.txt
 # [Success] Model file created:
-#   /home/zhonghuihuang/pheno_sd/mod11.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod10.txt
 # [Success] Model file created:
-  # /home/zhonghuihuang/pheno_sd/mod12.txt
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod11.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod12.txt
+# 
+# 
 # > print(outs)
+# 
 # === Best Model Code ===
 #   no.cmpt eta.vmax eta.km eta.cl eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
-# 1       1        0      0      1      1      0       0     0      0  0     1  3
+# 1       1        0      0      1      1      0       0     0      0  0     1  1
 # 
 # === Best Model Name ===
-#   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 
+#   bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 # 
 # === Stepwise Selection History ===
 #   Step                                                Penalty.terms                                       Model.name          Model.code  Fitness      AIC      BIC      OFV
-# 1  No. of compartments                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
-# 2     Elimination type                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 11182.26 1167.041 1182.258 872.1700
-# 5        IIV (forward)                     rse, theta, covariance, shrinkage, omega bolus_1cmpt_etaCLVC_FOelim_uncorrelated_combined 1,0,1,0,0,0,0,0,0,3 11094.81 1076.548 1094.808 779.6768
-# 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
-# 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1086.86 1055.556 1076.860 756.6853
+# 1  No. of compartments                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 1286.979 1261.762 1276.979 966.8906
+# 2     Elimination type                                       rse, theta, covariance   bolus_1cmpt_etaCL_FOelim_uncorrelated_combined 1,0,0,0,0,0,0,0,0,3 1286.979 1261.762 1276.979 966.8906
+# 5        IIV (forward)                     rse, theta, covariance, shrinkage, omega bolus_1cmpt_etaCLVC_FOelim_uncorrelated_combined 1,0,1,0,0,0,0,0,0,3 1175.111 1146.850 1165.111 849.9795
+# 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3 1168.921 1137.618 1158.921 838.7466
+# 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma        bolus_1cmpt_etaCLVC_FOelim_correlated_add 1,0,1,0,0,0,0,0,1,1 1055.980 1037.719 1055.980 740.8485
 ```
 GA example
 ``` r
