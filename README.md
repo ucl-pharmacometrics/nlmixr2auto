@@ -506,16 +506,16 @@ GA results
 
 ACO example
 ``` r
-outs <-  aco.operator(
+pheno_sd_aco <-  aco.operator(
+  seed = 20,                         # Random seed for aco
   dat = pheno_sd,                    # Dataset used for model fitting
   search.space = "ivbase",           # Structural search space for IV PK models
   filename = "pheno_sd_aco",         # Prefix for output files
   foldername = "pheno_sd_aco",       # Folder where results will be stored
   saem.control = saemControl(        # SAEM estimation control settings
-    seed = 1234,                     # Random seed
     nBurn = 200,                     # SAEM burn-in iterations
     nEm   = 300,                     # SAEM EM-phase iterations
-    rxControl = rxControl(cores = 4),# CPU cores for ODE solving
+    rxControl = rxControl(cores = 4),# Number of cores for ODE solving.
     logLik    = TRUE                 # Compute log-likelihood
   ),
   table.control = tableControl(
@@ -523,7 +523,7 @@ outs <-  aco.operator(
   ),
   max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
 )
-print(outs)
+print(pheno_sd_aco) 
 
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
@@ -542,9 +542,9 @@ print(outs)
 # Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
 # Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
 # Run parameter sweeping on multi-compartmental PK parameters....................
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod1.txt
-# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=1234; print=1
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=99; print=1
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod2.txt
 # [Success] Model file created:
@@ -573,7 +573,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod14.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod15.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod16.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod17.txt
@@ -603,7 +603,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod29.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod30.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod31.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod32.txt
@@ -633,7 +633,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod44.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod45.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod46.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod47.txt
@@ -663,7 +663,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod59.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod60.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod61.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod62.txt
@@ -693,7 +693,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod74.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod75.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod76.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod77.txt
@@ -723,7 +723,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod89.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod90.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod91.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod92.txt
@@ -753,7 +753,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod104.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod105.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod106.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod107.txt
@@ -783,7 +783,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod119.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod120.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod121.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod122.txt
@@ -813,7 +813,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod134.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod135.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod136.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod137.txt
@@ -843,7 +843,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod149.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod150.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod151.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod152.txt
@@ -873,7 +873,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod164.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod165.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod166.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod167.txt
@@ -903,7 +903,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod179.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod180.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod181.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod182.txt
@@ -933,7 +933,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod194.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod195.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod196.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod197.txt
@@ -963,7 +963,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod209.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod210.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod211.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod212.txt
@@ -993,7 +993,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod224.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod225.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod226.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod227.txt
@@ -1023,7 +1023,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod239.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod240.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod241.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod242.txt
@@ -1053,7 +1053,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod254.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod255.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod256.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod257.txt
@@ -1083,7 +1083,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod269.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod270.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod271.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod272.txt
@@ -1113,7 +1113,7 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod284.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod285.txt
-# [Success] Model file created:                                                                                                                                                                                     
+# [Success] Model file created:                                                                                                                                                      
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod286.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod287.txt
@@ -1143,15 +1143,14 @@ print(outs)
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod299.txt
 # [Success] Model file created:
 # /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod300.txt
-# 
-# > print(outs)
+# > print(pheno_sd_aco)                                                                                                                                                              
 # 
 # === Final Selected Model Code (ACO) ===
-#   no.cmpt eta.km eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
-# 57       1      0      1      0       0     0      0  0     0  1
+#    no.cmpt eta.km eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
+# 67       1      0      1      0       0     0      0  0     1  1
 # 
 # === Final Selected Model Name (ACO) ===
-#   bolus_1cmpt_etaCLVC_FOelim_uncorrelated_add 
+# bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ``` 
 
 Tabu example
