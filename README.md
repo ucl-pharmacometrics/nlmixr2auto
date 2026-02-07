@@ -507,11 +507,652 @@ GA results
 
 ACO example
 ``` r
-outs<-aco.operator(dat=pheno_sd,
-                  search.space = "ivbase",
-                  filename =  "pheno_sd",
-                  foldername =   "pheno_sd" )
+outs <-  aco.operator(
+  dat = pheno_sd,                    # Dataset used for model fitting
+  search.space = "ivbase",           # Structural search space for IV PK models
+  filename = "pheno_sd_aco",         # Prefix for output files
+  foldername = "pheno_sd_aco",       # Folder where results will be stored
+  saem.control = saemControl(        # SAEM estimation control settings
+    seed = 1234,                     # Random seed
+    nBurn = 200,                     # SAEM burn-in iterations
+    nEm   = 300,                     # SAEM EM-phase iterations
+    rxControl = rxControl(cores = 4),# CPU cores for ODE solving
+    logLik    = TRUE                 # Compute log-likelihood
+  ),
+  table.control = tableControl(
+    cwres = TRUE                     # Compute conditional weighted residuals (CWRES)
+  ),
+  max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
+)
 print(outs)
+
+# Infometrics                               Value          
+# ----------------------------------------  ---------------
+# Dose Route                                bolus          
+# Dose Type                                 combined_doses 
+# Number of Subjects                        59             
+# Number of Observations                    155            
+# Subjects with First-Dose Interval Data    35             
+# Observations in the First-Dose Interval   35             
+# Subjects with Multiple-Dose Data          56             
+# Observations after Multiple Doses         120            
+# ----------------------------------------  ------
+# Estimating half-life....................
+# Half-life estimation complete: Estimated t1/2 = 16.44 h
+# Evaluating the predictive performance of calculated one-compartment model parameters....................
+# Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
+# Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
+# Run parameter sweeping on multi-compartmental PK parameters....................
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod1.txt
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=1234; print=1
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod2.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod3.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod4.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod5.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod6.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod7.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod8.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod9.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod10.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod11.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod12.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod13.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod14.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod15.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod16.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod17.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod18.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod19.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod20.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod21.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod22.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod23.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod24.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod25.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod26.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod27.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod28.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod29.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod30.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod31.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod32.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod33.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod34.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod35.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod36.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod37.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod38.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod39.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod40.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod41.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod42.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod43.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod44.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod45.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod46.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod47.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod48.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod49.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod50.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod51.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod52.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod53.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod54.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod55.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod56.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod57.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod58.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod59.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod60.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod61.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod62.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod63.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod64.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod65.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod66.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod67.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod68.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod69.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod70.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod71.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod72.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod73.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod74.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod75.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod76.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod77.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod78.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod79.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod80.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod81.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod82.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod83.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod84.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod85.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod86.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod87.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod88.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod89.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod90.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod91.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod92.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod93.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod94.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod95.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod96.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod97.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod98.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod99.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod100.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod101.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod102.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod103.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod104.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod105.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod106.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod107.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod108.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod109.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod110.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod111.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod112.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod113.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod114.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod115.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod116.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod117.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod118.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod119.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod120.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod121.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod122.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod123.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod124.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod125.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod126.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod127.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod128.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod129.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod130.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod131.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod132.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod133.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod134.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod135.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod136.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod137.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod138.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod139.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod140.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod141.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod142.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod143.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod144.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod145.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod146.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod147.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod148.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod149.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod150.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod151.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod152.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod153.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod154.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod155.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod156.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod157.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod158.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod159.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod160.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod161.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod162.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod163.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod164.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod165.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod166.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod167.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod168.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod169.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod170.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod171.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod172.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod173.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod174.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod175.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod176.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod177.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod178.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod179.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod180.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod181.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod182.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod183.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod184.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod185.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod186.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod187.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod188.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod189.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod190.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod191.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod192.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod193.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod194.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod195.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod196.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod197.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod198.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod199.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod200.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod201.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod202.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod203.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod204.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod205.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod206.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod207.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod208.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod209.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod210.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod211.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod212.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod213.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod214.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod215.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod216.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod217.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod218.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod219.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod220.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod221.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod222.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod223.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod224.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod225.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod226.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod227.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod228.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod229.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod230.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod231.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod232.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod233.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod234.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod235.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod236.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod237.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod238.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod239.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod240.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod241.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod242.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod243.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod244.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod245.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod246.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod247.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod248.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod249.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod250.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod251.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod252.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod253.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod254.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod255.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod256.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod257.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod258.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod259.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod260.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod261.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod262.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod263.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod264.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod265.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod266.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod267.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod268.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod269.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod270.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod271.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod272.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod273.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod274.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod275.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod276.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod277.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod278.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod279.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod280.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod281.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod282.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod283.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod284.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod285.txt
+# [Success] Model file created:                                                                                                                                                                                     
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod286.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod287.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod288.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod289.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod290.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod291.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod292.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod293.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod294.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod295.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod296.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod297.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod298.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod299.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_aco/mod300.txt
+# 
+# > print(outs)
+# 
+# === Final Selected Model Code (ACO) ===
+#   no.cmpt eta.km eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv
+# 57       1      0      1      0       0     0      0  0     0  1
+# 
+# === Final Selected Model Name (ACO) ===
+#   bolus_1cmpt_etaCLVC_FOelim_uncorrelated_add 
 ``` 
 
 Tabu example
