@@ -114,393 +114,925 @@ outs<-ga.operator(dat=pheno_sd,
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
 # Dose Type                                 combined_doses 
-# Total Number of Subjects                  59             
-# Total Number of Observations              155            
+# Number of Subjects                        59             
+# Number of Observations                    155            
 # Subjects with First-Dose Interval Data    35             
 # Observations in the First-Dose Interval   35             
 # Subjects with Multiple-Dose Data          56             
 # Observations after Multiple Doses         120            
 # ----------------------------------------  ------
 # Estimating half-life....................
-# Half-life estimation complete: Estimated t½ = 16.44 h
+# Half-life estimation complete: Estimated t1/2 = 16.44 h
 # Evaluating the predictive performance of calculated one-compartment model parameters....................
-# (hybrid mode: parameters combined across sources)....................
 # Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
-# Run parameter sweeping on nonlinear eliminiation kinetics PK parameters....................
-# Run parameter sweeping on multi-compartmental PK parameters.................... 
-# [Success] Model file created in current working directory:                      
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod1.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod2.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod3.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod4.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod5.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod6.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod7.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod8.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod9.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod10.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod11.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod12.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod13.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod14.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod15.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod16.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod17.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod18.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod19.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod20.txt
-#  GA Search [==>---------------------]  13% (iteration 2/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod21.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod22.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod23.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod24.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod25.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod26.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod27.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod28.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod29.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod30.txt
-#  GA Search [====>-------------------]  20% (iteration 3/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod31.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod32.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod33.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod34.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod35.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod36.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod37.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod38.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod39.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod40.txt
-#  GA Search [=====>------------------]  27% (iteration 4/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod41.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod42.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod43.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod44.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod45.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod46.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod47.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod48.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod49.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod50.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod51.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod52.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod53.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod54.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod55.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod56.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod57.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod58.txt
-#  GA Search [=======>----------------]  33% (iteration 5/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod59.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod60.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod61.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod62.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod63.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod64.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod65.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod66.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod67.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod68.txt
-#  GA Search [=========>--------------]  40% (iteration 6/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod69.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod70.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod71.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod72.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod73.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod74.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod75.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod76.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod77.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod78.txt
-#  GA Search [==========>-------------]  47% (iteration 7/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod79.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod80.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod81.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod82.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod83.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod84.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod85.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod86.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod87.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod88.txt
-#  GA Search [============>-----------]  53% (iteration 8/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod89.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod90.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod91.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod92.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod93.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod94.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod95.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod96.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod97.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod98.txt
-#  GA Search [=============>----------]  60% (iteration 9/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod99.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod100.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod101.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod102.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod103.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod104.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod105.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod106.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod107.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod108.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod109.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod110.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod111.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod112.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod113.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod114.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod115.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod116.txt
-#  GA Search [==============>--------]  67% (iteration 10/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod117.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod118.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod119.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod120.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod121.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod122.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod123.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod124.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod125.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod126.txt
-#  GA Search [================>------]  73% (iteration 11/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod127.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod128.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod129.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod130.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod131.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod132.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod133.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod134.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod135.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod136.txt
-#  GA Search [=================>-----]  80% (iteration 12/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod137.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod138.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod139.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod140.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod141.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod142.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod143.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod144.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod145.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod146.txt
-#  GA Search [===================>---]  87% (iteration 13/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod147.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod148.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod149.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod150.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod151.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod152.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod153.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod154.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod155.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod156.txt
-#  GA Search [====================>--]  93% (iteration 14/15)
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod157.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod158.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod159.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod160.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod161.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod162.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod163.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod164.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod165.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod166.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod167.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod168.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod169.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod170.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod171.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod172.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod173.txt
-# [Success] Model file created in current working directory:
-# /home/zhonghuihuang/Desktop/test/Step_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/GA_2025-09-04-pheno_sd_359e255ca82e284a7b41aefd444b39a1_temp/mod174.txt
-#  GA Search [=======================] 100% (iteration 15/15)
-```
-GA results
-```r
-# > print(outs)
+# Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
+# Run parameter sweeping on multi-compartmental PK parameters....................
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod1.txt
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=99; print=1
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod2.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod3.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod4.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod5.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod6.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod7.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod8.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod9.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod10.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod11.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod12.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod13.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod14.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod15.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod16.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod17.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod18.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod19.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod20.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod21.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod22.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod23.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod24.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod25.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod26.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod27.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod28.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod29.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod30.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod31.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod32.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod33.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod34.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod35.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod36.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod37.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod38.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod39.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod40.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod41.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod42.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod43.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod44.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod45.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod46.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod47.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod48.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod49.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod50.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod51.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod52.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod53.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod54.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod55.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod56.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod57.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod58.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod59.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod60.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod61.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod62.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod63.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod64.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod65.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod66.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod67.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod68.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod69.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod70.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod71.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod72.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod73.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod74.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod75.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod76.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod77.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod78.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod79.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod80.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod81.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod82.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod83.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod84.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod85.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod86.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod87.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod88.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod89.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod90.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod91.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod92.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod93.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod94.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod95.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod96.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod97.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod98.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod99.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod100.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod101.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod102.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod103.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod104.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod105.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod106.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod107.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod108.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod109.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod110.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod111.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod112.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod113.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod114.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod115.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod116.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod117.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod118.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod119.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod120.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod121.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod122.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod123.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod124.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod125.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod126.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod127.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod128.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod129.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod130.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod131.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod132.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod133.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod134.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod135.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod136.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod137.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod138.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod139.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod140.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod141.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod142.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod143.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod144.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod145.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod146.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod147.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod148.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod149.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod150.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod151.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod152.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod153.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod154.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod155.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod156.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod157.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod158.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod159.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod160.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod161.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod162.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod163.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod164.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod165.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod166.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod167.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod168.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod169.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod170.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod171.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod172.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod173.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod174.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod175.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod176.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod177.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod178.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod179.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod180.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod181.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod182.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod183.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod184.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod185.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod186.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod187.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod188.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod189.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod190.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod191.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod192.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod193.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod194.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod195.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod196.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod197.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod198.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod199.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod200.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod201.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod202.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod203.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod204.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod205.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod206.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod207.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod208.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod209.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod210.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod211.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod212.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod213.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod214.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod215.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod216.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod217.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod218.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod219.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod220.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod221.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod222.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod223.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod224.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod225.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod226.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod227.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod228.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod229.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod230.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod231.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod232.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod233.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod234.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod235.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod236.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod237.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod238.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod239.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod240.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod241.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod242.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod243.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod244.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod245.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod246.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod247.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod248.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod249.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod250.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod251.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod252.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod253.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod254.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod255.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod256.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod257.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod258.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod259.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod260.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod261.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod262.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod263.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod264.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod265.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod266.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod267.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod268.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod269.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod270.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod271.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod272.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod273.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod274.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod275.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod276.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod277.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod278.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod279.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod280.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod281.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod282.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod283.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod284.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod285.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod286.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod287.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod288.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod289.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod290.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod291.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod292.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod293.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod294.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod295.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod296.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod297.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod298.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod299.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod300.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod301.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod302.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod303.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod304.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod305.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod306.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod307.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod308.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod309.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod310.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod311.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod312.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod313.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod314.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod315.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod316.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod317.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod318.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod319.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod320.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod321.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod322.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod323.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod324.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod325.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod326.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod327.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod328.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod329.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod330.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod331.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod332.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod333.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod334.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod335.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod336.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod337.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod338.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod339.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod340.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod341.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod342.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod343.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod344.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod345.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod346.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod347.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod348.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod349.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod350.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod351.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod352.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod353.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod354.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod355.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod356.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod357.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod358.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod359.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod360.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod361.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod362.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod363.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod364.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod365.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod366.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod367.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod368.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod369.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod370.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod371.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod372.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod373.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod374.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod375.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod376.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod377.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod378.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod379.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod380.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod381.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod382.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod383.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod384.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod385.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod386.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod387.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod388.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod389.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod390.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod391.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod392.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod393.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod394.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod395.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod396.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod397.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod398.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod399.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod400.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod401.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod402.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod403.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod404.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod405.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod406.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod407.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod408.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod409.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod410.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod411.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod412.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod413.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod414.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod415.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod416.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod417.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod418.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod419.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod420.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod421.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod422.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod423.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod424.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod425.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod426.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod427.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod428.txt
+# [Success] Model file created:                                                                                                                                                                
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod429.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod430.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod431.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod432.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod433.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod434.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod435.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod436.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod437.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod438.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod439.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod440.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod441.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod442.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod443.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod444.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod445.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod446.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod447.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_ga/mod448.txt
+# >                                                                                                                                                                                            
+# > print(pheno_sd_ga)
 # 
 # === Final Selected Model Code ===
 #   no.cmpt1 no.cmpt2 eta.km eta.vc eta.vp eta.vp2 eta.q eta.q2 mm mcorr rv1 rv2
-# 1        0        1      0      1      0       0     0      0  0     0   0   1
+# 1        0        1      0      1      0       0     0      0  0     1   0   1
 # 
 # === Final Selected Model Name ===
-#   iv_1cmpt_etaCLVC_First-order elimination_No correlation_additive 
+# bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
 
 ACO example
