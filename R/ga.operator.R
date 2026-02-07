@@ -378,6 +378,8 @@ ga.operator <-  function(dat,
         children.cross    = children.cross,
         children.mutation = children.all
       )
+      # Increment round number
+      .modEnv$r <- .modEnv$r + 1L
       p(sprintf("GA iteration %d / %d", ga.iter, ga.control$niter))
     }
   })

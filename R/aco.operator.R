@@ -460,7 +460,8 @@ aco.operator <- function(dat,
         # Extend node history
         nodeslst.hist <- rbind(nodeslst.hist, nodeslsts)
       }
-
+      # Increment round number
+      .modEnv$r <- .modEnv$r + 1L
       p(sprintf("ACO iteration %d / %d", aco.iter, aco.control$niter))
     }
   })

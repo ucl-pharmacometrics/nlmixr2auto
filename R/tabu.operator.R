@@ -515,7 +515,8 @@ tabu.operator <- function(dat,
 
       rownames(tabu.elements.all) <- NULL
       tabu.elements.history[[tabu.iter]] <- tabu.elements.all
-
+      # Increment round number
+      .modEnv$r <- .modEnv$r + 1L
       p(sprintf("Tabu iteration %d / %d", tabu.iter, tabu.control$niter))
     }
   })
