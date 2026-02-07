@@ -59,35 +59,35 @@ print(outs)
 # Running Step 1: Number of compartments ----------------------------------------------------
 # Loaded cached model results from 'pheno_sd_sf/pheno_sd_sf.csv'.
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod1.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod1.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod2.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod2.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod3.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod3.txt
 # Running Step 2: Elimination type ----------------------------------------------------
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod4.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod4.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod5.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod5.txt
 # Running Step 3: IIV on Km ----------------------------------------------------
 # Step 3: IIV on Km skipped.
 # Running Step 5: IIV (forward selection) ----------------------------------------------------
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod6.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod6.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod7.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod7.txt
 # Running Step 6: ETA correlation ----------------------------------------------------
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod8.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod8.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod9.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod9.txt
 # Running Step 7: Residual error model ----------------------------------------------------
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod10.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod10.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod11.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod11.txt
 # [Success] Model file created:
-# /home/zhonghuihuang/Desktop/nlmixr2test/pheno_sd_sf/mod12.txt
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_sf/mod12.txt
 # > print(pheno_sd_sf)
 # 
 # === Best Model Code ===
