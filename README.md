@@ -25,7 +25,6 @@ outs <- sf.operator(
   filename = "pheno_sd",             # Prefix for output files
   foldername = "pheno_sd",           # Folder where results will be stored
   saem.control = saemControl(        # SAEM estimation control settings
-    seed = 1234,                     # Random seed
     nBurn = 200,                     # SAEM burn-in iterations 
     nEm   = 300,                     # SAEM EM-phase iterations 
     rxControl = rxControl(cores = 4),# CPU cores for ODE solving
