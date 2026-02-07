@@ -1,3 +1,10 @@
+<!-- badges: start -->
+![CRAN](https://img.shields.io/badge/CRAN-Released-green)
+[![CRAN version](https://www.r-pkg.org/badges/version/nlmixr2autoinit)](https://cran.r-project.org/package=nlmixr2auto)
+![downloads](https://cranlogs.r-pkg.org/badges/grand-total/nlmixr2auto)
+![downloads-month](https://cranlogs.r-pkg.org/badges/nlmixr2auto)
+<!-- badges: end -->
+
 # nlmixr2auto
 Automated Population Pharmacokinetic Modelling. This package offers serveral optimisation algorithms designed for automated population pharmacokinetic modeling, serving as a valuable tool for pharmacokinetic model selection.
 
