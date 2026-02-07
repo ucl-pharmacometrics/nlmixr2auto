@@ -106,10 +106,26 @@ print(outs)
 ```
 GA example
 ``` r
-outs<-ga.operator(dat=pheno_sd,
-                  search.space = "ivbase",
-                  filename =  "pheno_sd",
-                  foldername =   "pheno_sd" )
+pheno_sd_ga <- ga.operator(
+  seed = 20,
+  dat = pheno_sd,                    # Dataset used for model fitting
+  search.space = "ivbase",           # Structural search space for IV PK models
+  filename = "pheno_sd_ga",             # Prefix for output files
+  foldername = "pheno_sd_ga",           # Folder where results will be stored
+  saem.control = saemControl(        # SAEM estimation control settings
+    nBurn = 200,                     # SAEM burn-in iterations
+    nEm   = 300,                     # SAEM EM-phase iterations
+    rxControl = rxControl(cores = 4),# CPU cores for ODE solving
+    logLik    = TRUE                 # Compute log-likelihood
+  ),
+  table.control = tableControl(
+    cwres = TRUE                     # Compute conditional weighted residuals (CWRES)
+  ),
+  max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
+)
+
+print(pheno_sd_ga)
+
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
