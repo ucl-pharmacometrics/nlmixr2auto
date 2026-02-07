@@ -110,8 +110,8 @@ pheno_sd_ga <- ga.operator(
   seed = 20,
   dat = pheno_sd,                    # Dataset used for model fitting
   search.space = "ivbase",           # Structural search space for IV PK models
-  filename = "pheno_sd_ga",             # Prefix for output files
-  foldername = "pheno_sd_ga",           # Folder where results will be stored
+  filename = "pheno_sd_ga",          # Prefix for output files
+  foldername = "pheno_sd_ga",        # Folder where results will be stored
   saem.control = saemControl(        # SAEM estimation control settings
     nBurn = 200,                     # SAEM burn-in iterations
     nEm   = 300,                     # SAEM EM-phase iterations
@@ -1702,12 +1702,416 @@ print(pheno_sd_aco)
 
 Tabu example
 ``` r
-outs<-tabu.operator(dat=pheno_sd,
-                   search.space = "ivbase",
-                   filename =  "pheno_sd",
-                   foldername =   "pheno_sd" )
-print(outs)
+pheno_sd_tabu <- tabu.operator(
+  dat = pheno_sd,                    # Dataset used for model fitting
+  search.space = "ivbase",           # Structural search space for IV PK models
+  filename = "pheno_sd_tabu",        # Prefix for output files
+  foldername = "pheno_sd_tabu",      # Folder where results will be stored
+  saem.control = saemControl(        # SAEM estimation control settings
+    nBurn = 200,                     # SAEM burn-in iterations
+    nEm   = 300,                     # SAEM EM-phase iterations
+    rxControl = rxControl(cores = 4),# CPU cores for ODE solving
+    logLik    = TRUE                 # Compute log-likelihood
+  ),
+  table.control = tableControl(
+    cwres = TRUE                     # Compute conditional weighted residuals (CWRES)
+  ),
+  max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
+)
 
+print(pheno_sd_tabu)
+
+# Infometrics                               Value          
+# ----------------------------------------  ---------------
+# Dose Route                                bolus          
+# Dose Type                                 combined_doses 
+# Number of Subjects                        59             
+# Number of Observations                    155            
+# Subjects with First-Dose Interval Data    35             
+# Observations in the First-Dose Interval   35             
+# Subjects with Multiple-Dose Data          56             
+# Observations after Multiple Doses         120            
+# ----------------------------------------  ------
+# Estimating half-life....................
+# Half-life estimation complete: Estimated t1/2 = 16.44 h
+# Evaluating the predictive performance of calculated one-compartment model parameters....................
+# Base PK parameter analysis finished. Estimated ka: NA, estimated CL: 0.0087, estimated Vd: 1.25 
+# Run parameter sweeping on nonlinear elimination kinetics PK parameters....................
+# Run parameter sweeping on multi-compartmental PK parameters....................
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod1.txt
+# SAEM control (core) = niter=200|300; nBurn=200; nEm=300; seed=99; print=1
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod2.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod3.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod4.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod5.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod6.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod7.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod8.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod9.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod10.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod11.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod12.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod13.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod14.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod15.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod16.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod17.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod18.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod19.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod20.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod21.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod22.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod23.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod24.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod25.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod26.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod27.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod28.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod29.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod30.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod31.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod32.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod33.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod34.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod35.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod36.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod37.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod38.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod39.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod40.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod41.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod42.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod43.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod44.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod45.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod46.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod47.txt
+# Iteration 6: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod48.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod49.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod50.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod51.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod52.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod53.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod54.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod55.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod56.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod57.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod58.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod59.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod60.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod61.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod62.txt
+# Iteration 8: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod63.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod64.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod65.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod66.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod67.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod68.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod69.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod70.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod71.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod72.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod73.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod74.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod75.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod76.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod77.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod78.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod79.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod80.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod81.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod82.txt
+# Iteration 10: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod83.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod84.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod85.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod86.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod87.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod88.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod89.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod90.txt
+# Iteration 11: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod91.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod92.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod93.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod94.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod95.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod96.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod97.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod98.txt
+# Iteration 12: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod99.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod100.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod101.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod102.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod103.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod104.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod105.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod106.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod107.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod108.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod109.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod110.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod111.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod112.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod113.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod114.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod115.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod116.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod117.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod118.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod119.txt
+# Iteration 14: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod120.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod121.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod122.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod123.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod124.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod125.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod126.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod127.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod128.txt
+# Iteration 15: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod129.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod130.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod131.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod132.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod133.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod134.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod135.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod136.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod137.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod138.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod139.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod140.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod141.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod142.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod143.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod144.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod145.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod146.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod147.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod148.txt
+# Iteration 17: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod149.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod150.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod151.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod152.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod153.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod154.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod155.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod156.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod157.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod158.txt
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod159.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod160.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod161.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod162.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod163.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod164.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod165.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod166.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod167.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod168.txt
+# Iteration 19: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# [Success] Model file created:                                                                                                                                                                 
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod169.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod170.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod171.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod172.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod173.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod174.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod175.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod176.txt
+# [Success] Model file created:
+# /home/zhonghuihuang/Desktop/nlmixr2autotest/pheno_sd_tabu/mod177.txt
+# Iteration 20: candidate already used as a starting point. Applying 2-bit perturbation to avoid cycling.
+# >                                                                                                                                                                                             
+# > print(pheno_sd_tabu)
+# 
+# === Final Selected Model Code (Tabu Search) ===
+# no.cmpt  eta.km  eta.vc  eta.vp eta.vp2   eta.q  eta.q2      mm   mcorr      rv 
+#       1       0       1       0       0       0       0       0       1       1 
+# 
+# === Final Selected Model Name (Tabu Search) ===
+# bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
 
 
