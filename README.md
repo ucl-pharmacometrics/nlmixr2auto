@@ -1072,7 +1072,7 @@ print(pheno_sd_ga)
 # === Final Selected Model Name ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
-<details>
+</details>
   
 ###  Ant colony optimization algorithms
 
@@ -1729,7 +1729,7 @@ print(pheno_sd_aco)
 # === Final Selected Model Name (ACO) ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ``` 
-<details>
+</details>
   
 ###  Tabu search algorithm
 This basic example demonstrates how the tabu search algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
@@ -2151,5 +2151,5 @@ print(pheno_sd_tabu)
 # === Final Selected Model Name (Tabu Search) ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
-<details>
+</details>
 
