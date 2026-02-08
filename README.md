@@ -39,7 +39,12 @@ outs <- sf.operator(
 )
 
 print(outs)
+```
 
+<details>
+<summary>📊 Click to view Stepwise output</summary>
+
+```r
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
@@ -106,6 +111,10 @@ print(outs)
 # 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1097.977 1066.6730 1087.977 767.8021
 # 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma        bolus_1cmpt_etaCLVC_FOelim_correlated_add 1,0,1,0,0,0,0,0,1,1  1014.616  986.3554 1004.616 689.4845
 ```
+
+</details>
+
+
 GA example
 ``` r
 pheno_sd_ga <- ga.operator(
