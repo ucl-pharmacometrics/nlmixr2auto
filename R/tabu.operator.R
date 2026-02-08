@@ -4,9 +4,6 @@
 #'
 #' @param tenure Integer. Number of iterations a move remains tabu.
 #' @param niter Integer. Maximum number of search iterations.
-#' @param aspiration Logical. Whether to apply the aspiration criterion.
-#'   If TRUE, tabu moves are allowed if they yield a solution strictly better
-#'   than the global best found so far.
 #' @param nsize Optional integer. If not NULL, restricts neighborhood sear
 #'   to a random subset of this size (candidate list strategy).
 #' @param policy Character. Type of tabu restriction:
@@ -25,13 +22,11 @@
 #' @export
 tabuControl <- function(tenure = 3,
                         niter = 20,
-                        aspiration = TRUE,
                         nsize = NULL,
                         policy = "attribute") {
   list(
     tenure = tenure,
     niter = niter,
-    aspiration = aspiration,
     nsize = nsize,
     policy = policy
   )
@@ -59,7 +54,6 @@ tabuControl <- function(tenure = 3,
 #'     \item{tenure}{Integer. Number of iterations a move remains tabu.}
 #'     \item{niter}{Integer. Maximum number of search iterations.}
 #'     \item{start.point}{Optional initial model code vector.}
-#'     \item{aspiration}{Logical. If TRUE, allows aspiration criterion.}
 #'     \item{policy}{Character. Tabu restriction policy: \code{move} or
 #'       \code{attribute}. See Details.}
 #'     \item{nsize}{Optional integer. Maximum number of neighbors randomly
@@ -390,14 +384,14 @@ tabu.operator <- function(dat,
                                            }
                                          },
                                          numeric(1))
-        # Aspiration criterion check
-        if (tabu.control$aspiration) {
-          best.fitness <- min(.modEnv$Store.all$fitness, na.rm = TRUE)
-          aspiration_candidates <-
-            neighbors_eval[neighbors_eval$fitness < best.fitness,]
-        } else {
-          aspiration_candidates <- data.frame()
-        }
+        # # Aspiration criterion check
+        # if (tabu.control$aspiration) {
+        #   best.fitness <- min(.modEnv$Store.all$fitness, na.rm = TRUE)
+        #   aspiration_candidates <-
+        #     neighbors_eval[neighbors_eval$fitness < best.fitness,]
+        # } else {
+        #   aspiration_candidates <- data.frame()
+        # }
       } else {
         neighbors_eval <- data.frame()
         aspiration_candidates <- data.frame()

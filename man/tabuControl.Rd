@@ -4,22 +4,12 @@
 \alias{tabuControl}
 \title{Control Parameters for Tabu Search}
 \usage{
-tabuControl(
-  tenure = 3,
-  niter = 20,
-  aspiration = TRUE,
-  nsize = NULL,
-  policy = "attribute"
-)
+tabuControl(tenure = 3, niter = 20, nsize = NULL, policy = "attribute")
 }
 \arguments{
 \item{tenure}{Integer. Number of iterations a move remains tabu.}
 
 \item{niter}{Integer. Maximum number of search iterations.}
-
-\item{aspiration}{Logical. Whether to apply the aspiration criterion.
-If TRUE, tabu moves are allowed if they yield a solution strictly better
-than the global best found so far.}
 
 \item{nsize}{Optional integer. If not NULL, restricts neighborhood sear
 to a random subset of this size (candidate list strategy).}

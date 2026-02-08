@@ -44,7 +44,6 @@ Default is "ivbase".}
 \item{tenure}{Integer. Number of iterations a move remains tabu.}
 \item{niter}{Integer. Maximum number of search iterations.}
 \item{start.point}{Optional initial model code vector.}
-\item{aspiration}{Logical. If TRUE, allows aspiration criterion.}
 \item{policy}{Character. Tabu restriction policy: \code{move} or
 \code{attribute}. See Details.}
 \item{nsize}{Optional integer. Maximum number of neighbors randomly
