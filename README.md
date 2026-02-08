@@ -19,6 +19,7 @@ install_github("ucl-pharmacometrics/nlmixr2auto")
 For additional information on installing the broader nlmixr2 ecosystem,such as compiler configuration, system requirements, and platform-specific setup—please see the installation instructions in the main nlmixr2 repository(https://github.com/nlmixr2/nlmixr2).
 
 ## Examples
+### Stepwise model building algorithm
 This basic example demonstrates how the stepwise model building algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
 
 ``` r
@@ -118,6 +119,7 @@ print(outs)
 ```
 </details>
 
+### Genetic algorithms
 This basic example demonstrates how the genetic algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
 
 ``` r
@@ -144,6 +146,7 @@ print(pheno_sd_ga)
 
 <details>
 <summary> Click to view GA output</summary>
+  
 ```r
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
@@ -1070,6 +1073,8 @@ print(pheno_sd_ga)
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
 <details>
+  
+###  Ant colony optimization algorithms
 
 This basic example demonstrates how the ant colony optimization algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
 
@@ -1725,7 +1730,8 @@ print(pheno_sd_aco)
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ``` 
 <details>
-
+  
+###  Tabu search algorithm
 This basic example demonstrates how the tabu search algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
 
 ```r
