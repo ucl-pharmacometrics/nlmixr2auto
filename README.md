@@ -1,21 +1,26 @@
-
-
 # nlmixr2auto
-Automated Population Pharmacokinetic Modelling. This package offers serveral optimisation algorithms designed for automated population pharmacokinetic modeling, serving as a valuable tool for pharmacokinetic model selection.
 
-## Installation of nlmixr2autoinit
-```r
-install.packages("nlmixr2autoinit", dependencies = TRUE)
+nlmixr2auto is a fully automated population pharmacokinetic (PopPK) modeling tool that enables end to end model development within the nlmixr2 ecosystem with minimal user intervention. Users only need to provide a dataset and the framework can generate data driven initialization, perform model evaluation, and apply metaheuristic optimization to support automated model selection and parameter estimation. It supports multiple search and optimization strategies including genetic algorithms, ant colony optimization, tabu search, and stepwise procedures to explore candidate structural, variability, and residual error models and refine parameter estimates. Nlmixr2auto streamlines PopPK workflow execution by promoting automated model building and enabling algorithm driven exploration of model space within nlmixr2.
+
+## Installation
+
+You can install nlmixr2auto either from CRAN or from the development version on GitHub:
+
+From CRAN (stable release)
+``` r
+install.packages("nlmixr2auto",dependencies = TRUE)
 ```
 
-## Installation of nlmixr2auto
+From GitHub (development version)
 ``` r
 library(devtools)
 install_github("ucl-pharmacometrics/nlmixr2auto")
 ```
+For additional information on installing the broader nlmixr2 ecosystem,such as compiler configuration, system requirements, and platform-specific setup—please see the installation instructions in the main nlmixr2 repository(https://github.com/nlmixr2/nlmixr2).
 
 ## Examples
-Stepwsie example
+This basic example demonstrates how the stepwise model building algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
+
 ``` r
 library(nlmixr2)
 library(nlmixr2autoinit)
@@ -42,7 +47,7 @@ print(outs)
 ```
 
 <details>
-<summary>📊 Click to view Stepwise output</summary>
+<summary> Click to view Stepwise output</summary>
 
 ```r
 # Infometrics                               Value          
@@ -111,11 +116,10 @@ print(outs)
 # 6      Eta correlation        rse, theta, covariance, shrinkage, omega, correlation   bolus_1cmpt_etaCLVC_FOelim_correlated_combined 1,0,1,0,0,0,0,0,1,3  1097.977 1066.6730 1087.977 767.8021
 # 7 Residual error types rse, theta, covariance, shrinkage, omega, correlation, sigma        bolus_1cmpt_etaCLVC_FOelim_correlated_add 1,0,1,0,0,0,0,0,1,1  1014.616  986.3554 1004.616 689.4845
 ```
-
 </details>
 
+This basic example demonstrates how the genetic algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
 
-GA example
 ``` r
 pheno_sd_ga <- ga.operator(
   seed = 20,
@@ -136,7 +140,11 @@ pheno_sd_ga <- ga.operator(
 )
 
 print(pheno_sd_ga)
+```
 
+<details>
+<summary> Click to view GA output</summary>
+```r
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
@@ -1061,8 +1069,10 @@ print(pheno_sd_ga)
 # === Final Selected Model Name ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
+<details>
 
-ACO example
+This basic example demonstrates how the ant colony optimization algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
+
 ``` r
 pheno_sd_aco <-  aco.operator(
   seed = 20,                         # Random seed for aco
@@ -1082,7 +1092,11 @@ pheno_sd_aco <-  aco.operator(
   max_wall_time = 2 * 60 * 60        # Maximum allowed wall-clock time (seconds) per model; here: 2 hours
 )
 print(pheno_sd_aco) 
+```
 
+<details>
+<summary> Click to view ACO output</summary>
+```r
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
@@ -1710,9 +1724,11 @@ print(pheno_sd_aco)
 # === Final Selected Model Name (ACO) ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ``` 
+<details>
 
-Tabu example
-``` r
+This basic example demonstrates how the tabu search algorithm implemented in this package can be used to automate model development and optimization of *pheno_sd* (`nlmixr2data::pheno_sd`) for the intravenous case.
+
+```r
 pheno_sd_tabu <- tabu.operator(
   dat = pheno_sd,                    # Dataset used for model fitting
   search.space = "ivbase",           # Structural search space for IV PK models
@@ -1731,7 +1747,12 @@ pheno_sd_tabu <- tabu.operator(
 )
 
 print(pheno_sd_tabu)
+```
 
+<details>
+<summary> Click to view tabu output</summary>
+
+```r
 # Infometrics                               Value          
 # ----------------------------------------  ---------------
 # Dose Route                                bolus          
@@ -2124,5 +2145,5 @@ print(pheno_sd_tabu)
 # === Final Selected Model Name (Tabu Search) ===
 # bolus_1cmpt_etaCLVC_FOelim_correlated_add 
 ```
-
+<details>
 
