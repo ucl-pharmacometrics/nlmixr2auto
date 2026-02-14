@@ -224,11 +224,11 @@ is_move_tabu <-
         )
       )
     } else if (policy == "attribute") {
-      # Attribute-based tabu: forbid any move that sets the element to a tabu value
+      # Attribute-based tabu: forbid any move related to this tabu value
       return(
         any(
           tabu_list$element == move$element &
-            tabu_list$to     == move$to &
+            (tabu_list$to == move$to | tabu_list$to == move$from)  &
             tabu_list$tabu.iteration.left > 0
         )
       )
