@@ -8,8 +8,8 @@
 #'   to a random subset of this size (candidate list strategy).
 #' @param policy Character. Type of tabu restriction:
 #'   \itemize{
-#'     \item \code{"attribute"} — forbid revisiting a variable value (default).
-#'     \item \code{"move"} — forbid only specific from–to transitions.
+#'     \item \code{"attribute"} — forbid revisiting a variable value .
+#'     \item \code{"move"} — forbid only specific from–to transitions (default).
 #'   }
 #'
 #' @return A named list containing all tabu control parameters.
@@ -23,7 +23,7 @@
 tabuControl <- function(tenure = 3,
                         niter = 20,
                         nsize = NULL,
-                        policy = "attribute") {
+                        policy = "move") {
   list(
     tenure = tenure,
     niter = niter,
@@ -484,9 +484,8 @@ tabu.operator <- function(dat,
             )
           )
         } else if (tabu.control$policy == "attribute") {
-          # Attribute-based tabu:
-          # Store only the target value (e.g., "element = no.cmpt, to = 3")
-          # This forbids any move that sets the element to this value.
+          # Attribute-based tabu: forbid any move involving the tabu value
+          # (both setting to it or moving from it)
           tabu.elements <- data.frame(
             tabu.num = tabu.iter,
             element  = move$element,

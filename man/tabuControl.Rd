@@ -4,7 +4,7 @@
 \alias{tabuControl}
 \title{Control Parameters for Tabu Search}
 \usage{
-tabuControl(tenure = 3, niter = 20, nsize = NULL, policy = "attribute")
+tabuControl(tenure = 3, niter = 20, nsize = NULL, policy = "move")
 }
 \arguments{
 \item{tenure}{Integer. Number of iterations a move remains tabu.}
@@ -16,8 +16,8 @@ to a random subset of this size (candidate list strategy).}
 
 \item{policy}{Character. Type of tabu restriction:
 \itemize{
-\item \code{"attribute"} — forbid revisiting a variable value (default).
-\item \code{"move"} — forbid only specific from–to transitions.
+\item \code{"attribute"} — forbid revisiting a variable value .
+\item \code{"move"} — forbid only specific from–to transitions (default).
 }}
 }
 \value{
