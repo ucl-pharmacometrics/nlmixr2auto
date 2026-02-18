@@ -1,5 +1,12 @@
 # nlmixr2auto
 
+<!-- badges: start -->
+![CRAN](https://img.shields.io/badge/CRAN-Released-green)
+[![CRAN version](https://www.r-pkg.org/badges/version/nlmixr2autoinit)](https://cran.r-project.org/package=nlmixr2auto)
+![downloads](https://cranlogs.r-pkg.org/badges/grand-total/nlmixr2auto)
+![downloads-month](https://cranlogs.r-pkg.org/badges/nlmixr2auto)
+<!-- badges: end -->
+
 nlmixr2auto is a fully automated population pharmacokinetic (PopPK) modeling tool that enables end to end model development within the nlmixr2 ecosystem with minimal user intervention. Users only need to provide a dataset and the framework can generate data driven initialization, perform model evaluation, and apply metaheuristic optimization to support automated model selection and parameter estimation. It supports multiple search and optimization strategies including genetic algorithms, ant colony optimization, tabu search, and stepwise procedures to explore candidate structural, variability, and residual error models and refine parameter estimates. Nlmixr2auto streamlines PopPK workflow execution by promoting automated model building and enabling algorithm driven exploration of model space within nlmixr2.
 
 ## Installation
