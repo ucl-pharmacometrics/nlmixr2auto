@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 ![CRAN](https://img.shields.io/badge/CRAN-Released-green)
-[![CRAN version](https://www.r-pkg.org/badges/version/nlmixr2autoinit)](https://cran.r-project.org/package=nlmixr2auto)
+[![CRAN version](https://www.r-pkg.org/badges/version/nlmixr2auto)](https://cran.r-project.org/package=nlmixr2auto)
 ![downloads](https://cranlogs.r-pkg.org/badges/grand-total/nlmixr2auto)
 ![downloads-month](https://cranlogs.r-pkg.org/badges/nlmixr2auto)
 <!-- badges: end -->
